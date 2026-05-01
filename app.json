@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "CarpoolGo",
+    "slug": "carpoolgo",
+    "version": "1.0.0",
+    "sdkVersion": "54.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.devsphere.carpoolgo"
+    },
+    "android": {
+      "package": "com.devsphere.carpoolgo",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "VIBRATE"
+      ]
+    },
+    "plugins": [
+      "expo-secure-store"
+    ]
+  }
+}

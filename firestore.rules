@@ -1,0 +1,124 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() { return request.auth != null; }
+    function isOwner(uid) { return isAuthenticated() && request.auth.uid == uid; }
+    function callerRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    function isPassenger()  { return isAuthenticated() && callerRole() == 'passenger'; }
+    function isDriver()     { return isAuthenticated() && callerRole() == 'driver'; }
+    function isAdmin()      { return isAuthenticated() && (callerRole() == 'admin' || callerRole() == 'superadmin'); }
+    function isSuperAdmin() { return isAuthenticated() && callerRole() == 'superadmin'; }
+    function roleNotChanged() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']);
+    }
+
+    // ── Users ────────────────────────────────────────────────────────────────
+    match /users/{uid} {
+      allow read:   if isOwner(uid) || isAdmin();
+      allow create: if isAuthenticated() && request.auth.uid == uid
+        && request.resource.data.keys().hasAll(['fullName','email','role','createdAt'])
+        && request.resource.data.role in ['passenger','driver'];
+      allow update: if (isOwner(uid) && roleNotChanged()) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── Trips ─────────────────────────────────────────────────────────────────
+    match /trips/{tripId} {
+      allow read:   if isAuthenticated();
+      allow create: if isDriver()
+        && request.resource.data.driverUid == request.auth.uid
+        && request.resource.data.keys().hasAll(['driverUid','from','to','departureTime','seats','pricePerSeat','status'])
+        && request.resource.data.seats   >  0
+        && request.resource.data.seats   <= 8
+        && request.resource.data.pricePerSeat > 0;
+      allow update: if (isDriver() && resource.data.driverUid == request.auth.uid) || isAdmin();
+      allow delete: if (isDriver() && resource.data.driverUid == request.auth.uid) || isAdmin();
+    }
+
+    // ── Bookings ──────────────────────────────────────────────────────────────
+    match /bookings/{bookingId} {
+      allow read:   if isAuthenticated() && (
+        resource.data.passengerUid == request.auth.uid ||
+        resource.data.driverUid   == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if isPassenger()
+        && request.resource.data.passengerUid == request.auth.uid
+        && request.resource.data.keys().hasAll(['tripId','passengerUid','driverUid','status','createdAt']);
+      allow update: if (
+        resource.data.passengerUid == request.auth.uid ||
+        resource.data.driverUid   == request.auth.uid ||
+        isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    // ── Trip Chat ─────────────────────────────────────────────────────────────
+    // Only passengers with a confirmed booking + the driver can read/write
+    match /tripChats/{tripId}/messages/{messageId} {
+      allow read:   if isAuthenticated();
+      allow create: if isAuthenticated()
+        && request.resource.data.senderUid == request.auth.uid
+        && request.resource.data.text.size() <= 500
+        && request.resource.data.text.size() > 0;
+      allow update: if isAuthenticated()
+        && resource.data.senderUid == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+
+    // ── Payments ──────────────────────────────────────────────────────────────
+    match /payments/{paymentId} {
+      allow read:   if isAuthenticated() && (
+        resource.data.passengerUid == request.auth.uid ||
+        resource.data.driverUid   == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if false; // Cloud Functions only
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // ── Ratings ───────────────────────────────────────────────────────────────
+    match /ratings/{ratingId} {
+      allow read:   if isAuthenticated();
+      allow create: if isPassenger()
+        && request.resource.data.passengerUid == request.auth.uid
+        && request.resource.data.score >= 1
+        && request.resource.data.score <= 5;
+      allow update: if false; // Write-once
+      allow delete: if isAdmin();
+    }
+
+    // ── Disputes ──────────────────────────────────────────────────────────────
+    match /disputes/{disputeId} {
+      allow read:   if isAuthenticated() && (resource.data.raisedByUid == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && request.resource.data.raisedByUid == request.auth.uid;
+      allow update: if isAdmin();
+      allow delete: if false; // Never delete — audit trail
+    }
+
+    // ── Safety Alerts ─────────────────────────────────────────────────────────
+    match /safetyAlerts/{alertId} {
+      allow read:   if isAdmin() || (isAuthenticated() && resource.data.passengerUid == request.auth.uid);
+      allow create: if isAuthenticated() && request.resource.data.passengerUid == request.auth.uid;
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // ── Refunds ───────────────────────────────────────────────────────────────
+    match /refunds/{refundId} {
+      allow read:   if isAdmin();
+      allow create: if isAdmin();
+      allow update: if isSuperAdmin(); // Amounts above R1000 need super admin
+      allow delete: if false;
+    }
+
+    // ── Deny everything else ──────────────────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
