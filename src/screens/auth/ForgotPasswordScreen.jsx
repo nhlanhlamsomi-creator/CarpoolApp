@@ -1,37 +1,191 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
-  KeyboardAvoidingView, Platform, StatusBar, Alert,
+  KeyboardAvoidingView, Platform, StatusBar,
+  Animated, TextInput,
 } from 'react-native';
-import Input from '../../components/common/Input';
-import Button from '../../components/common/Button';
+import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { resetPassword } from '../../services/auth.service';
 import { validateEmail } from '../../utils/sanitise';
-import { colors, typography, spacing, radius, shadows } from '../../theme';
+import { colors, typography, spacing, radius } from '../../theme';
+
+// ─── Icons ───────────────────────────────────────────────────────────────────
+
+const IconChevronLeft = ({ size = 22, color = '#fff' }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path d="M15 18l-6-6 6-6" stroke={color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+  </Svg>
+);
+
+const IconMail = ({ size = 44, color = '#fff' }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke={color} strokeWidth="1.6" fill="none" />
+    <Path d="M22 6l-10 7L2 6" stroke={color} strokeWidth="1.6" strokeLinecap="round" />
+  </Svg>
+);
+
+const IconMailInput = ({ size = 18, color = '#AAA' }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke={color} strokeWidth="1.7" fill="none" />
+    <Path d="M22 6l-10 7L2 6" stroke={color} strokeWidth="1.7" strokeLinecap="round" />
+  </Svg>
+);
+
+const IconShieldCheck = ({ size = 44, color = '#fff' }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path d="M12 2L4 5v6c0 5.25 3.4 10.15 8 11.35C16.6 21.15 20 16.25 20 11V5l-8-3z" stroke={color} strokeWidth="1.6" fill="none" strokeLinejoin="round" />
+    <Path d="M9 12l2 2 4-4" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </Svg>
+);
+
+const IconArrowRight = ({ size = 18, color = '#fff' }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path d="M5 12h14M13 6l6 6-6 6" stroke={color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+  </Svg>
+);
+
+// ─── Decorative blobs ─────────────────────────────────────────────────────────
+
+function HeroBlobIcon({ sent }) {
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, { toValue: 1.08, duration: 1800, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1,    duration: 1800, useNativeDriver: true }),
+      ])
+    ).start();
+  }, []);
+
+  return (
+    <View style={heroStyles.wrap}>
+      {/* Outer ring */}
+      <Animated.View style={[heroStyles.ringOuter, { transform: [{ scale: pulseAnim }] }]} />
+      {/* Inner ring */}
+      <View style={heroStyles.ringInner} />
+      {/* Icon circle */}
+      <View style={heroStyles.iconCircle}>
+        {sent
+          ? <IconShieldCheck size={40} color="#fff" />
+          : <IconMail size={40} color="#fff" />
+        }
+      </View>
+    </View>
+  );
+}
+
+const heroStyles = StyleSheet.create({
+  wrap: { alignItems: 'center', justifyContent: 'center', marginBottom: 28 },
+  ringOuter: {
+    position: 'absolute',
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+  },
+  ringInner: {
+    position: 'absolute',
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+  },
+  iconCircle: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    backgroundColor: 'rgba(255,255,255,0.22)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
+
+// ─── Field ────────────────────────────────────────────────────────────────────
+
+function Field({ icon: Icon, label, error, ...props }) {
+  return (
+    <View style={fieldStyles.wrapper}>
+      <Text style={fieldStyles.label}>{label}</Text>
+      <View style={[fieldStyles.box, error && fieldStyles.boxError]}>
+        {Icon && (
+          <View style={fieldStyles.iconWrap}>
+            <Icon size={18} color={error ? '#EF4444' : '#AAA'} />
+          </View>
+        )}
+        <TextInput
+          style={fieldStyles.input}
+          placeholderTextColor="#C0C0C0"
+          autoCapitalize="none"
+          {...props}
+        />
+      </View>
+      {!!error && <Text style={fieldStyles.error}>{error}</Text>}
+    </View>
+  );
+}
+
+const fieldStyles = StyleSheet.create({
+  wrapper: { marginBottom: 16 },
+  label: { fontSize: 13, fontWeight: '600', color: '#444', marginBottom: 7 },
+  box: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F7F8FA',
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: '#E5E7EB',
+    paddingHorizontal: 14,
+    height: 52,
+  },
+  boxError: { borderColor: '#EF4444', backgroundColor: '#FFF5F5' },
+  iconWrap: { marginRight: 10 },
+  input: { flex: 1, fontSize: 15, color: '#1a1a2e' },
+  error: { fontSize: 12, color: '#EF4444', marginTop: 5, marginLeft: 4 },
+});
+
+// ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function ForgotPasswordScreen({ navigation }) {
-  const [email, setEmail] = useState('');
-  const [error, setError] = useState(null);
+  const [email, setEmail]   = useState('');
+  const [error, setError]   = useState(null);
   const [loading, setLoading] = useState(false);
-  const [sent, setSent] = useState(false);
+  const [sent, setSent]     = useState(false);
+
+  const fadeAnim  = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(32)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim,  { toValue: 1, duration: 450, useNativeDriver: true }),
+      Animated.spring(slideAnim, { toValue: 0, tension: 70, friction: 10, useNativeDriver: true }),
+    ]).start();
+  }, [sent]);
+
+  const transitionToSent = () => {
+    Animated.parallel([
+      Animated.timing(fadeAnim,  { toValue: 0, duration: 180, useNativeDriver: true }),
+      Animated.timing(slideAnim, { toValue: -24, duration: 180, useNativeDriver: true }),
+    ]).start(() => {
+      setSent(true);
+      slideAnim.setValue(32);
+      fadeAnim.setValue(0);
+    });
+  };
 
   const handleReset = async () => {
     const { valid, error: emailError, value: cleanEmail } = validateEmail(email);
-    if (!valid) {
-      setError(emailError);
-      return;
-    }
-
+    if (!valid) { setError(emailError); return; }
     setLoading(true);
     try {
       await resetPassword(cleanEmail);
-      setSent(true);
-    } catch (err) {
-      // SECURITY: Don't reveal whether the email exists or not
-      // Always show success message to prevent email enumeration attacks
-      setSent(true);
+    } catch {
+      // intentionally silent — security: don't reveal if email exists
     } finally {
       setLoading(false);
+      transitionToSent();
     }
   };
 
@@ -42,191 +196,283 @@ export default function ForgotPasswordScreen({ navigation }) {
     >
       <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
 
+      {/* ── Header ── */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Text style={styles.backIcon}>←</Text>
+        <TouchableOpacity
+          style={styles.backBtn}
+          onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
+        >
+          <IconChevronLeft size={22} color="rgba(255,255,255,0.9)" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Reset Password</Text>
-        <View style={{ width: 32 }} />
+
+        {/* Hero icon lives in header so it sits half in/half out the sheet */}
+        <View style={styles.heroArea}>
+          <HeroBlobIcon sent={sent} />
+          <Text style={styles.heroTitle}>
+            {sent ? 'Email Sent!' : 'Forgot Password?'}
+          </Text>
+          <Text style={styles.heroSub}>
+            {sent
+              ? `We sent a reset link to\n${email}`
+              : "No worries — it happens to everyone."}
+          </Text>
+        </View>
       </View>
 
-      <View style={styles.content}>
-        {!sent ? (
-          <>
-            <View style={styles.iconBox}>
-              <Text style={styles.icon}>🔑</Text>
-            </View>
+      {/* ── Sheet ── */}
+      <View style={styles.sheet}>
+        <View style={styles.sheetHandle} />
 
-            <Text style={styles.title}>Forgot your password?</Text>
-            <Text style={styles.subtitle}>
-              Enter your email address and we'll send you a link to reset your password.
-            </Text>
+        <Animated.View
+          style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}
+        >
+          {!sent ? (
+            <>
+              <Text style={styles.cardTitle}>Enter your email</Text>
+              <Text style={styles.cardSub}>
+                We'll send a secure reset link — no account confirmation either way.
+              </Text>
 
-            <View style={styles.formCard}>
-              <Input
+              <Field
+                icon={IconMailInput}
                 label="Email Address"
                 placeholder="e.g. sipho@email.com"
                 value={email}
-                onChangeText={(v) => {
-                  setEmail(v);
-                  setError(null);
-                }}
+                onChangeText={v => { setEmail(v); setError(null); }}
                 error={error}
                 keyboardType="email-address"
               />
 
-              {/* Security note: we never reveal if email exists */}
-              <View style={styles.securityNote}>
-                <Text style={styles.securityIcon}>🔒</Text>
+              {/* Security note */}
+              <View style={styles.securityRow}>
+                <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                  <Path d="M12 2L4 5v6c0 5.25 3.4 10.15 8 11.35C16.6 21.15 20 16.25 20 11V5l-8-3z" fill={colors.primary} opacity={0.7} />
+                  <Path d="M9 12l2 2 4-4" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
                 <Text style={styles.securityText}>
-                  For security, we don't confirm whether an email is registered. Check your inbox after submitting.
+                  We never reveal whether an email is registered.
                 </Text>
               </View>
 
-              <Button
-                title="Send Reset Link"
+              {/* CTA */}
+              <TouchableOpacity
+                style={[styles.ctaBtn, loading && { opacity: 0.72 }]}
                 onPress={handleReset}
-                size="full"
-                loading={loading}
-                style={styles.submitBtn}
-              />
-            </View>
+                activeOpacity={0.85}
+                disabled={loading}
+              >
+                <Text style={styles.ctaBtnText}>
+                  {loading ? 'Sending…' : 'Send Reset Link'}
+                </Text>
+                {!loading && <IconArrowRight size={18} color="#fff" />}
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              style={styles.backLink}
-            >
-              <Text style={styles.backLinkText}>← Back to Login</Text>
-            </TouchableOpacity>
-          </>
-        ) : (
-          /* Sent state */
-          <View style={styles.sentBox}>
-            <Text style={styles.sentIcon}>📧</Text>
-            <Text style={styles.sentTitle}>Check your inbox</Text>
-            <Text style={styles.sentText}>
-              If an account exists for {email}, you'll receive a password reset link shortly.
-            </Text>
-            <Text style={styles.sentSubtext}>
-              Didn't receive it? Check your spam folder or try again in a few minutes.
-            </Text>
+              <TouchableOpacity
+                onPress={() => navigation.goBack()}
+                style={styles.backLink}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.backLinkText}>Back to Login</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <Text style={styles.cardTitle}>Check your inbox</Text>
+              <Text style={styles.cardSub}>
+                If an account exists for this email, you'll receive a reset link shortly. Also check your spam folder.
+              </Text>
 
-            <Button
-              title="Back to Login"
-              onPress={() => navigation.replace('Login')}
-              size="full"
-              style={styles.backBtn2}
-            />
+              {/* Tips */}
+              {[
+                'Check your spam or junk folder',
+                'The link expires in 15 minutes',
+                'Request a new link if needed',
+              ].map((tip, i) => (
+                <View key={i} style={styles.tipRow}>
+                  <View style={styles.tipDot} />
+                  <Text style={styles.tipText}>{tip}</Text>
+                </View>
+              ))}
 
-            <TouchableOpacity
-              onPress={() => setSent(false)}
-              style={styles.retryLink}
-            >
-              <Text style={styles.retryText}>Try a different email</Text>
-            </TouchableOpacity>
-          </View>
-        )}
+              {/* Back to login */}
+              <TouchableOpacity
+                style={styles.ctaBtn}
+                onPress={() => navigation.goBack()}
+                activeOpacity={0.85}
+              >
+                <Text style={styles.ctaBtnText}>Back to Login</Text>
+                <IconArrowRight size={18} color="#fff" />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => {
+                  fadeAnim.setValue(0);
+                  slideAnim.setValue(32);
+                  setSent(false);
+                }}
+                style={styles.backLink}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.backLinkText}>Try a different email</Text>
+              </TouchableOpacity>
+            </>
+          )}
+        </Animated.View>
       </View>
     </KeyboardAvoidingView>
   );
 }
 
+// ─── Styles ───────────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
+  container: {
+    flex: 1,
+    backgroundColor: colors.primary,
+  },
+
+  // Header / hero area
   header: {
     backgroundColor: colors.primary,
-    paddingTop: 52,
-    paddingBottom: spacing.lg,
-    paddingHorizontal: spacing.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
+    paddingTop: Platform.OS === 'ios' ? 56 : 40,
+    paddingHorizontal: 20,
+    paddingBottom: 48,
   },
-  backBtn: { width: 32 },
-  backIcon: { color: colors.white, fontSize: 22 },
-  headerTitle: {
-    flex: 1, textAlign: 'center',
-    fontSize: typography.fontSize.lg,
-    fontWeight: '800',
-    color: colors.white,
-  },
-  content: {
-    flex: 1,
-    padding: spacing.lg,
-    alignItems: 'center',
-    paddingTop: spacing.xxl,
-  },
-  iconBox: {
-    width: 80, height: 80,
-    backgroundColor: colors.primaryLight,
-    borderRadius: 24,
+  backBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.15)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: spacing.lg,
+    marginBottom: 24,
   },
-  icon: { fontSize: 40 },
-  title: {
-    fontSize: typography.fontSize.xxl,
-    fontWeight: '800',
-    color: colors.textPrimary,
+  heroArea: {
+    alignItems: 'center',
+  },
+  heroTitle: {
+    fontSize: 26,
+    fontWeight: '900',
+    color: '#fff',
+    letterSpacing: -0.5,
+    marginBottom: 8,
     textAlign: 'center',
-    marginBottom: spacing.sm,
   },
-  subtitle: {
-    fontSize: typography.fontSize.base,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: spacing.xl,
-    lineHeight: 22,
-  },
-  formCard: {
-    backgroundColor: colors.white,
-    borderRadius: radius.xl,
-    padding: spacing.lg,
-    width: '100%',
-    ...shadows.md,
-  },
-  securityNote: {
-    flexDirection: 'row',
-    backgroundColor: colors.primaryLight,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    marginBottom: spacing.md,
-    gap: spacing.sm,
-  },
-  securityIcon: { fontSize: 14 },
-  securityText: {
-    flex: 1,
-    fontSize: typography.fontSize.xs,
-    color: colors.primary,
-    lineHeight: 18,
-  },
-  submitBtn: { borderRadius: radius.full },
-  backLink: { marginTop: spacing.xl },
-  backLinkText: { color: colors.primary, fontWeight: '600', fontSize: typography.fontSize.base },
-  // Sent state
-  sentBox: { alignItems: 'center', width: '100%' },
-  sentIcon: { fontSize: 64, marginBottom: spacing.lg },
-  sentTitle: {
-    fontSize: typography.fontSize.xxl,
-    fontWeight: '800',
-    color: colors.textPrimary,
-    marginBottom: spacing.sm,
-  },
-  sentText: {
-    fontSize: typography.fontSize.base,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: spacing.md,
-  },
-  sentSubtext: {
-    fontSize: typography.fontSize.sm,
-    color: colors.textMuted,
+  heroSub: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.65)',
     textAlign: 'center',
     lineHeight: 20,
-    marginBottom: spacing.xl,
   },
-  backBtn2: { width: '100%', borderRadius: radius.full, marginBottom: spacing.md },
-  retryLink: { paddingVertical: spacing.md },
-  retryText: { color: colors.primary, fontWeight: '600', fontSize: typography.fontSize.base },
+
+  // Sheet
+  sheet: {
+    flex: 1,
+    backgroundColor: '#F7F8FA',
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    paddingHorizontal: 24,
+    paddingTop: 14,
+    paddingBottom: Platform.OS === 'ios' ? 44 : 32,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 16,
+  },
+  sheetHandle: {
+    width: 40,
+    height: 4,
+    backgroundColor: '#DDD',
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginBottom: 26,
+  },
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#1a1a2e',
+    letterSpacing: -0.3,
+    marginBottom: 6,
+  },
+  cardSub: {
+    fontSize: 13.5,
+    color: '#888',
+    lineHeight: 20,
+    marginBottom: 22,
+  },
+
+  // Security note
+  securityRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: (colors.primaryLight || '#E8F5EE'),
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 20,
+  },
+  securityText: {
+    fontSize: 12,
+    color: colors.primaryDark,
+    flex: 1,
+    lineHeight: 17,
+    fontWeight: '500',
+  },
+
+  // Tips (sent state)
+  tipRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 12,
+  },
+  tipDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: colors.primary,
+    opacity: 0.5,
+  },
+  tipText: {
+    fontSize: 13.5,
+    color: '#666',
+    lineHeight: 20,
+  },
+
+  // CTA
+  ctaBtn: {
+    height: 54,
+    backgroundColor: colors.primary,
+    borderRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    marginTop: 8,
+    marginBottom: 4,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.32,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  ctaBtnText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 0.2,
+  },
+
+  // Back link
+  backLink: {
+    alignItems: 'center',
+    paddingVertical: 14,
+  },
+  backLinkText: {
+    color: colors.primary,
+    fontSize: 14,
+    fontWeight: '600',
+  },
 });
