@@ -19,13 +19,19 @@ import TripResultsScreen      from '../screens/passenger/TripResultsScreen';
 import ConfirmBookingScreen   from '../screens/passenger/ConfirmBookingScreen';
 import MyTripsScreen          from '../screens/passenger/MyTripsScreen';
 import PassengerProfileScreen from '../screens/passenger/PassengerProfileScreen';
-import EditProfileScreen       from '../screens/passenger/EditProfileScreen';
-import IDVerificationScreen    from '../screens/passenger/IDVerificationScreen';
+import EditProfileScreen      from '../screens/passenger/EditProfileScreen';
+import IDVerificationScreen   from '../screens/passenger/IDVerificationScreen';
 import SelfieVerificationScreen from '../screens/passenger/SelfieVerificationScreen';
-import PaymentMethodsScreen    from '../screens/passenger/PaymentMethodsScreen';
+import PaymentMethodsScreen   from '../screens/passenger/PaymentMethodsScreen';
 
 // Driver
 import DriverHomeScreen    from '../screens/driver/DriverHomeScreen';
+import DriverIDVerificationScreen      from '../screens/driver/DriverIDVerificationScreen';
+import DriverLicenceVerificationScreen from '../screens/driver/DriverLicenceVerificationScreen';
+import DriverVehicleDetailsScreen      from '../screens/driver/DriverVehicleDetailsScreen';
+import DriverBankDetailsScreen         from '../screens/driver/DriverBankDetailsScreen';
+import DriverSelfieVerificationScreen  from '../screens/passenger/SelfieVerificationScreen';
+import DriverEditProfileScreen         from '../screens/passenger/EditProfileScreen';
 import CreateTripScreen    from '../screens/driver/CreateTripScreen';
 import EarningsScreen      from '../screens/driver/EarningsScreen';
 import DriverProfileScreen from '../screens/driver/DriverProfileScreen';
@@ -241,6 +247,14 @@ export default function AppNavigator() {
 
         {/* ── Driver app ── */}
         <Stack.Screen name="DriverTabs" component={DriverTabs} options={{ animation: 'fade' }} />
+
+        {/* ── Driver verification sub-screens ── */}
+        <Stack.Screen name="DriverIDVerification"    component={DriverIDVerificationScreen}      options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="DriverLicenceVerification" component={DriverLicenceVerificationScreen} options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="DriverVehicleDetails"    component={DriverVehicleDetailsScreen}      options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="DriverBankDetails"       component={DriverBankDetailsScreen}         options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="DriverSelfieVerification" component={DriverSelfieVerificationScreen} options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="DriverEditProfile"       component={DriverEditProfileScreen}         options={{ animation: 'slide_from_right' }} />
 
         {/* ── Shared screens ── */}
         <Stack.Screen name="ActiveRide" component={ActiveRideScreen} options={{ animation: 'slide_from_right', gestureEnabled: false }} />
