@@ -4,17 +4,24 @@
  * All logic handled by AuthContext mock for now.
  */
 
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { auth } from '../../firebase.config';
+
 export async function register(form) {
   return { uid: 'user_' + Date.now(), role: form.role };
 }
 
 export async function login(email, password) {
-  return null;
+  throw new Error('Use AuthContext.login instead');
 }
 
-export async function logout() {}
+export async function logout() {
+  throw new Error('Use AuthContext.logout instead');
+}
 
-export async function resetPassword(email) {}
+export async function resetPassword(email) {
+  await sendPasswordResetEmail(auth, email);
+}
 
 export async function getCachedUser() {
   return null;
