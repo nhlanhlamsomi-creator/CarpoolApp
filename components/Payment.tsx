@@ -106,7 +106,6 @@ const Payment = ({
         customerEphemeralKeySecret: ephemeralKey.secret,
         paymentIntentClientSecret: paymentIntent.client_secret,
         allowsDelayedPaymentMethods: false,
-        currencyCode: "zar",
         returnURL: "myapp://book-ride",
         defaultBillingDetails: {
           email: safeEmail,
