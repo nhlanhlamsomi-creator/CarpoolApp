@@ -68,7 +68,7 @@ export default function RegisterScreen({ navigation, route }) {
         phone: phone.trim(),
         role,
       });
-      Alert.alert('Account created', 'Your account has been saved to Firebase. Please log in.', [
+      Alert.alert('Account created', 'Your account has been saved to Supabase. Please log in.', [
         { text: 'OK', onPress: () => navigation.replace('Login') },
       ]);
     } catch (error) {

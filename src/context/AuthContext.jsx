@@ -14,7 +14,7 @@ import {
   serverTimestamp,
   updateDoc,
 } from 'firebase/firestore';
-import { auth, db } from '../../firebase.config';
+import { auth, db } from '../firebase.config';
 
 const AuthContext = createContext(null);
 
@@ -52,17 +52,22 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+    const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
       if (!fbUser) {
         setUser(null);
         setLoading(false);
         return;
       }
 
-      const userDoc = await getDoc(doc(db, 'users', fbUser.uid));
-      const firestoreData = userDoc.exists() ? userDoc.data() : null;
-      setUser(buildUserObject(fbUser, firestoreData));
+      setUser(buildUserObject(fbUser, null));
       setLoading(false);
+
+      getDoc(doc(db, 'users', fbUser.uid)).then((userDoc) => {
+        const firestoreData = userDoc.exists() ? userDoc.data() : null;
+        setUser(buildUserObject(fbUser, firestoreData));
+      }).catch((error) => {
+        console.warn('Failed to load user profile:', error);
+      });
     });
 
     return unsubscribe;
@@ -72,10 +77,16 @@ export function AuthProvider({ children }) {
     try {
       const credential = await signInWithEmailAndPassword(auth, email, password);
       const fbUser = credential.user;
-      const userDoc = await getDoc(doc(db, 'users', fbUser.uid));
-      const firestoreData = userDoc.exists() ? userDoc.data() : null;
-      const currentUser = buildUserObject(fbUser, firestoreData);
+      const currentUser = buildUserObject(fbUser, null);
       setUser(currentUser);
+
+      getDoc(doc(db, 'users', fbUser.uid)).then((userDoc) => {
+        const firestoreData = userDoc.exists() ? userDoc.data() : null;
+        setUser(buildUserObject(fbUser, firestoreData));
+      }).catch((error) => {
+        console.warn('Failed to load user profile:', error);
+      });
+
       return currentUser;
     } catch (error) {
       throw new Error(authErrorMessage(error));

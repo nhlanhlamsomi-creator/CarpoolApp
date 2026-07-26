@@ -81,12 +81,15 @@ export default function Input({
             onPress={() => setShowPassword(!showPassword)}
             style={styles.rightIcon}
           >
-            <Text style={styles.eyeIcon}>{showPassword ? '🙈' : '👁'}</Text>
-          </TouchableOpacity>
-        ) : rightIcon ? (
+           {/* Emojis removed and replaced with clean text */}
+    <Text style={styles.eyeIcon}>{showPassword ? 'Hide' : 'Show'}</Text>
+  </TouchableOpacity>
+) : rightIcon ? (
           <View style={styles.rightIcon}>{rightIcon}</View>
         ) : null}
       </View>
+
+      {error ? (
 
       {error ? (
         <Text style={styles.errorText}>{error}</Text>
