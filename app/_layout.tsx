@@ -1,16 +1,19 @@
-import "../global.css";
 import { ClerkLoaded, ClerkProvider } from "@clerk/clerk-expo";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { LogBox, View } from "react-native";
 import "react-native-reanimated";
-import { LogBox } from "react-native";
+import "../global.css";
 
+import AnimatedSplash from "@/components/AnimatedSplash";
 import { tokenCache } from "@/lib/auth";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
+// The catch matters: in Expo Go and after a Fast Refresh there may be no native
+// splash registered, and the rejected promise surfaces as a red-box error.
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
 
@@ -33,9 +36,14 @@ export default function RootLayout() {
     "Jakarta-SemiBold": require("../assets/fonts/PlusJakartaSans-SemiBold.ttf"),
   });
 
+  // Tracks whether the animated splash has played out and faded away
+  const [splashDone, setSplashDone] = useState(false);
+
   useEffect(() => {
     if (loaded) {
-      SplashScreen.hideAsync();
+      // Hand off from the native splash to ours. Both use the same green
+      // background, so there's no visible seam.
+      SplashScreen.hideAsync().catch(() => {});
     }
   }, [loaded]);
 
@@ -44,15 +52,20 @@ export default function RootLayout() {
   }
 
   return (
-    <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
-      <ClerkLoaded>
-        <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          <Stack.Screen name="(root)" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-      </ClerkLoaded>
-    </ClerkProvider>
+    <View style={{ flex: 1 }}>
+      <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
+        <ClerkLoaded>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="index" />
+            <Stack.Screen name="(auth)" />
+            <Stack.Screen name="(root)" />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+        </ClerkLoaded>
+      </ClerkProvider>
+
+      {/* Sits above everything, including Clerk's own loading gap, then lifts */}
+      {!splashDone && <AnimatedSplash onFinish={() => setSplashDone(true)} />}
+    </View>
   );
 }

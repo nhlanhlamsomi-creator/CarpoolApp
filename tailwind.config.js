@@ -9,9 +9,7 @@ module.exports = {
     "./types/**/*.{js,jsx,ts,tsx}",
   ],
 
-  presets: [
-    require("nativewind/preset"),
-  ],
+  presets: [require("nativewind/preset")],
 
   theme: {
     extend: {
@@ -27,75 +25,92 @@ module.exports = {
       },
 
       colors: {
+        // Dark green. Same shape as before, so every existing
+        // bg-primary-500 / text-primary-500 turns green with no edits.
         primary: {
-          100: "#F5F8FF",
-          200: "#EBF4FF",
-          300: "#C3D9FF",
-          400: "#9BBFFF",
-          500: "#0286FF",
-          600: "#6A85E6",
-          700: "#475A99",
-          800: "#364573",
-          900: "#242B4D",
+          100: "#F2F8F5",
+          200: "#E6F2EC", // pale tint — chips, selected rows
+          300: "#C9E3D7",
+          400: "#7FC9A8",
+          500: "#0E5C3F", // the brand green — buttons, active states
+          600: "#0B4B33",
+          700: "#093B28",
+          800: "#06231A", // near-black green — headers, tab bar
+          900: "#04160F",
+        },
+
+        // Emerald accent, for highlights that sit on top of primary
+        accent: {
+          100: "#EAFBF3",
+          200: "#C6F2DF",
+          300: "#8FE6C1",
+          400: "#4FD3A0",
+          500: "#1FB574",
+          600: "#189260",
+          700: "#12704A",
+          800: "#0C4D33",
+          900: "#06301F",
         },
 
         secondary: {
-          100: "#F8F8F8",
-          200: "#F1F1F1",
-          300: "#D9D9D9",
-          400: "#C2C2C2",
-          500: "#AAAAAA",
-          600: "#999999",
-          700: "#666666",
-          800: "#4D4D4D",
-          900: "#333333",
+          100: "#F7F9F8",
+          200: "#EEF1F0",
+          300: "#DDE3E0",
+          400: "#BFC8C4",
+          500: "#9BA6A1",
+          600: "#68756F",
+          700: "#4A5450",
+          800: "#2C3532",
+          900: "#101814",
         },
 
         success: {
-          100: "#F0FFF4",
-          200: "#C6F6D5",
-          300: "#9AE6B4",
-          400: "#68D391",
-          500: "#38A169",
-          600: "#2F855A",
-          700: "#276749",
-          800: "#22543D",
-          900: "#1C4532",
+          100: "#F0FBF5",
+          200: "#D5F2E3",
+          300: "#A9E6C6",
+          400: "#5FD09B",
+          500: "#1FB574",
+          600: "#0E5C3F",
+          700: "#0B4B33",
+          800: "#093B28",
+          900: "#06231A",
         },
 
         danger: {
-          100: "#FFF5F5",
-          200: "#FED7D7",
-          300: "#FEB2B2",
-          400: "#FC8181",
-          500: "#F56565",
-          600: "#E53E3E",
-          700: "#C53030",
-          800: "#9B2C2C",
-          900: "#742A2A",
+          100: "#FEF3F3",
+          200: "#FBDCDC",
+          300: "#F7B9B9",
+          400: "#EF8484",
+          500: "#E04545",
+          600: "#C22F2F",
+          700: "#9C2525",
+          800: "#761C1C",
+          900: "#4F1212",
         },
 
         warning: {
-          100: "#FFFBEB",
-          200: "#FEF3C7",
-          300: "#FDE68A",
-          400: "#FACC15",
-          500: "#EAB308",
-          600: "#CA8A04",
-          700: "#A16207",
-          800: "#854D0E",
-          900: "#713F12",
+          100: "#FDF8EB",
+          200: "#FBEFCC",
+          300: "#F7DF99",
+          400: "#F0C74F",
+          500: "#E3A008",
+          600: "#B87F06",
+          700: "#8A6100",
+          800: "#5C4100",
+          900: "#2E2000",
         },
 
+        // Legacy keys kept so old class names keep resolving. general-500
+        // is the app background, general-200 is muted body text.
         general: {
-          100: "#CED1DD",
-          200: "#858585",
-          300: "#EEEEEE",
-          400: "#0CC25F",
-          500: "#F6F8FA",
-          600: "#E6F3FF",
-          700: "#EBEBEB",
-          800: "#ADADAD",
+          100: "#E2E9E5", // borders
+          200: "#68756F", // muted text
+          300: "#EEF1F0", // subtle fills
+          400: "#1FB574", // accent green
+          500: "#F5F8F6", // app background
+          600: "#E6F2EC", // selected row background
+          700: "#E2E9E5",
+          800: "#9BA6A1", // captions
         },
       },
     },

@@ -10,19 +10,17 @@ const TabIcon = ({
   source: ImageSourcePropType;
   focused: boolean;
 }) => (
-  <View className="flex flex-row justify-center items-center rounded-full bg-white/10 p-1">
-    <View
-      className={`rounded-full w-12 h-12 items-center justify-center ${
-        focused ? "bg-primary-500" : "bg-white/10"
-      }`}
-    >
-      <Image
-        source={source}
-        tintColor="white"
-        resizeMode="contain"
-        className="w-7 h-7"
-      />
-    </View>
+  <View
+    className={`h-12 w-12 items-center justify-center rounded-2xl ${
+      focused ? "bg-[#1FB574]" : "bg-transparent"
+    }`}
+  >
+    <Image
+      source={source}
+      tintColor={focused ? "#FFFFFF" : "rgba(255,255,255,0.45)"}
+      resizeMode="contain"
+      className="h-6 w-6"
+    />
   </View>
 );
 
@@ -31,27 +29,27 @@ export default function Layout() {
     <Tabs
       initialRouteName="home"
       screenOptions={{
-        tabBarActiveTintColor: "white",
-        tabBarInactiveTintColor: "white",
+        tabBarActiveTintColor: "#FFFFFF",
+        tabBarInactiveTintColor: "rgba(255,255,255,0.45)",
         tabBarShowLabel: false,
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: "#111827",
-          borderRadius: 24,
+          backgroundColor: "#06231A",
+          borderRadius: 26,
           paddingBottom: 10,
           paddingTop: 10,
-          marginHorizontal: 16,
-          marginBottom: 16,
           height: 72,
           position: "absolute",
           left: 16,
           right: 16,
-          bottom: 16,
+          bottom: 20,
+          borderTopWidth: 0,
           borderWidth: 0,
-          shadowColor: "#000",
-          shadowOpacity: 0.08,
+          shadowColor: "#06231A",
+          shadowOffset: { width: 0, height: 10 },
+          shadowOpacity: 0.28,
           shadowRadius: 22,
-          elevation: 12,
+          elevation: 14,
         },
       }}
     >

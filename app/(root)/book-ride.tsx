@@ -1,10 +1,10 @@
 import { useUser } from "@clerk/clerk-expo";
+import { Ionicons } from "@expo/vector-icons";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { Image, Text, View } from "react-native";
 
 import Payment from "@/components/Payment";
 import RideLayout from "@/components/RideLayout";
-import { icons } from "@/constants";
 import { formatTime } from "@/lib/utils";
 import { useDriverStore, useLocationStore } from "@/store";
 
@@ -17,78 +17,102 @@ const BookRide = () => {
     (driver) => +driver.id === selectedDriver,
   )[0];
 
+  const driverName =
+    driverDetails?.title ||
+    `${driverDetails?.first_name ?? ""} ${driverDetails?.last_name ?? ""}`.trim() ||
+    "Your driver";
+
   return (
     <StripeProvider
       publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!}
-      merchantIdentifier="merchant.com.uber"
+      // Must match `merchantIdentifier` in app.json or Apple Pay won't appear
+      merchantIdentifier="merchant.com.lyft"
       urlScheme="myapp"
     >
-      <RideLayout title="Book Ride">
+      <RideLayout title="Confirm booking" snapPoints={["70%", "92%"]}>
         <>
-          <View className="rounded-3xl bg-white p-5 shadow-sm shadow-neutral-300">
-            <View className="items-center justify-center">
+          {/* ── Driver ── */}
+          <View className="items-center rounded-3xl border border-[#E2E9E5] bg-white px-5 pb-5 pt-6">
+            <View className="relative">
               <Image
                 source={{ uri: driverDetails?.profile_image_url }}
-                className="h-28 w-28 rounded-full"
+                className="h-24 w-24 rounded-full bg-[#EEF1F0]"
               />
+              <View className="absolute -bottom-1 -right-1 h-7 w-7 items-center justify-center rounded-full border-[3px] border-white bg-[#1FB574]">
+                <Ionicons name="checkmark" size={13} color="#fff" />
+              </View>
+            </View>
 
-              <Text className="mt-5 text-xl font-JakartaBold text-neutral-900">
-                {driverDetails?.title || `${driverDetails?.first_name} ${driverDetails?.last_name}`}
-              </Text>
+            <Text className="mt-4 text-[19px] font-JakartaExtraBold text-[#101814]">
+              {driverName}
+            </Text>
 
-              <View className="mt-3 flex-row items-center gap-2 rounded-full bg-primary-50 px-4 py-2">
-                <Image
-                  source={icons.star}
-                  className="w-4 h-4"
-                  resizeMode="contain"
-                />
-                <Text className="text-base font-JakartaMedium text-neutral-900">
+            <View className="mt-2 flex-row items-center gap-3">
+              <View className="flex-row items-center gap-1 rounded-full bg-[#F5F8F6] px-3 py-1.5">
+                <Ionicons name="star" size={12} color="#E3A008" />
+                <Text className="text-[12px] font-JakartaBold text-[#4A5450]">
                   {driverDetails?.rating ?? "4.9"}
+                </Text>
+              </View>
+
+              <View className="flex-row items-center gap-1 rounded-full bg-[#F5F8F6] px-3 py-1.5">
+                <Ionicons name="people-outline" size={12} color="#68756F" />
+                <Text className="text-[12px] font-JakartaBold text-[#4A5450]">
+                  {driverDetails?.car_seats ?? 0} seats
                 </Text>
               </View>
             </View>
 
-            <View className="mt-6 rounded-3xl bg-primary-50 p-4">
-              <View className="flex flex-row items-center justify-between mb-3">
-                <Text className="text-base font-JakartaMedium text-neutral-500">Ride Price</Text>
-                <Text className="text-base font-JakartaBold text-success-600">
-                  R{driverDetails?.price ?? "0.00"}
+            {/* ── Fare breakdown ── */}
+            <View className="mt-5 w-full rounded-2xl bg-[#E6F2EC] p-4">
+              <View className="mb-3 flex-row items-center justify-between">
+                <Text className="text-[13px] font-JakartaMedium text-[#4A5450]">
+                  Pickup in
                 </Text>
-              </View>
-
-              <View className="flex flex-row items-center justify-between mb-3">
-                <Text className="text-base font-JakartaMedium text-neutral-500">Pickup Time</Text>
-                <Text className="text-base font-JakartaBold text-neutral-900">
+                <Text className="text-[13px] font-JakartaBold text-[#101814]">
                   {formatTime(driverDetails?.time ?? 0)}
                 </Text>
               </View>
 
-              <View className="flex flex-row items-center justify-between">
-                <Text className="text-base font-JakartaMedium text-neutral-500">Car Seats</Text>
-                <Text className="text-base font-JakartaBold text-neutral-900">
-                  {driverDetails?.car_seats ?? 0}
+              <View className="mb-3 h-[1px] bg-[#C9E3D7]" />
+
+              <View className="flex-row items-center justify-between">
+                <Text className="text-[14px] font-JakartaBold text-[#0E5C3F]">
+                  Total fare
+                </Text>
+                <Text className="text-[20px] font-JakartaExtraBold text-[#0E5C3F]">
+                  R{driverDetails?.price ?? "0.00"}
                 </Text>
               </View>
             </View>
           </View>
 
-          <View className="mt-5 rounded-3xl bg-white p-4 shadow-sm shadow-neutral-300">
-            <View className="flex-row items-start gap-3 border-b border-neutral-200 pb-4 mb-4">
-              <Image source={icons.to} className="w-6 h-6" />
-              <View className="flex-1">
-                <Text className="text-sm font-JakartaMedium text-neutral-500">Pickup</Text>
-                <Text className="text-base font-JakartaRegular text-neutral-900">
-                  {userAddress}
-                </Text>
-              </View>
-            </View>
+          {/* ── Route ── */}
+          <View className="mt-4 rounded-3xl border border-[#E2E9E5] bg-white p-5">
+            <Text className="mb-4 text-[13px] font-JakartaExtraBold uppercase tracking-wider text-[#9BA6A1]">
+              Your route
+            </Text>
 
-            <View className="flex-row items-start gap-3">
-              <Image source={icons.point} className="w-6 h-6" />
+            <View className="flex-row">
+              <View className="mr-3 items-center pt-1.5">
+                <View className="h-2.5 w-2.5 rounded-full bg-[#1FB574]" />
+                <View className="my-1.5 w-[1.5px] flex-1 bg-[#E2E9E5]" />
+                <View className="h-2.5 w-2.5 rounded-[3px] bg-[#0E5C3F]" />
+              </View>
+
               <View className="flex-1">
-                <Text className="text-sm font-JakartaMedium text-neutral-500">Destination</Text>
-                <Text className="text-base font-JakartaRegular text-neutral-900">
-                  {destinationAddress}
+                <Text className="text-[11px] font-Jakarta text-[#9BA6A1]">
+                  Pickup
+                </Text>
+                <Text className="mb-5 mt-0.5 text-[14px] font-JakartaSemiBold text-[#101814]">
+                  {userAddress ?? "—"}
+                </Text>
+
+                <Text className="text-[11px] font-Jakarta text-[#9BA6A1]">
+                  Drop-off
+                </Text>
+                <Text className="mt-0.5 text-[14px] font-JakartaSemiBold text-[#101814]">
+                  {destinationAddress ?? "—"}
                 </Text>
               </View>
             </View>

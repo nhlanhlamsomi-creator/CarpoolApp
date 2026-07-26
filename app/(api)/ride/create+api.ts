@@ -19,13 +19,23 @@ export async function POST(request: Request) {
       user_id,
     } = body;
 
-    const rideTimeNumber = typeof ride_time === "number" ? ride_time : Number(ride_time);
+    // The client sends a duration in minutes. We keep BOTH readings of it:
+    //   duration_minutes — how long the trip takes ("25 min" on the card)
+    //   scheduled_for    — when it's expected to happen (drives Upcoming)
+    // Storing only the timestamp is what made durations display as garbage.
+    const rideTimeNumber =
+      typeof ride_time === "number" ? ride_time : Number(ride_time);
     const farePriceNumber = Number(fare_price);
+
+    const durationMinutes = Number.isFinite(rideTimeNumber)
+      ? Math.round(rideTimeNumber)
+      : null;
+
     const rideTimeAsTimestamp = Number.isFinite(rideTimeNumber)
       ? new Date(Date.now() + rideTimeNumber * 60000).toISOString()
       : typeof ride_time === "string"
-      ? new Date(ride_time).toISOString()
-      : null;
+        ? new Date(ride_time).toISOString()
+        : null;
 
     if (
       !origin_address ||
@@ -40,10 +50,7 @@ export async function POST(request: Request) {
       !driver_id ||
       !user_id
     ) {
-      return Response.json(
-        { error: "Missing required fields" },
-        { status: 400 },
-      );
+      return Response.json({ error: "Missing required fields" }, { status: 400 });
     }
 
     const supabase = getSupabaseServerClient();
@@ -57,6 +64,11 @@ export async function POST(request: Request) {
         destination_latitude,
         destination_longitude,
         ride_time: rideTimeAsTimestamp,
+        duration_minutes: durationMinutes,
+        scheduled_for: rideTimeAsTimestamp,
+        // A freshly paid ride is booked, not history. Without this every trip
+        // dropped straight into the History tab.
+        status: "booked",
         fare_price: farePriceNumber,
         payment_status,
         payment_method: payment_method ?? "Mock Card",
@@ -82,11 +94,9 @@ export async function POST(request: Request) {
 
     return Response.json({ data }, { status: 201 });
   } catch (error) {
-    console.error("Error inserting data into recent_rides:", error);
+    console.error("Error inserting ride:", error);
     return Response.json(
-      {
-        error: error instanceof Error ? error.message : String(error),
-      },
+      { error: error instanceof Error ? error.message : String(error) },
       { status: 500 },
     );
   }

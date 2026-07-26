@@ -9,9 +9,28 @@ export async function GET(request: Request, { id }: { id: string }) {
     const { data, error } = await supabase
       .from("rides")
       .select(
-        "ride_id, origin_address, destination_address, origin_latitude, origin_longitude, destination_latitude, destination_longitude, ride_time, fare_price, payment_status, created_at, driver_id, drivers(id, first_name, last_name, profile_image_url, car_image_url, car_seats, rating)"
+        `ride_id,
+         origin_address,
+         destination_address,
+         origin_latitude,
+         origin_longitude,
+         destination_latitude,
+         destination_longitude,
+         ride_time,
+         duration_minutes,
+         scheduled_for,
+         status,
+         completed_at,
+         cancelled_at,
+         fare_price,
+         payment_status,
+         created_at,
+         driver_id,
+         drivers(id, first_name, last_name, profile_image_url, car_image_url, car_seats, rating, phone_number)`
       )
       .eq("user_id", id)
+      // Upcoming trips first, soonest at the top; then the rest newest first.
+      .order("scheduled_for", { ascending: true, nullsFirst: false })
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -20,6 +39,21 @@ export async function GET(request: Request, { id }: { id: string }) {
 
     const response = (data ?? []).map((ride: any) => ({
       ...ride,
+      // Old rows predate duration_minutes, so fall back to the gap between
+      // creation and scheduled time rather than showing nothing.
+      duration_minutes:
+        ride.duration_minutes ??
+        (ride.ride_time && ride.created_at
+          ? Math.max(
+              0,
+              Math.round(
+                (new Date(ride.ride_time).getTime() -
+                  new Date(ride.created_at).getTime()) /
+                  60000,
+              ),
+            )
+          : null),
+      status: ride.status ?? "completed",
       driver: ride.drivers
         ? {
             driver_id: ride.drivers.id,
@@ -29,6 +63,7 @@ export async function GET(request: Request, { id }: { id: string }) {
             car_image_url: ride.drivers.car_image_url,
             car_seats: ride.drivers.car_seats,
             rating: ride.drivers.rating,
+            phone_number: ride.drivers.phone_number,
           }
         : null,
     }));

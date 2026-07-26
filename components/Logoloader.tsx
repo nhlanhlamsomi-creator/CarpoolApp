@@ -1,12 +1,12 @@
 import { useEffect, useRef } from "react";
 import {
-    Animated,
-    Dimensions,
-    Easing,
-    Image,
-    StyleSheet,
-    Text,
-    View,
+  Animated,
+  Dimensions,
+  Easing,
+  Image,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 
 const { width } = Dimensions.get("window");

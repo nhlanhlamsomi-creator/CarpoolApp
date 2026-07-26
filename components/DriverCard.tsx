@@ -1,64 +1,86 @@
+import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
-import { icons } from "@/constants";
 import { formatTime } from "@/lib/utils";
 import { DriverCardProps } from "@/types/type";
 
 const DriverCard = ({ item, selected, setSelected }: DriverCardProps) => {
+  const isSelected = selected === item.id;
+  const rating = Number(item.rating ?? 0);
+
   return (
     <TouchableOpacity
       onPress={setSelected}
-      className={`${
-        selected === item.id ? "bg-general-600" : "bg-white"
-      } flex flex-row items-center justify-between py-5 px-3 rounded-xl`}
+      activeOpacity={0.85}
+      accessibilityRole="button"
+      accessibilityState={{ selected: isSelected }}
+      className={`mb-3 flex-row items-center rounded-3xl border-[1.5px] p-3.5 ${
+        isSelected
+          ? "border-[#0E5C3F] bg-[#E6F2EC]"
+          : "border-[#E2E9E5] bg-white"
+      }`}
     >
-      <Image
-        source={{ uri: item.profile_image_url }}
-        className="w-14 h-14 rounded-full"
-      />
-
-      <View className="flex-1 flex flex-col items-start justify-center mx-3">
-        <View className="flex flex-row items-center justify-start mb-1">
-          <Text className="text-lg font-JakartaRegular">{item.title}</Text>
-
-          <View className="flex flex-row items-center space-x-1 ml-2">
-            <Image source={icons.star} className="w-3.5 h-3.5" />
-            <Text className="text-sm font-JakartaRegular">4</Text>
-          </View>
-        </View>
-
-        <View className="flex flex-row items-center justify-start">
-          <View className="flex flex-row items-center">
-            <Image source={icons.dollar} className="w-4 h-4" />
-            <Text className="text-sm font-JakartaRegular ml-1">
-              R{item.price}
-            </Text>
-          </View>
-
-          <Text className="text-sm font-JakartaRegular text-general-800 mx-1">
-            |
-          </Text>
-
-          <Text className="text-sm font-JakartaRegular text-general-800">
-            {formatTime(item.time!)}
-          </Text>
-
-          <Text className="text-sm font-JakartaRegular text-general-800 mx-1">
-            |
-          </Text>
-
-          <Text className="text-sm font-JakartaRegular text-general-800">
-            {item.car_seats} seats
-          </Text>
+      {/* Avatar + verified tick */}
+      <View className="relative">
+        <Image
+          source={{ uri: item.profile_image_url }}
+          className="h-14 w-14 rounded-2xl bg-[#EEF1F0]"
+        />
+        <View className="absolute -bottom-1 -right-1 h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-[#1FB574]">
+          <Ionicons name="checkmark" size={11} color="#fff" />
         </View>
       </View>
 
-      <Image
-        source={{ uri: item.car_image_url }}
-        className="h-14 w-14"
-        resizeMode="contain"
-      />
+      {/* Details */}
+      <View className="mx-3 flex-1">
+        <View className="flex-row items-center gap-2">
+          <Text
+            className="flex-shrink text-[15px] font-JakartaBold text-[#101814]"
+            numberOfLines={1}
+          >
+            {item.title}
+          </Text>
+
+          <View className="flex-row items-center gap-0.5 rounded-full bg-[#F5F8F6] px-2 py-0.5">
+            <Ionicons name="star" size={11} color="#E3A008" />
+            <Text className="text-[11px] font-JakartaBold text-[#4A5450]">
+              {rating > 0 ? rating.toFixed(1) : "New"}
+            </Text>
+          </View>
+        </View>
+
+        {/* Meta chips — spaced, not pipe-separated */}
+        <View className="mt-2 flex-row items-center gap-3">
+          <View className="flex-row items-center gap-1">
+            <Ionicons name="time-outline" size={13} color="#68756F" />
+            <Text className="text-xs font-JakartaMedium text-[#68756F]">
+              {formatTime(item.time!)}
+            </Text>
+          </View>
+
+          <View className="h-3 w-[1px] bg-[#E2E9E5]" />
+
+          <View className="flex-row items-center gap-1">
+            <Ionicons name="people-outline" size={13} color="#68756F" />
+            <Text className="text-xs font-JakartaMedium text-[#68756F]">
+              {item.car_seats} seats
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Price + car */}
+      <View className="items-end">
+        <Text className="text-[17px] font-JakartaExtraBold text-[#0E5C3F]">
+          R{item.price}
+        </Text>
+        <Image
+          source={{ uri: item.car_image_url }}
+          className="mt-1 h-9 w-14"
+          resizeMode="contain"
+        />
+      </View>
     </TouchableOpacity>
   );
 };
