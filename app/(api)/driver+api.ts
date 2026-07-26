@@ -1,4 +1,5 @@
-import { getSupabaseClient } from "@/lib/supabase";
+
+import { getSupabaseServerClient } from "@/lib/supabase-server";
 
 const fallbackDrivers = [
   {
@@ -26,7 +27,7 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const email = url.searchParams.get("email");
 
-    const supabase = getSupabaseClient();
+    const supabase = getSupabaseServerClient();
 
     if (email) {
       const { data, error } = await supabase

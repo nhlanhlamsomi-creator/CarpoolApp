@@ -29,44 +29,69 @@ export const tokenCache = {
 };
 
 export const googleOAuth = async (startOAuthFlow: any) => {
+  if (!startOAuthFlow || typeof startOAuthFlow !== "function") {
+    return {
+      success: false,
+      code: "missing_oauth_flow",
+      message: "OAuth flow is unavailable.",
+    };
+  }
+
   try {
-    const { createdSessionId, setActive, signUp } = await startOAuthFlow({
+    const response = await startOAuthFlow({
       redirectUrl: Linking.createURL("/(root)/(tabs)/home"),
     });
 
-    if (createdSessionId) {
-      if (setActive) {
-        await setActive({ session: createdSessionId });
+    if (!response || typeof response !== "object") {
+      return {
+        success: false,
+        code: "invalid_oauth_response",
+        message: "Received an invalid OAuth response.",
+      };
+    }
 
-        if (signUp.createdUserId) {
-          await fetchAPI("/(api)/user", {
-            method: "POST",
-            body: JSON.stringify({
-              name: `${signUp.firstName} ${signUp.lastName}`,
-              email: signUp.emailAddress,
-              clerkId: signUp.createdUserId,
-            }),
-          });
-        }
+    const { createdSessionId, setActive, signUp } = response as {
+      createdSessionId?: string;
+      setActive?: ({ session }: { session: string }) => Promise<void>;
+      signUp?: { createdUserId?: string; firstName?: string; lastName?: string; emailAddress?: string };
+    };
 
-        return {
-          success: true,
-          code: "success",
-          message: "You have successfully signed in with Google",
-        };
-      }
+    if (!createdSessionId) {
+      return {
+        success: false,
+        code: "missing_session",
+        message: "Google sign-in did not create a session.",
+      };
+    }
+
+    if (setActive) {
+      await setActive({ session: createdSessionId });
+    }
+
+    if (signUp?.createdUserId) {
+      await fetchAPI("/(api)/user", {
+        method: "POST",
+        body: JSON.stringify({
+          name: `${signUp.firstName ?? ""} ${signUp.lastName ?? ""}`.trim(),
+          email: signUp.emailAddress ?? "",
+          clerkId: signUp.createdUserId,
+        }),
+      });
     }
 
     return {
-      success: false,
-      message: "An error occurred while signing in with Google",
+      success: true,
+      code: "success",
+      message: "You have successfully signed in with Google",
     };
   } catch (err: any) {
     console.error(err);
     return {
       success: false,
-      code: err.code,
-      message: err?.errors[0]?.longMessage,
+      code: err?.code ?? "unknown_error",
+      message:
+        err?.message || err?.errors?.[0]?.longMessage ||
+        "An error occurred while signing in with Google",
     };
   }
 };

@@ -1,10 +1,11 @@
-import { getSupabaseClient } from "@/lib/supabase";
+
+import { getSupabaseServerClient } from "@/lib/supabase-server";
 
 export async function POST(request: Request) {
   try {
     console.log("========== CREATE USER ==========");
 
-    const supabase = getSupabaseClient();
+    const supabase = getSupabaseServerClient();
     const body = await request.json();
 
     console.log("Request Body:", body);

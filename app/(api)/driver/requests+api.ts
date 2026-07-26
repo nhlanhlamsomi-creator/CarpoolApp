@@ -1,4 +1,5 @@
-import { getSupabaseClient } from "@/lib/supabase";
+
+import { getSupabaseServerClient } from "@/lib/supabase-server";
 
 const fallbackRequests = [
   {
@@ -29,7 +30,7 @@ const fallbackRequests = [
 
 export async function GET() {
   try {
-    const supabase = getSupabaseClient();
+    const supabase = getSupabaseServerClient();
     const { data, error } = await supabase
       .from("driver_requests")
       .select(

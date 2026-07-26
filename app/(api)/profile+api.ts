@@ -1,4 +1,5 @@
-import { getSupabaseClient } from "@/lib/supabase";
+
+import { getSupabaseServerClient } from "@/lib/supabase-server";
 
 export async function GET(request: Request) {
   try {
@@ -9,7 +10,7 @@ export async function GET(request: Request) {
       return Response.json({ error: "Missing clerkId" }, { status: 400 });
     }
 
-    const supabase = getSupabaseClient();
+    const supabase = getSupabaseServerClient();
     const { data: profile, error } = await supabase
       .from("users")
       .select("id, name, email, clerk_id, profile_image_url, rating, total_trips, verification_percentage, profile_data")
@@ -43,7 +44,7 @@ export async function POST(request: Request) {
       return Response.json({ error: "Missing clerkId" }, { status: 400 });
     }
 
-    const supabase = getSupabaseClient();
+    const supabase = getSupabaseServerClient();
 
     const profilePayload =
       profile_data && typeof profile_data === "object" ? profile_data : {};

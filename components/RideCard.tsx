@@ -39,13 +39,13 @@ const RideCard = ({ ride }: { ride: Ride }) => {
           <View className="flex flex-row items-center justify-between mb-3">
             <Text className="text-sm font-JakartaMedium text-neutral-500">Driver</Text>
             <Text className="text-sm font-JakartaBold">
-              {ride.driver.first_name} {ride.driver.last_name}
+              {ride.driver?.first_name ?? "Unknown"} {ride.driver?.last_name ?? "Driver"}
             </Text>
           </View>
 
           <View className="flex flex-row items-center justify-between mb-3">
             <Text className="text-sm font-JakartaMedium text-neutral-500">Car Seats</Text>
-            <Text className="text-sm font-JakartaBold">{ride.driver.car_seats}</Text>
+            <Text className="text-sm font-JakartaBold">{ride.driver?.car_seats ?? "N/A"}</Text>
           </View>
 
           <View className="flex flex-row items-center justify-between">

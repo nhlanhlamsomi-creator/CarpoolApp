@@ -50,7 +50,7 @@ declare interface Ride {
     first_name: string;
     last_name: string;
     car_seats: number;
-  };
+  } | null;
 }
 
 declare interface ButtonProps extends TouchableOpacityProps {
