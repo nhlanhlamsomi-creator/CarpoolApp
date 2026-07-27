@@ -113,11 +113,30 @@ const Rides = () => {
         {
           text: "Cancel trip",
           style: "destructive",
-          onPress: () =>
-            Alert.alert(
-              "Not available yet",
-              "Cancelling needs the /(api)/ride/cancel endpoint. Contact support in the meantime.",
-            ),
+          onPress: async () => {
+            try {
+              const res = await fetch("/(api)/ride/cancel", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ ride_id: (ride as any).ride_id, user_id: user?.id }),
+              });
+
+              const json = await res.json();
+
+              if (!res.ok) {
+                console.error("Cancel failed:", json);
+                Alert.alert("Cancel failed", json?.error || "Unable to cancel trip");
+                return;
+              }
+
+              Alert.alert("Cancelled", "Your trip has been cancelled.");
+              // Refresh list
+              await refetch?.();
+            } catch (e) {
+              console.error("Error calling cancel endpoint:", e);
+              Alert.alert("Cancel failed", "Unable to cancel trip");
+            }
+          },
         },
       ],
     );
