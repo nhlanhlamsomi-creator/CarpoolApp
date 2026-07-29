@@ -26,7 +26,7 @@ async function loadParticipants(supabase: any, rideId: string) {
       .maybeSingle(),
     supabase
       .from("drivers")
-      .select("clerk_id, first_name, last_name, profile_image_url")
+      .select("clerk_id, email, first_name, last_name, profile_image_url")
       .eq("id", ride.driver_id)
       .maybeSingle(),
   ]);
@@ -53,7 +53,8 @@ export async function GET(request: Request, { rideId }: { rideId: string }) {
     const { ride, passenger, driver } = context;
 
     const isPassenger = passenger?.clerk_id === clerkId;
-    const isDriver = driver?.clerk_id === clerkId;
+    const isDriver =
+      driver?.clerk_id === clerkId || driver?.email === clerkId;
 
     if (!isPassenger && !isDriver) {
       return Response.json({ error: "Not part of this trip" }, { status: 403 });
@@ -120,7 +121,9 @@ export async function POST(request: Request, { rideId }: { rideId: string }) {
 
     const { ride, passenger, driver } = context;
     const isMember =
-      passenger?.clerk_id === clerkId || driver?.clerk_id === clerkId;
+      passenger?.clerk_id === clerkId ||
+      driver?.clerk_id === clerkId ||
+      driver?.email === clerkId;
 
     if (!isMember) {
       return Response.json({ error: "Not part of this trip" }, { status: 403 });
