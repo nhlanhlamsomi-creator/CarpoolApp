@@ -11,6 +11,7 @@ import {
   ScrollView,
   Switch,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -83,6 +84,25 @@ const Profile = () => {
   const [sheet, setSheet] = useState<null | "gender" | "language" | "vehicle">(
     null,
   );
+  // Collapsible sections state
+  const [expandedSections, setExpandedSections] = useState<{
+    identitySecurity: boolean;
+    personalInfo: boolean;
+    ridePreferences: boolean;
+    trips: boolean;
+    support: boolean;
+  }>({
+    identitySecurity: false,
+    personalInfo: false,
+    ridePreferences: false,
+    trips: false,
+    support: false,
+  });
+
+  // Emergency contact editing state
+  const [editingEmergency, setEditingEmergency] = useState(false);
+  const [emergencyName, setEmergencyName] = useState("");
+  const [emergencyPhone, setEmergencyPhone] = useState("");
 
   const loadProfile = async () => {
     if (!user?.id) {
@@ -113,8 +133,6 @@ const Profile = () => {
     loadProfile();
   }, [user?.id]);
 
-  // Coming back from verification or edit-profile should show the new values,
-  // not whatever was loaded when the tab first mounted.
   useFocusEffect(
     useCallback(() => {
       loadProfile();
@@ -173,7 +191,6 @@ const Profile = () => {
     await savePreference(key, value);
   };
 
-  /** Merge a single key into profile_data without clobbering the rest. */
   const savePreference = async (key: string, value: unknown) => {
     const existingProfileData = profile?.profile_data ?? {};
     await saveProfile({
@@ -196,6 +213,35 @@ const Profile = () => {
         },
       },
     ]);
+  };
+
+  // Save emergency contact
+  const saveEmergencyContact = async () => {
+    if (!emergencyName.trim()) {
+      Alert.alert("Error", "Please enter a contact name");
+      return;
+    }
+    if (emergencyPhone.trim() && emergencyPhone.trim().length < 10) {
+      Alert.alert("Error", "Phone number must be at least 10 digits");
+      return;
+    }
+
+    const contactData = JSON.stringify({
+      name: emergencyName.trim(),
+      phone: emergencyPhone.trim(),
+    });
+
+    await savePreference("emergency_contact", contactData);
+    setEditingEmergency(false);
+    setEmergencyName("");
+    setEmergencyPhone("");
+  };
+
+  const toggleSection = (section: keyof typeof expandedSections) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
   };
 
   const profileData = profile?.profile_data ?? {};
@@ -224,8 +270,6 @@ const Profile = () => {
   const hasId = Boolean(profile?.government_id_url || profileData.government_id_url);
   const hasSelfie = Boolean(profile?.selfie_image_url || profileData.selfie_image_url);
 
-  // Each step is checked independently, so a gap in the middle doesn't hide
-  // the steps after it.
   const steps = [
     { label: "Profile photo", done: hasPhoto },
     { label: "Phone number", done: hasPhone },
@@ -235,6 +279,20 @@ const Profile = () => {
   const completedSteps = steps.filter((s) => s.done).length;
   const progressValue = Math.round((completedSteps / steps.length) * 100);
 
+  // Parse emergency contact data
+  let emergencyContact = { name: "Nobody added yet", phone: "" };
+  if (profileData.emergency_contact && profileData.emergency_contact !== "Nobody added yet") {
+    try {
+      const parsed = JSON.parse(profileData.emergency_contact);
+      emergencyContact = {
+        name: parsed.name || "Unknown",
+        phone: parsed.phone || "",
+      };
+    } catch (e) {
+      emergencyContact = { name: profileData.emergency_contact, phone: "" };
+    }
+  }
+
   const renderSkeleton = () => (
     <View className="px-1 py-3">
       <View className="mb-5 h-28 w-full rounded-3xl bg-[#E9EEEB]" />
@@ -242,6 +300,34 @@ const Profile = () => {
       <View className="mb-4 h-32 rounded-3xl bg-[#E9EEEB]" />
       <View className="mb-4 h-24 rounded-3xl bg-[#E9EEEB]" />
     </View>
+  );
+
+  // Render collapsible section header with icon
+  const renderSectionHeader = (
+    title: string, 
+    section: keyof typeof expandedSections,
+    iconName: string,
+    iconBgColor: string = "#E6F2EC",
+    iconColor: string = "#0E5C3F"
+  ) => (
+    <Pressable
+      onPress={() => toggleSection(section)}
+      className="mb-3 flex-row items-center justify-between rounded-2xl border border-[#E2E9E5] bg-white px-4 py-3 active:opacity-70"
+    >
+      <View className="flex-row items-center gap-3">
+        <View className={`h-10 w-10 items-center justify-center rounded-xl ${iconBgColor}`}>
+          <Ionicons name={iconName as any} size={20} color={iconColor} />
+        </View>
+        <Text className="text-[15px] font-JakartaExtraBold text-[#101814]">
+          {title}
+        </Text>
+      </View>
+      <Ionicons
+        name={expandedSections[section] ? "chevron-up" : "chevron-down"}
+        size={22}
+        color="#68756F"
+      />
+    </Pressable>
   );
 
   return (
@@ -361,242 +447,315 @@ const Profile = () => {
               )}
             </Pressable>
 
-            {/* ── Identity & security ── */}
-            <Text className="mb-3 text-[15px] font-JakartaExtraBold text-[#101814]">
-              Identity & security
-            </Text>
-            <View className="mb-5">
-              <SectionCard
-                title="Identity verification"
-                value="ID document and selfie"
-                icon="shield-checkmark-outline"
-                status={hasId && hasSelfie ? "verified" : "required"}
-                onPress={() => router.push("/(root)/verification")}
-              />
-              <SectionCard
-                title="Phone verification"
-                icon="call-outline"
-                status={hasPhone ? "verified" : "required"}
-                onPress={() =>
-                  Alert.alert(
-                    "Phone verification",
-                    "Use Clerk phone verification when it is enabled for your account.",
-                  )
-                }
-              />
-              <SectionCard
-                title="Change password"
-                value="Update it here in the app"
-                icon="key-outline"
-                onPress={() => router.push("/(root)/change-password")}
-              />
-            </View>
-
-            {/* ── Personal information ── */}
-            <Text className="mb-3 text-[15px] font-JakartaExtraBold text-[#101814]">
-              Personal information
-            </Text>
-            <View className="mb-5">
-              <SectionCard
-                title="Full name"
-                value={fullName}
-                icon="person-outline"
-                onPress={() =>
-                  router.push({
-                    pathname: "/(root)/edit-profile",
-                    params: { field: "name", label: "Full name" },
-                  })
-                }
-              />
-              <SectionCard
-                title="Email"
-                value={emailAddress}
-                icon="mail-outline"
-                onPress={() =>
-                  router.push({
-                    pathname: "/(root)/edit-profile",
-                    params: { field: "email", label: "Email" },
-                  })
-                }
-              />
-              <SectionCard
-                title="Phone number"
-                value={phoneNumber}
-                icon="call-outline"
-                status={hasPhone ? "verified" : "required"}
-                onPress={() =>
-                  router.push({
-                    pathname: "/(root)/edit-profile",
-                    params: { field: "phone_number", label: "Phone number" },
-                  })
-                }
-              />
-              <SectionCard
-                title="Gender"
-                value={profileData.gender || "Not set"}
-                icon="male-female-outline"
-                onPress={() => setSheet("gender")}
-              />
-              <SectionCard
-                title="Emergency contacts"
-                value={profileData.emergency_contact || "Nobody added yet"}
-                icon="alert-circle-outline"
-                onPress={() =>
-                  router.push({
-                    pathname: "/(root)/edit-profile",
-                    params: {
-                      field: "emergency_contact",
-                      label: "Emergency contact",
-                    },
-                  })
-                }
-              />
-            </View>
-
-            {/* ── Ride preferences ── */}
-            <Text className="mb-3 text-[15px] font-JakartaExtraBold text-[#101814]">
-              Ride preferences
-            </Text>
-            <View className="mb-5">
-              <SectionCard
-                title="Preferred vehicle"
-                value={profileData.preferred_vehicle || "Any vehicle"}
-                icon="car-outline"
-                onPress={() => setSheet("vehicle")}
-              />
-              <SectionCard
-                title="Payment method"
-                value={profileData.payment_method || "Card"}
-                icon="card-outline"
-                onPress={() => router.push("/(root)/payment-methods")}
-              />
-              <SectionCard
-                title="Favourite locations"
-                value={profileData.favorite_locations || "Add a favourite place"}
-                icon="location-outline"
-                onPress={() =>
-                  router.push({
-                    pathname: "/(root)/edit-profile",
-                    params: { field: "favorite_locations", label: "Favourite locations" },
-                  })
-                }
-              />
-
-              {/* A switch, not a row that toggles when tapped — people expect
-                  to see the state before they change it */}
-              <View className="mb-2.5 flex-row items-center justify-between rounded-2xl border border-[#E2E9E5] bg-white px-4 py-3.5">
-                <View className="flex-1 flex-row items-center gap-3">
-                  <View className="h-10 w-10 items-center justify-center rounded-xl bg-[#E6F2EC]">
-                    <Ionicons name="notifications-outline" size={18} color="#0E5C3F" />
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-[14px] font-JakartaSemiBold text-[#101814]">
-                      Trip notifications
-                    </Text>
-                    <Text className="mt-0.5 text-[12px] font-Jakarta text-[#68756F]">
-                      Driver updates and booking confirmations
-                    </Text>
-                  </View>
-                </View>
-
-                <Switch
-                  value={Boolean(profileData.notifications_enabled)}
-                  onValueChange={(value) =>
-                    handleTogglePreference("notifications_enabled", value)
+            {/* ── Identity & security (Collapsible) ── */}
+            {renderSectionHeader("Identity & security", "identitySecurity", "shield-checkmark", "bg-[#E6F2EC]", "#0E5C3F")}
+            {expandedSections.identitySecurity && (
+              <View className="mb-5">
+                <SectionCard
+                  title="Identity verification"
+                  value="ID document and selfie"
+                  icon="shield-checkmark-outline"
+                  status={hasId && hasSelfie ? "verified" : "required"}
+                  onPress={() => router.push("/(root)/verification")}
+                />
+                <SectionCard
+                  title="Phone verification"
+                  icon="call-outline"
+                  status={hasPhone ? "verified" : "required"}
+                  onPress={() =>
+                    Alert.alert(
+                      "Phone verification",
+                      "Use Clerk phone verification when it is enabled for your account.",
+                    )
                   }
-                  trackColor={{ false: "#DFE6E2", true: "#1FB574" }}
-                  thumbColor="#FFFFFF"
+                />
+                <SectionCard
+                  title="Change password"
+                  value="Update it here in the app"
+                  icon="key-outline"
+                  onPress={() => router.push("/(root)/change-password")}
                 />
               </View>
+            )}
 
-              <SectionCard
-                title="Language"
-                value={profileData.language || "English"}
-                icon="language-outline"
-                onPress={() => setSheet("language")}
-              />
-            </View>
+            {/* ── Personal information (Collapsible) ── */}
+            {renderSectionHeader("Personal information", "personalInfo", "person", "bg-[#F0F4FF]", "#4A6FA5")}
+            {expandedSections.personalInfo && (
+              <View className="mb-5">
+                <SectionCard
+                  title="Full name"
+                  value={fullName}
+                  icon="person-outline"
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(root)/edit-profile",
+                      params: { field: "name", label: "Full name" },
+                    })
+                  }
+                />
+                <SectionCard
+                  title="Email"
+                  value={emailAddress}
+                  icon="mail-outline"
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(root)/edit-profile",
+                      params: { field: "email", label: "Email" },
+                    })
+                  }
+                />
+                <SectionCard
+                  title="Phone number"
+                  value={phoneNumber}
+                  icon="call-outline"
+                  status={hasPhone ? "verified" : "required"}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(root)/edit-profile",
+                      params: { field: "phone_number", label: "Phone number" },
+                    })
+                  }
+                />
+                <SectionCard
+                  title="Gender"
+                  value={profileData.gender || "Not set"}
+                  icon="male-female-outline"
+                  onPress={() => setSheet("gender")}
+                />
+                
+                {/* ── Emergency Contact with separate name and phone ── */}
+                <View className="mb-2.5 rounded-2xl border border-[#E2E9E5] bg-white overflow-hidden">
+                  {editingEmergency ? (
+                    <View className="p-4">
+                      <Text className="mb-3 text-[14px] font-JakartaSemiBold text-[#101814]">
+                        Add Emergency Contact
+                      </Text>
+                      
+                      <Text className="mb-1 text-[12px] font-Jakarta text-[#68756F]">
+                        Contact Name
+                      </Text>
+                      <TextInput
+                        className="mb-3 rounded-xl border border-[#E2E9E5] px-3 py-2 text-[14px] font-Jakarta"
+                        placeholder="e.g., John Doe"
+                        value={emergencyName}
+                        onChangeText={setEmergencyName}
+                      />
+                      
+                      <Text className="mb-1 text-[12px] font-Jakarta text-[#68756F]">
+                        Phone Number (10+ digits)
+                      </Text>
+                      <TextInput
+                        className="mb-3 rounded-xl border border-[#E2E9E5] px-3 py-2 text-[14px] font-Jakarta"
+                        placeholder="e.g., 0712345678"
+                        value={emergencyPhone}
+                        onChangeText={setEmergencyPhone}
+                        keyboardType="phone-pad"
+                        maxLength={15}
+                      />
+                      
+                      <View className="flex-row gap-2">
+                        <Pressable
+                          onPress={saveEmergencyContact}
+                          className="flex-1 rounded-xl bg-[#0E5C3F] py-3 active:opacity-80"
+                        >
+                          <Text className="text-center text-[14px] font-JakartaBold text-white">
+                            Save
+                          </Text>
+                        </Pressable>
+                        <Pressable
+                          onPress={() => {
+                            setEditingEmergency(false);
+                            setEmergencyName("");
+                            setEmergencyPhone("");
+                          }}
+                          className="flex-1 rounded-xl border border-[#E2E9E5] py-3 active:opacity-80"
+                        >
+                          <Text className="text-center text-[14px] font-JakartaBold text-[#68756F]">
+                            Cancel
+                          </Text>
+                        </Pressable>
+                      </View>
+                    </View>
+                  ) : (
+                    <Pressable
+                      onPress={() => setEditingEmergency(true)}
+                      className="flex-row items-center justify-between px-4 py-3.5 active:opacity-70"
+                    >
+                      <View className="flex-1 flex-row items-center gap-3">
+                        <View className="h-10 w-10 items-center justify-center rounded-xl bg-[#FFF3E0]">
+                          <Ionicons name="alert-circle-outline" size={18} color="#E65100" />
+                        </View>
+                        <View className="flex-1">
+                          <Text className="text-[14px] font-JakartaSemiBold text-[#101814]">
+                            Emergency contact
+                          </Text>
+                          {emergencyContact.name !== "Nobody added yet" ? (
+                            <>
+                              <Text className="mt-0.5 text-[13px] font-JakartaMedium text-[#101814]">
+                                {emergencyContact.name}
+                              </Text>
+                              {emergencyContact.phone && (
+                                <Text className="text-[12px] font-Jakarta text-[#68756F]">
+                                  {emergencyContact.phone}
+                                </Text>
+                              )}
+                            </>
+                          ) : (
+                            <Text className="mt-0.5 text-[13px] font-Jakarta text-[#68756F]">
+                              Add emergency contact
+                            </Text>
+                          )}
+                        </View>
+                      </View>
+                      <Ionicons name="chevron-forward" size={20} color="#A0AFA8" />
+                    </Pressable>
+                  )}
+                </View>
+              </View>
+            )}
 
-            {/* ── Trips ── */}
-            <Text className="mb-3 text-[15px] font-JakartaExtraBold text-[#101814]">
-              Trips
-            </Text>
-            <View className="mb-5">
-              <SectionCard
-                title="Trip history"
-                value={
-                  rideSummary.completed_trips > 0
-                    ? `${rideSummary.completed_trips} completed · R${
-                        typeof rideSummary.money_spent === "number"
-                          ? rideSummary.money_spent.toFixed(2)
-                          : "0.00"
-                      } spent`
-                    : "No trips yet"
-                }
-                icon="receipt-outline"
-                onPress={() => router.push("/(root)/(tabs)/rides")}
-              />
-            </View>
+            {/* ── Ride preferences (Collapsible) ── */}
+            {renderSectionHeader("Ride preferences", "ridePreferences", "car", "bg-[#E8F5E9]", "#2E7D32")}
+            {expandedSections.ridePreferences && (
+              <View className="mb-5">
+                <SectionCard
+                  title="Preferred vehicle"
+                  value={profileData.preferred_vehicle || "Any vehicle"}
+                  icon="car-outline"
+                  onPress={() => setSheet("vehicle")}
+                />
+                <SectionCard
+                  title="Payment method"
+                  value={profileData.payment_method || "Card"}
+                  icon="card-outline"
+                  onPress={() => router.push("/(root)/payment-methods")}
+                />
+                <SectionCard
+                  title="Favourite locations"
+                  value={profileData.favorite_locations || "Add a favourite place"}
+                  icon="location-outline"
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(root)/edit-profile",
+                      params: { field: "favorite_locations", label: "Favourite locations" },
+                    })
+                  }
+                />
 
-            {/* ── Support ── */}
-            <Text className="mb-3 text-[15px] font-JakartaExtraBold text-[#101814]">
-              Support
-            </Text>
-            <View className="mb-5">
-              <SectionCard
-                title="WhatsApp support"
-                value="Fastest reply, usually within an hour"
-                icon="logo-whatsapp"
-                onPress={() =>
-                  openLink(`https://wa.me/${SUPPORT_WHATSAPP}`)
-                }
-              />
-              <SectionCard
-                title="Email us"
-                value={SUPPORT_EMAIL}
-                icon="mail-outline"
-                onPress={() =>
-                  openLink(
-                    `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
-                      "Lyft support request",
-                    )}&body=${encodeURIComponent(
-                      `\n\n---\nAccount: ${emailAddress}\nName: ${fullName}`,
-                    )}`,
-                  )
-                }
-              />
-              <SectionCard
-                title="Call support"
-                value={SUPPORT_PHONE}
-                icon="call-outline"
-                onPress={() => openLink(`tel:${SUPPORT_PHONE}`)}
-              />
-              <SectionCard
-                title="Report a problem with a trip"
-                icon="flag-outline"
-                onPress={() => router.push("/(root)/(tabs)/rides")}
-              />
-              <SectionCard
-                title="Privacy policy"
-                icon="shield-checkmark-outline"
-                onPress={() =>
-                  router.push({
-                    pathname: "/(root)/legal",
-                    params: { tab: "privacy" },
-                  })
-                }
-              />
-              <SectionCard
-                title="Terms of use"
-                icon="document-text-outline"
-                onPress={() =>
-                  router.push({
-                    pathname: "/(root)/legal",
-                    params: { tab: "terms" },
-                  })
-                }
-              />
-            </View>
+                <View className="mb-2.5 flex-row items-center justify-between rounded-2xl border border-[#E2E9E5] bg-white px-4 py-3.5">
+                  <View className="flex-1 flex-row items-center gap-3">
+                    <View className="h-10 w-10 items-center justify-center rounded-xl bg-[#E6F2EC]">
+                      <Ionicons name="notifications-outline" size={18} color="#0E5C3F" />
+                    </View>
+                    <View className="flex-1">
+                      <Text className="text-[14px] font-JakartaSemiBold text-[#101814]">
+                        Trip notifications
+                      </Text>
+                      <Text className="mt-0.5 text-[12px] font-Jakarta text-[#68756F]">
+                        Driver updates and booking confirmations
+                      </Text>
+                    </View>
+                  </View>
+
+                  <Switch
+                    value={Boolean(profileData.notifications_enabled)}
+                    onValueChange={(value) =>
+                      handleTogglePreference("notifications_enabled", value)
+                    }
+                    trackColor={{ false: "#DFE6E2", true: "#1FB574" }}
+                    thumbColor="#FFFFFF"
+                  />
+                </View>
+
+                <SectionCard
+                  title="Language"
+                  value={profileData.language || "English"}
+                  icon="language-outline"
+                  onPress={() => setSheet("language")}
+                />
+              </View>
+            )}
+
+            {/* ── Trips (Collapsible) ── */}
+            {renderSectionHeader("Trips", "trips", "time", "bg-[#F3E5F5]", "#7B1FA2")}
+            {expandedSections.trips && (
+              <View className="mb-5">
+                <SectionCard
+                  title="Trip history"
+                  value={
+                    rideSummary.completed_trips > 0
+                      ? `${rideSummary.completed_trips} completed · R${
+                          typeof rideSummary.money_spent === "number"
+                            ? rideSummary.money_spent.toFixed(2)
+                            : "0.00"
+                        } spent`
+                      : "No trips yet"
+                  }
+                  icon="receipt-outline"
+                  onPress={() => router.push("/(root)/(tabs)/rides")}
+                />
+              </View>
+            )}
+
+            {/* ── Support (Collapsible) ── */}
+            {renderSectionHeader("Support", "support", "help-circle", "bg-[#FFEBEE]", "#C62828")}
+            {expandedSections.support && (
+              <View className="mb-5">
+                <SectionCard
+                  title="WhatsApp support"
+                  value="Fastest reply, usually within an hour"
+                  icon="logo-whatsapp"
+                  onPress={() =>
+                    openLink(`https://wa.me/${SUPPORT_WHATSAPP}`)
+                  }
+                />
+                <SectionCard
+                  title="Email us"
+                  value={SUPPORT_EMAIL}
+                  icon="mail-outline"
+                  onPress={() =>
+                    openLink(
+                      `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
+                        "Lyft support request",
+                      )}&body=${encodeURIComponent(
+                        `\n\n---\nAccount: ${emailAddress}\nName: ${fullName}`,
+                      )}`,
+                    )
+                  }
+                />
+                <SectionCard
+                  title="Call support"
+                  value={SUPPORT_PHONE}
+                  icon="call-outline"
+                  onPress={() => openLink(`tel:${SUPPORT_PHONE}`)}
+                />
+                <SectionCard
+                  title="Report a problem with a trip"
+                  icon="flag-outline"
+                  onPress={() => router.push("/(root)/(tabs)/rides")}
+                />
+                <SectionCard
+                  title="Privacy policy"
+                  icon="shield-checkmark-outline"
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(root)/legal",
+                      params: { tab: "privacy" },
+                    })
+                  }
+                />
+                <SectionCard
+                  title="Terms of use"
+                  icon="document-text-outline"
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(root)/legal",
+                      params: { tab: "terms" },
+                    })
+                  }
+                />
+              </View>
+            )}
 
             {/* ── Sign out ── */}
             <SectionCard
