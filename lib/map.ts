@@ -91,3 +91,82 @@ export const calculateDriverTimes = async ({
     price: (45 + index * 10).toFixed(2),
   }));
 };
+
+/**
+ * Fetch a route from the Geoapify Routing API.
+ * Returns an array of {latitude, longitude} coordinates following the road,
+ * or null if the request failed / no route was found.
+ *
+ * Geoapify returns a MultiLineString geometry with coordinates as
+ * "lng lat" strings. We flatten all line segments into a single path.
+ */
+export async function fetchRoutePolyline({
+  originLatitude,
+  originLongitude,
+  destinationLatitude,
+  destinationLongitude,
+  apiKey,
+}: {
+  originLatitude: number;
+  originLongitude: number;
+  destinationLatitude: number;
+  destinationLongitude: number;
+  apiKey: string;
+}): Promise<{ latitude: number; longitude: number }[] | null> {
+  // Geoapify Routing API v1
+  const url = `https://api.geoapify.com/v1/routing?waypoints=${originLatitude},${originLongitude}|${destinationLatitude},${destinationLongitude}&mode=drive&apiKey=${apiKey}`;
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (!data.features?.length) {
+      console.warn("Geoapify routing error: no features in response", data);
+      return null;
+    }
+
+    const geometry = data.features[0].geometry;
+    if (!geometry?.coordinates?.length) {
+      console.warn("Geoapify routing: no coordinates in geometry");
+      return null;
+    }
+
+    const coords: { latitude: number; longitude: number }[] = [];
+
+    // Handle both LineString and MultiLineString
+    const segments = geometry.type === "MultiLineString"
+      ? geometry.coordinates
+      : [geometry.coordinates];
+
+    for (const segment of segments) {
+      for (const point of segment) {
+        // Geoapify returns coordinates as "lng lat" strings
+        if (typeof point === "string") {
+          const parts = (point as string).split(" ");
+          if (parts.length >= 2) {
+            coords.push({
+              longitude: parseFloat(parts[0]),
+              latitude: parseFloat(parts[1]),
+            });
+          }
+        } else if (Array.isArray(point) && point.length >= 2) {
+          // Standard GeoJSON [lng, lat] array
+          coords.push({
+            longitude: point[0],
+            latitude: point[1],
+          });
+        }
+      }
+    }
+
+    if (coords.length === 0) {
+      console.warn("Geoapify routing: no valid coordinates parsed");
+      return null;
+    }
+
+    return coords;
+  } catch (error) {
+    console.error("Geoapify routing fetch failed:", error);
+    return null;
+  }
+}

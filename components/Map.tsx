@@ -1,23 +1,24 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import MapView, {
     Marker,
-    PROVIDER_DEFAULT,
+    Polyline,
+    PROVIDER_GOOGLE,
 } from "react-native-maps";
-import MapViewDirections from "react-native-maps-directions";
 
 import { icons } from "@/constants";
 import {
     calculateDriverTimes,
     calculateRegion,
+    fetchRoutePolyline,
     generateMarkersFromData,
 } from "@/lib/map";
 import { getSupabaseClient } from "@/lib/supabase";
 import { useDriverStore, useLocationStore } from "@/store";
 import { Driver, MarkerData } from "@/types/type";
 
-const GOOGLE_API_KEY =
-  process.env.EXPO_PUBLIC_DIRECTIONS_API_KEY!;
+const GEOAPIFY_API_KEY =
+  process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY!;
 
 export default function Map() {
   const {
@@ -32,6 +33,9 @@ export default function Map() {
 
   const [markers, setMarkers] = useState<MarkerData[]>([]);
   const [drivers, setLoadedDrivers] = useState<Driver[]>([]);
+  const [routeCoordinates, setRouteCoordinates] = useState<
+    { latitude: number; longitude: number }[] | null
+  >(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -115,6 +119,48 @@ export default function Map() {
     setStoreDrivers,
   ]);
 
+  // Fetch route from Geoapify whenever origin/destination changes
+  useEffect(() => {
+    if (
+      userLatitude != null &&
+      userLongitude != null &&
+      destinationLatitude != null &&
+      destinationLongitude != null
+    ) {
+      // 1. Immediate straight-line fallback (always visible)
+      const steps = 20;
+      const fallback: { latitude: number; longitude: number }[] = [];
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        fallback.push({
+          latitude: userLatitude + (destinationLatitude - userLatitude) * t,
+          longitude: userLongitude + (destinationLongitude - userLongitude) * t,
+        });
+      }
+      setRouteCoordinates(fallback);
+
+      // 2. Try to fetch a real road route from Geoapify
+      fetchRoutePolyline({
+        originLatitude: userLatitude,
+        originLongitude: userLongitude,
+        destinationLatitude,
+        destinationLongitude,
+        apiKey: GEOAPIFY_API_KEY,
+      }).then((coords) => {
+        if (coords && coords.length > 0) {
+          setRouteCoordinates(coords);
+        }
+      });
+    } else {
+      setRouteCoordinates(null);
+    }
+  }, [
+    userLatitude,
+    userLongitude,
+    destinationLatitude,
+    destinationLongitude,
+  ]);
+
   const region = calculateRegion({
     userLatitude,
     userLongitude,
@@ -136,9 +182,12 @@ export default function Map() {
     );
   }
 
+  const hasDestination =
+    destinationLatitude != null && destinationLongitude != null;
+
   return (
     <MapView
-      provider={PROVIDER_DEFAULT}
+      provider={PROVIDER_GOOGLE}
       style={{ flex: 1 }}
       initialRegion={region}
       showsUserLocation
@@ -146,6 +195,14 @@ export default function Map() {
       mapType="standard"
       userInterfaceStyle="light"
     >
+      {hasDestination && routeCoordinates && routeCoordinates.length > 0 && (
+        <Polyline
+          coordinates={routeCoordinates}
+          strokeWidth={5}
+          strokeColor="#0286FF"
+        />
+      )}
+
       {markers.map((marker) => (
         <Marker
           key={marker.id}
@@ -162,33 +219,16 @@ export default function Map() {
         />
       ))}
 
-      {destinationLatitude != null &&
-        destinationLongitude != null && (
-          <>
-            <Marker
-              coordinate={{
-                latitude: destinationLatitude,
-                longitude: destinationLongitude,
-              }}
-              title="Destination"
-              image={icons.pin}
-            />
-
-            <MapViewDirections
-              origin={{
-                latitude: userLatitude,
-                longitude: userLongitude,
-              }}
-              destination={{
-                latitude: destinationLatitude,
-                longitude: destinationLongitude,
-              }}
-              apikey={GOOGLE_API_KEY}
-              strokeWidth={5}
-              strokeColor="#0286FF"
-            />
-          </>
-        )}
+      {hasDestination && (
+        <Marker
+          coordinate={{
+            latitude: destinationLatitude,
+            longitude: destinationLongitude,
+          }}
+          title="Destination"
+          image={icons.pin}
+        />
+      )}
     </MapView>
   );
 }
