@@ -28,12 +28,15 @@ export default function Map() {
     destinationLongitude,
   } = useLocationStore();
 
-  const { selectedDriver, setDrivers: setStoreDrivers } =
+  const { selectedDriver, drivers: storeDrivers, setDrivers: setStoreDrivers } =
     useDriverStore();
 
   const [markers, setMarkers] = useState<MarkerData[]>([]);
   const [drivers, setLoadedDrivers] = useState<Driver[]>([]);
   const [routeCoordinates, setRouteCoordinates] = useState<
+    { latitude: number; longitude: number }[] | null
+  >(null);
+  const [driverRouteCoordinates, setDriverRouteCoordinates] = useState<
     { latitude: number; longitude: number }[] | null
   >(null);
 
@@ -119,7 +122,7 @@ export default function Map() {
     setStoreDrivers,
   ]);
 
-  // Fetch route from Geoapify whenever origin/destination changes
+  // Fetch route from user to destination (blue line)
   useEffect(() => {
     if (
       userLatitude != null &&
@@ -127,7 +130,7 @@ export default function Map() {
       destinationLatitude != null &&
       destinationLongitude != null
     ) {
-      // 1. Immediate straight-line fallback (always visible)
+      // 1. Immediate straight-line fallback
       const steps = 20;
       const fallback: { latitude: number; longitude: number }[] = [];
       for (let i = 0; i <= steps; i++) {
@@ -160,6 +163,51 @@ export default function Map() {
     destinationLatitude,
     destinationLongitude,
   ]);
+
+  // Fetch route from selected driver to user (green line)
+  useEffect(() => {
+    if (
+      selectedDriver != null &&
+      userLatitude != null &&
+      userLongitude != null
+    ) {
+      // Find the selected driver's marker
+      const driverMarker = markers.find(
+        (m) => Number(m.id) === selectedDriver
+      );
+
+      if (driverMarker) {
+        // 1. Immediate straight-line fallback
+        const steps = 20;
+        const fallback: { latitude: number; longitude: number }[] = [];
+        for (let i = 0; i <= steps; i++) {
+          const t = i / steps;
+          fallback.push({
+            latitude: driverMarker.latitude + (userLatitude - driverMarker.latitude) * t,
+            longitude: driverMarker.longitude + (userLongitude - driverMarker.longitude) * t,
+          });
+        }
+        setDriverRouteCoordinates(fallback);
+
+        // 2. Try to fetch a real road route from Geoapify
+        fetchRoutePolyline({
+          originLatitude: driverMarker.latitude,
+          originLongitude: driverMarker.longitude,
+          destinationLatitude: userLatitude,
+          destinationLongitude: userLongitude,
+          apiKey: GEOAPIFY_API_KEY,
+        }).then((coords) => {
+          if (coords && coords.length > 0) {
+            setDriverRouteCoordinates(coords);
+          }
+        });
+      } else {
+        setDriverRouteCoordinates(null);
+      }
+    } else {
+      setDriverRouteCoordinates(null);
+    }
+  }, [selectedDriver, userLatitude, userLongitude, markers]);
 
   const region = calculateRegion({
     userLatitude,
@@ -195,11 +243,21 @@ export default function Map() {
       mapType="standard"
       userInterfaceStyle="light"
     >
+      {/* Route from user to destination (blue) */}
       {hasDestination && routeCoordinates && routeCoordinates.length > 0 && (
         <Polyline
           coordinates={routeCoordinates}
           strokeWidth={5}
           strokeColor="#0286FF"
+        />
+      )}
+
+      {/* Route from selected driver to user (green) */}
+      {driverRouteCoordinates && driverRouteCoordinates.length > 0 && (
+        <Polyline
+          coordinates={driverRouteCoordinates}
+          strokeWidth={4}
+          strokeColor="#1FB574"
         />
       )}
 
