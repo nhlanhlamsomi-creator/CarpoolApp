@@ -178,7 +178,7 @@ Passenger Tabs   Driver Tabs
 | Member | Role | Responsibility |
 | ------ | ---- | -------------- |
 | S. Mdala | Project Manager | Project management and process flows |
-| M. Sithomola | Backend Developer | Firebase services |
+| M. Sithomola | Backend Developer | Firebase services and Apis|
 | N.S. Msomi | Frontend Developer | UI components and screens |
 | L.P. Nama | Business Analyst | Requirements gathering |
 | T. Macholo | UX/UI Designer | Figma design and navigation |
