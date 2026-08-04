@@ -123,7 +123,7 @@ const BookRide = () => {
             email={user?.emailAddresses[0].emailAddress!}
             amount={driverDetails?.price!}
             driverId={driverDetails?.id}
-            rideTime={driverDetails?.time!}
+            rideTime={driverDetails?.trip_time ?? driverDetails?.time!}
           />
         </>
       </RideLayout>

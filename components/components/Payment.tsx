@@ -48,7 +48,7 @@ const Payment = ({
       merchantDisplayName: "Example, Inc.",
       intentConfiguration: {
         mode: {
-          amount: parseInt(amount) * 100,
+          amount: Math.round(Number(amount) * 100),
           currencyCode: "usd",
         },
         confirmHandler: async (
@@ -66,7 +66,7 @@ const Payment = ({
               body: JSON.stringify({
                 name: fullName || email.split("@")[0],
                 email: email,
-                amount: amount,
+                amount: Number(amount),
                 paymentMethodId: paymentMethod.id,
               }),
             },
@@ -100,7 +100,7 @@ const Payment = ({
                   destination_latitude: destinationLatitude,
                   destination_longitude: destinationLongitude,
                   ride_time: rideTime.toFixed(0),
-                  fare_price: parseInt(amount) * 100,
+                  fare_price: Math.round(Number(amount) * 100),
                   payment_status: "paid",
                   driver_id: driverId,
                   user_id: userId,

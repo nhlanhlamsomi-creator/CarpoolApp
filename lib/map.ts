@@ -77,6 +77,10 @@ export const calculateRegion = ({
 
 export const calculateDriverTimes = async ({
   markers,
+  userLatitude,
+  userLongitude,
+  destinationLatitude,
+  destinationLongitude,
 }: {
   markers: MarkerData[];
   userLatitude: number | null;
@@ -84,12 +88,78 @@ export const calculateDriverTimes = async ({
   destinationLatitude: number | null;
   destinationLongitude: number | null;
 }) => {
-  // Mock values so Google Directions API isn't required
-  return markers.map((marker, index) => ({
-    ...marker,
-    time: 3 + index * 2,
-    price: (45 + index * 10).toFixed(2),
-  }));
+  // If any required location is missing, return markers unchanged
+  if (
+    markers == null ||
+    userLatitude == null ||
+    userLongitude == null ||
+    destinationLatitude == null ||
+    destinationLongitude == null
+  ) {
+    return markers;
+  }
+
+  // Haversine formula to compute great-circle distance (km)
+  const haversineKm = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number,
+  ) => {
+    const toRad = (v: number) => (v * Math.PI) / 180;
+    const R = 6371; // Earth radius in km
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) *
+        Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  // Pricing parameters (tweak as needed)
+  const baseFare = 10; // base fare in currency units
+  const perKm = 5; // per-kilometre rate
+  const avgSpeedKmh = 40; // used to estimate time in minutes
+
+  return markers.map((marker) => {
+    const distToUserKm = haversineKm(
+      marker.latitude,
+      marker.longitude,
+      userLatitude,
+      userLongitude,
+    );
+
+    const distUserToDestKm = haversineKm(
+      userLatitude,
+      userLongitude,
+      destinationLatitude,
+      destinationLongitude,
+    );
+
+    const totalDistanceKm = distToUserKm + distUserToDestKm;
+
+    // Estimate ETA (minutes) from driver to user
+    const etaMinutes = Math.max(1, Math.round((distToUserKm / avgSpeedKmh) * 60));
+
+    // Estimate trip duration (minutes) from pickup to destination
+    const tripMinutes = Math.max(1, Math.round((distUserToDestKm / avgSpeedKmh) * 60));
+
+    // Price = base fare + per-km * total distance
+    const price = baseFare + perKm * totalDistanceKm;
+
+    return {
+      ...marker,
+      // `time` is used in UI for "Pickup in" (ETA)
+      time: etaMinutes,
+      // `trip_time` will be used for ride duration when creating the ride
+      trip_time: tripMinutes,
+      price: price.toFixed(2),
+    };
+  });
 };
 
 /**

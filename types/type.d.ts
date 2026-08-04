@@ -22,6 +22,7 @@ declare interface MarkerData {
   first_name: string;
   last_name: string;
   time?: number;
+  trip_time?: number;
   price?: string;
 }
 

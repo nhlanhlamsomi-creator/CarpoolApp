@@ -59,7 +59,7 @@ const Payment = ({
             destination_latitude: destinationLatitude,
             destination_longitude: destinationLongitude,
             ride_time: Math.round(rideTime),
-            fare_price: parseInt(amount, 10) * 100,
+            fare_price: Math.round(Number(amount) * 100),
             payment_status: "paid",
             driver_id: driverId,
             user_id: userId ?? "guest",
@@ -86,7 +86,7 @@ const Payment = ({
         body: JSON.stringify({
           name: safeName,
           email: safeEmail,
-          amount: amount,
+          amount: Number(amount),
         }),
       });
 
