@@ -1,3 +1,4 @@
+// types/type.ts
 import { TextInputProps, TouchableOpacityProps } from "react-native";
 
 declare interface Driver {
@@ -138,3 +139,64 @@ declare interface DriverCardProps {
   selected: number;
   setSelected: () => void;
 }
+
+// ===== HUB TYPES =====
+
+declare interface Hub {
+  id: string;
+  name: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  type: HubType;
+  distance?: number;
+  vicinity?: string;
+  rating?: number;
+  user_ratings_total?: number;
+  place_id?: string;
+  icon?: string;
+  opening_hours?: {
+    open_now: boolean;
+    weekday_text?: string[];
+  };
+  photos?: string[];
+  phone_number?: string;
+  website?: string;
+}
+
+declare type HubType =
+  | "mall"
+  | "station"
+  | "park"
+  | "public_place"
+  | "transport_hub"
+  | "university"
+  | "school"
+  | "hospital"
+  | "office_park"
+  | "shopping_center"
+  | "community_center"
+  | "campus"
+  | "library"
+  | "museum"
+  | "sports_center"
+  | "market"
+  | "bus_stop"
+  | "police_station"
+  | "petrol_station";
+
+export {
+  Driver,
+  MarkerData,
+  MapProps,
+  Ride,
+  ButtonProps,
+  GoogleInputProps,
+  InputFieldProps,
+  PaymentProps,
+  LocationStore,
+  DriverStore,
+  DriverCardProps,
+  Hub,
+  HubType,
+};

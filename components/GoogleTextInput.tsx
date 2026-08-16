@@ -1,3 +1,4 @@
+// components/GoogleTextInput.tsx
 import { View, Image, TextInput, Text, TouchableOpacity } from "react-native";
 import { useState } from "react";
 
@@ -16,7 +17,7 @@ const GoogleTextInput = ({
 
   const [text, setText] = useState("");
   const [places, setPlaces] = useState<any[]>([]);
-
+  const [isLoading, setIsLoading] = useState(false);
 
   const searchPlaces = async (value: string) => {
     setText(value);
@@ -25,6 +26,8 @@ const GoogleTextInput = ({
       setPlaces([]);
       return;
     }
+
+    setIsLoading(true);
 
     try {
       const response = await fetch(
@@ -44,12 +47,12 @@ const GoogleTextInput = ({
     } catch (error) {
       console.log("Geoapify autocomplete error:", error);
       setPlaces([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-
   const handleSelectPlace = (place: any) => {
-
     const location = place.properties;
 
     handlePress({
@@ -61,7 +64,6 @@ const GoogleTextInput = ({
     setText(location.formatted);
     setPlaces([]);
   };
-
 
   return (
     <View
@@ -140,6 +142,5 @@ const GoogleTextInput = ({
     </View>
   );
 };
-
 
 export default GoogleTextInput;

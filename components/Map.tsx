@@ -1,24 +1,71 @@
+// components/Map.tsx
+import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import MapView, {
-    Marker,
-    Polyline,
-    PROVIDER_GOOGLE,
+  Marker,
+  Polyline,
+  PROVIDER_GOOGLE,
 } from "react-native-maps";
 
 import { icons } from "@/constants";
 import {
-    calculateDriverTimes,
-    calculateRegion,
-    fetchRoutePolyline,
-    generateMarkersFromData,
+  calculateDriverTimes,
+  calculateRegion,
+  fetchRoutePolyline,
+  generateMarkersFromData,
 } from "@/lib/map";
 import { getSupabaseClient } from "@/lib/supabase";
 import { useDriverStore, useLocationStore } from "@/store";
-import { Driver, MarkerData } from "@/types/type";
+import { Driver, MarkerData, Hub, HubType } from "@/types/type";
+import { findNearbyHubs } from "@/lib/lib/hub";
 
-const GEOAPIFY_API_KEY =
-  process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY!;
+const GEOAPIFY_API_KEY = process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY!;
+
+// Hub type configurations for map markers - FIXED ICON NAMES
+const TYPE_ICONS: Record<HubType, string> = {
+  mall: "storefront",
+  station: "train",
+  park: "leaf",
+  public_place: "location",
+  transport_hub: "bus",
+  university: "school",
+  school: "school",
+  hospital: "medical",
+  office_park: "business",
+  shopping_center: "cart",
+  community_center: "people",
+  campus: "school",
+  library: "book",
+  museum: "ribbon",
+  sports_center: "basketball",
+  market: "pricetag",
+  bus_stop: "bus",
+  police_station: "shield",
+  petrol_station: "flame", // <-- FIXED: use "flame" instead of "gas-station"
+};
+
+const TYPE_COLORS: Record<HubType, string> = {
+  mall: "#F7A13B",
+  station: "#00155F",
+  park: "#34D399",
+  public_place: "#8B5CF6",
+  transport_hub: "#EC4899",
+  university: "#6366F1",
+  school: "#F59E0B",
+  hospital: "#EF4444",
+  office_park: "#6B7280",
+  shopping_center: "#10B981",
+  community_center: "#3B82F6",
+  campus: "#6366F1",
+  library: "#8B5CF6",
+  museum: "#EC4899",
+  sports_center: "#F59E0B",
+  market: "#F7A13B",
+  bus_stop: "#00155F",
+  police_station: "#1E3A5F",
+  petrol_station: "#DC2626",
+};
 
 export default function Map() {
   const {
@@ -39,6 +86,7 @@ export default function Map() {
   const [driverRouteCoordinates, setDriverRouteCoordinates] = useState<
     { latitude: number; longitude: number }[] | null
   >(null);
+  const [nearbyHubs, setNearbyHubs] = useState<Hub[]>([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -75,6 +123,15 @@ export default function Map() {
       isMounted = false;
     };
   }, []);
+
+  // Load nearby hubs for display on map
+  useEffect(() => {
+    if (userLatitude != null && userLongitude != null) {
+      findNearbyHubs(userLatitude, userLongitude, 3000, 20).then((hubs) => {
+        setNearbyHubs(hubs);
+      });
+    }
+  }, [userLatitude, userLongitude]);
 
   useEffect(() => {
     if (
@@ -130,7 +187,6 @@ export default function Map() {
       destinationLatitude != null &&
       destinationLongitude != null
     ) {
-      // 1. Immediate straight-line fallback
       const steps = 20;
       const fallback: { latitude: number; longitude: number }[] = [];
       for (let i = 0; i <= steps; i++) {
@@ -142,7 +198,6 @@ export default function Map() {
       }
       setRouteCoordinates(fallback);
 
-      // 2. Try to fetch a real road route from Geoapify
       fetchRoutePolyline({
         originLatitude: userLatitude,
         originLongitude: userLongitude,
@@ -171,13 +226,11 @@ export default function Map() {
       userLatitude != null &&
       userLongitude != null
     ) {
-      // Find the selected driver's marker
       const driverMarker = markers.find(
         (m) => Number(m.id) === selectedDriver
       );
 
       if (driverMarker) {
-        // 1. Immediate straight-line fallback
         const steps = 20;
         const fallback: { latitude: number; longitude: number }[] = [];
         for (let i = 0; i <= steps; i++) {
@@ -189,7 +242,6 @@ export default function Map() {
         }
         setDriverRouteCoordinates(fallback);
 
-        // 2. Try to fetch a real road route from Geoapify
         fetchRoutePolyline({
           originLatitude: driverMarker.latitude,
           originLongitude: driverMarker.longitude,
@@ -224,7 +276,7 @@ export default function Map() {
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator
           size="large"
-          color="#0286FF"
+          color="#0E5C3F"
         />
       </View>
     );
@@ -232,6 +284,42 @@ export default function Map() {
 
   const hasDestination =
     destinationLatitude != null && destinationLongitude != null;
+
+  const HubMarker = ({ hub }: { hub: Hub }) => {
+    const iconName = TYPE_ICONS[hub.type] || "location";
+    const color = TYPE_COLORS[hub.type] || "#6B7280";
+
+    return (
+      <Marker
+        coordinate={{
+          latitude: hub.latitude,
+          longitude: hub.longitude,
+        }}
+        title={hub.name}
+        description={`${hub.address || hub.vicinity || ""}`}
+        anchor={{ x: 0.5, y: 0.5 }}
+      >
+        <View
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: 16,
+            backgroundColor: color,
+            borderWidth: 2,
+            borderColor: "#FFFFFF",
+            alignItems: "center",
+            justifyContent: "center",
+            shadowColor: color,
+            shadowOpacity: 0.3,
+            shadowRadius: 4,
+            shadowOffset: { width: 0, height: 2 },
+          }}
+        >
+          <Ionicons name={iconName as any} size={14} color="#FFFFFF" />
+        </View>
+      </Marker>
+    );
+  };
 
   return (
     <MapView
@@ -243,7 +331,6 @@ export default function Map() {
       mapType="standard"
       userInterfaceStyle="light"
     >
-      {/* Route from user to destination (blue) */}
       {hasDestination && routeCoordinates && routeCoordinates.length > 0 && (
         <Polyline
           coordinates={routeCoordinates}
@@ -252,7 +339,6 @@ export default function Map() {
         />
       )}
 
-      {/* Route from selected driver to user (green) */}
       {driverRouteCoordinates && driverRouteCoordinates.length > 0 && (
         <Polyline
           coordinates={driverRouteCoordinates}
@@ -275,6 +361,10 @@ export default function Map() {
               : icons.marker
           }
         />
+      ))}
+
+      {nearbyHubs.map((hub) => (
+        <HubMarker key={hub.id} hub={hub} />
       ))}
 
       {hasDestination && (
