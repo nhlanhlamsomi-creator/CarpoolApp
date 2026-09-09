@@ -1,36 +1,37 @@
-import { Ionicons } from "@expo/vector-icons";
+import { icons } from "@/constants";
 import { Tabs } from "expo-router";
-import { Text, View } from "react-native";
-
-// Matches the driver app's tab bar exactly — same pill, same labels, same
-// colours — so anyone using both apps feels one product, not two.
+import { Image, Pressable, Text, View } from "react-native";
 
 const TabIcon = ({
   focused,
   label,
-  name,
+  source,
 }: {
   focused: boolean;
   label: string;
-  name: keyof typeof Ionicons.glyphMap;
+  source: any;
 }) => (
-  <View className="w-16 items-center justify-center gap-1 pt-1">
+  <View className="w-[68px] items-center justify-center gap-2 pt-1">
     <View
-      className={`h-9 w-14 items-center justify-center rounded-2xl ${
-        focused ? "bg-[#1FB574]" : "bg-transparent"
+      className={`h-[52px] w-[52px] items-center justify-center rounded-[18px] ${
+        focused ? "bg-[#F7A13B]" : "bg-[#000000]"
       }`}
     >
-      <Ionicons
-        name={name}
-        size={19}
-        color={focused ? "#FFFFFF" : "rgba(255,255,255,0.45)"}
+      <Image
+        source={source}
+        resizeMode="contain"
+        style={{
+          width: 22,
+          height: 22,
+          tintColor: "#FFFFFF",
+        }}
       />
     </View>
     <Text
-      className={`text-[9.5px] ${
+      className={`text-[10px] ${
         focused
-          ? "font-JakartaBold text-white"
-          : "font-JakartaMedium text-white/45"
+          ? "font-JakartaBold text-[#1B2C4D]"
+          : "font-JakartaMedium text-[#000000]"
       }`}
     >
       {label}
@@ -46,30 +47,50 @@ export default function Layout() {
         headerShown: false,
         tabBarShowLabel: false,
         tabBarStyle: {
-          backgroundColor: "#06231A",
-          borderRadius: 26,
-          height: 78,
+          backgroundColor: "#FFFFFF",
+          borderRadius: 28,
+          height: 86,
           paddingTop: 8,
-          paddingBottom: 8,
+          paddingBottom: 6,
+          paddingHorizontal: 12,
           position: "absolute",
-          left: 16,
-          right: 16,
-          bottom: 20,
+          left: 12,
+          right: 12,
+          bottom: 8,
           borderTopWidth: 0,
           borderWidth: 0,
-          shadowColor: "#06231A",
-          shadowOffset: { width: 0, height: 10 },
-          shadowOpacity: 0.28,
-          shadowRadius: 22,
-          elevation: 14,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 10,
+          elevation: 5,
+          overflow: "hidden",
+          justifyContent: "space-between",
         },
+        tabBarItemStyle: {
+          width: "25%",
+          alignItems: "center",
+          justifyContent: "center",
+        },
+        tabBarButton: (props: any) => (
+          <Pressable
+            {...props}
+            style={({ pressed }) => ({
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              opacity: pressed ? 0.7 : 1,
+              backgroundColor: "transparent",
+            })}
+          />
+        ),
       }}
     >
       <Tabs.Screen
         name="home"
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon name="home" label="Home" focused={focused} />
+            <TabIcon source={icons.home} label="Home" focused={focused} />
           ),
         }}
       />
@@ -77,7 +98,15 @@ export default function Layout() {
         name="rides"
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon name="car-sport" label="Trips" focused={focused} />
+            <TabIcon source={icons.list} label="Trips" focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="earnings"
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIcon source={icons.dollar} label="Earnings" focused={focused} />
           ),
         }}
       />
@@ -85,7 +114,7 @@ export default function Layout() {
         name="chat"
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon name="chatbubbles" label="Chat" focused={focused} />
+            <TabIcon source={icons.chat} label="Messages" focused={focused} />
           ),
         }}
       />
@@ -93,7 +122,7 @@ export default function Layout() {
         name="profile"
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon name="person" label="Profile" focused={focused} />
+            <TabIcon source={icons.profile} label="Profile" focused={focused} />
           ),
         }}
       />
