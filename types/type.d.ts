@@ -26,6 +26,18 @@ declare interface MarkerData {
   price?: string;
 }
 
+declare interface Hub {
+  id: number;
+  name: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  radius: number;
+  status: "active" | "inactive";
+  created_at?: string;
+  updated_at?: string;
+}
+
 declare interface MapProps {
   destinationLatitude?: number;
   destinationLongitude?: number;

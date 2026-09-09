@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import MapView, {
+    Circle,
     Marker,
     Polyline,
     PROVIDER_GOOGLE,
@@ -15,7 +16,7 @@ import {
 } from "@/lib/map";
 import { getSupabaseClient } from "@/lib/supabase";
 import { useDriverStore, useLocationStore } from "@/store";
-import { Driver, MarkerData } from "@/types/type";
+import { Driver, Hub, MarkerData } from "@/types/type";
 
 const GEOAPIFY_API_KEY =
   process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY!;
@@ -33,6 +34,7 @@ export default function Map() {
 
   const [markers, setMarkers] = useState<MarkerData[]>([]);
   const [drivers, setLoadedDrivers] = useState<Driver[]>([]);
+  const [hubs, setHubs] = useState<Hub[]>([]);
   const [routeCoordinates, setRouteCoordinates] = useState<
     { latitude: number; longitude: number }[] | null
   >(null);
@@ -69,7 +71,31 @@ export default function Map() {
       }
     };
 
+    const loadHubs = async () => {
+      try {
+        const supabase = getSupabaseClient();
+        const { data, error } = await supabase
+          .from("hubs")
+          .select("id, name, address, latitude, longitude, radius, status")
+          .eq("status", "active");
+
+        if (!isMounted) return;
+
+        if (error) {
+          throw error;
+        }
+
+        setHubs((Array.isArray(data) ? data : []) as Hub[]);
+      } catch (error) {
+        console.error("Failed to load hubs:", error);
+        if (isMounted) {
+          setHubs([]);
+        }
+      }
+    };
+
     loadDrivers();
+    loadHubs();
 
     return () => {
       isMounted = false;
@@ -243,6 +269,30 @@ export default function Map() {
       mapType="standard"
       userInterfaceStyle="light"
     >
+      {hubs.map((hub) => (
+        <React.Fragment key={hub.id}>
+          <Circle
+            center={{
+              latitude: hub.latitude,
+              longitude: hub.longitude,
+            }}
+            radius={hub.radius}
+            strokeColor="#0286FF"
+            strokeWidth={2}
+            fillColor="rgba(2, 134, 255, 0.12)"
+          />
+          <Marker
+            coordinate={{
+              latitude: hub.latitude,
+              longitude: hub.longitude,
+            }}
+            title={hub.name}
+            description={hub.address}
+            pinColor="#0286FF"
+          />
+        </React.Fragment>
+      ))}
+
       {/* Route from user to destination (blue) */}
       {hasDestination && routeCoordinates && routeCoordinates.length > 0 && (
         <Polyline
