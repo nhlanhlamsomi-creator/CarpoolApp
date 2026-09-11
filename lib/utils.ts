@@ -1,13 +1,47 @@
 import { Ride } from "@/types/type";
 
-export const sortRides = (rides: Ride[]): Ride[] => {
-  const result = rides.sort((a, b) => {
-    const dateA = new Date(`${a.created_at}T${a.ride_time}`);
-    const dateB = new Date(`${b.created_at}T${b.ride_time}`);
-    return dateB.getTime() - dateA.getTime();
-  });
+export const isDriverVisible = (
+  driver?: Partial<{
+    status: string | null;
+    verified: boolean | null;
+    is_online: boolean | null;
+    driver_verification_status: string | null;
+  }>,
+): boolean => {
+  if (!driver) {
+    return false;
+  }
 
-  return result.reverse();
+  const status = String(driver.status ?? "").trim().toLowerCase();
+  const verificationStatus = String(
+    driver.driver_verification_status ?? "",
+  ).trim().toLowerCase();
+  const isOnline = driver.is_online === true || driver.verified === true;
+
+  const liveStatuses = new Set(["approved", "live", "active", "online"]);
+  const liveVerificationStatuses = new Set([
+    "approved",
+    "live",
+    "active",
+    "online",
+  ]);
+
+  const statusMatches = liveStatuses.has(status) || status === "";
+  const verificationMatches = liveVerificationStatuses.has(verificationStatus);
+
+  return (
+    (statusMatches && (isOnline || verificationMatches || status === "online")) ||
+    verificationMatches ||
+    (status === "live" && (driver.verified === true || driver.is_online === true))
+  );
+};
+
+export const sortRides = (rides: Ride[]): Ride[] => {
+  return [...rides].sort((a, b) => {
+    const dateA = new Date(a.created_at ?? a.ride_time ?? 0).getTime();
+    const dateB = new Date(b.created_at ?? b.ride_time ?? 0).getTime();
+    return dateB - dateA;
+  });
 };
 
 export function formatTime(value: number | string): string {

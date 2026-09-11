@@ -47,16 +47,43 @@ export async function GET(request: Request) {
 
     const { data, error } = await supabase
       .from("drivers")
-      .select("id, first_name, last_name, profile_image_url, car_image_url, car_seats, rating")
-      .eq("status", "approved")
-      .eq("verified", true);
+      .select(
+        "id, first_name, last_name, profile_image_url, car_image_url, car_seats, rating, status, verified, is_online, driver_verification_status"
+      );
 
     if (error) {
       throw error;
     }
 
+    const visibleDrivers = Array.isArray(data)
+      ? data.filter((driver: any) => {
+          const status = String(driver?.status ?? "").trim().toLowerCase();
+          const verificationStatus = String(
+            driver?.driver_verification_status ?? "",
+          ).trim().toLowerCase();
+          const isOnline = driver?.is_online === true || driver?.verified === true;
+
+          const liveStatuses = new Set(["approved", "live", "active", "online"]);
+          const liveVerificationStatuses = new Set([
+            "approved",
+            "live",
+            "active",
+            "online",
+          ]);
+
+          const statusMatches = liveStatuses.has(status) || status === "";
+          const verificationMatches = liveVerificationStatuses.has(verificationStatus);
+
+          return (
+            (statusMatches && (isOnline || verificationMatches || status === "online")) ||
+            verificationMatches ||
+            (status === "live" && (driver?.verified === true || driver?.is_online === true))
+          );
+        })
+      : [];
+
     return Response.json({
-      data: Array.isArray(data) ? data : [],
+      data: visibleDrivers,
     });
   } catch (error: any) {
     console.error("Error fetching drivers:", error);

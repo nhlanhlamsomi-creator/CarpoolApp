@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, Platform, View } from "react-native";
 import MapView, {
     Circle,
     Marker,
     Polyline,
+    PROVIDER_DEFAULT,
     PROVIDER_GOOGLE,
 } from "react-native-maps";
 
@@ -15,6 +16,7 @@ import {
     generateMarkersFromData,
 } from "@/lib/map";
 import { getSupabaseClient } from "@/lib/supabase";
+import { isDriverVisible } from "@/lib/utils";
 import { useDriverStore, useLocationStore } from "@/store";
 import { Driver, Hub, MarkerData } from "@/types/type";
 
@@ -51,10 +53,8 @@ export default function Map() {
         const { data, error } = await supabase
           .from("drivers")
           .select(
-            "id, first_name, last_name, profile_image_url, car_image_url, car_seats, rating"
-          )
-          .eq("status", "approved")
-          .eq("verified", true);
+            "id, first_name, last_name, profile_image_url, car_image_url, car_seats, rating, status, verified, is_online, driver_verification_status"
+          );
 
         if (!isMounted) return;
 
@@ -62,7 +62,11 @@ export default function Map() {
           throw error;
         }
 
-        setLoadedDrivers((Array.isArray(data) ? data : []) as Driver[]);
+        const visibleDrivers = (Array.isArray(data) ? data : []).filter(
+          isDriverVisible,
+        ) as Driver[];
+
+        setLoadedDrivers(visibleDrivers);
       } catch (error) {
         console.error("Failed to load drivers:", error);
         if (isMounted) {
@@ -261,7 +265,7 @@ export default function Map() {
 
   return (
     <MapView
-      provider={PROVIDER_GOOGLE}
+      provider={Platform.OS === "android" ? PROVIDER_GOOGLE : PROVIDER_DEFAULT}
       style={{ flex: 1 }}
       initialRegion={region}
       showsUserLocation
