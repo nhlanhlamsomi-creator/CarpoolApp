@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Platform, View } from "react-native";
+import { ActivityIndicator, Image, Platform, View } from "react-native";
 import MapView, {
     Circle,
     Marker,
@@ -53,7 +53,7 @@ export default function Map() {
         const { data, error } = await supabase
           .from("drivers")
           .select(
-            "id, first_name, last_name, profile_image_url, car_image_url, car_seats, rating, status, verified, is_online, driver_verification_status"
+            "id, first_name, last_name, profile_image_url, car_image_url, car_seats, rating, status, verified, is_online, driver_verification_status, latitude, longitude"
           );
 
         if (!isMounted) return;
@@ -315,21 +315,27 @@ export default function Map() {
         />
       )}
 
-      {markers.map((marker) => (
-        <Marker
-          key={marker.id}
-          coordinate={{
-            latitude: marker.latitude,
-            longitude: marker.longitude,
-          }}
-          title={marker.title}
-          image={
-            selectedDriver === Number(marker.id)
-              ? icons.selectedMarker
-              : icons.marker
-          }
-        />
-      ))}
+      {markers.map((marker) => {
+        const isSelected = selectedDriver === Number(marker.id);
+
+        return (
+          <Marker
+            key={marker.id}
+            coordinate={{
+              latitude: marker.latitude,
+              longitude: marker.longitude,
+            }}
+            title={marker.title}
+            anchor={{ x: 0.5, y: 0.5 }}
+          >
+            <Image
+              source={isSelected ? icons.selectedMarker : icons.marker}
+              style={{ width: 34, height: 34 }}
+              resizeMode="contain"
+            />
+          </Marker>
+        );
+      })}
 
       {hasDestination && (
         <Marker

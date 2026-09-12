@@ -8,6 +8,8 @@ declare interface Driver {
   car_image_url: string;
   car_seats: number;
   rating: number;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 declare interface MarkerData {

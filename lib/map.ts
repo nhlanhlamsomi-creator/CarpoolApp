@@ -10,6 +10,12 @@ export const generateMarkersFromData = ({
   userLongitude: number;
 }): MarkerData[] => {
   return data.map((driver, index) => {
+    const hasRealLocation =
+      driver.latitude != null &&
+      driver.longitude != null &&
+      Number.isFinite(driver.latitude) &&
+      Number.isFinite(driver.longitude);
+
     const offsets = [
       { lat: 0.005, lng: 0.003 },
       { lat: -0.004, lng: 0.004 },
@@ -24,8 +30,8 @@ export const generateMarkersFromData = ({
 
     return {
       ...driver,
-      latitude: userLatitude + offset.lat,
-      longitude: userLongitude + offset.lng,
+      latitude: hasRealLocation ? driver.latitude : userLatitude + offset.lat,
+      longitude: hasRealLocation ? driver.longitude : userLongitude + offset.lng,
       title: `${driver.first_name} ${driver.last_name}`,
     };
   });

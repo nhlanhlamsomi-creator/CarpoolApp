@@ -1,5 +1,4 @@
-import { describe, expect, it } from 'vitest';
-
+import { generateMarkersFromData } from '../lib/map';
 import {
     crossCheckProfile,
     formatIdNumber,
@@ -76,6 +75,35 @@ describe('South African ID validation', () => {
       'Your profile says male, but this ID number indicates female.',
       "Your profile date of birth doesn't match the one in this ID number.",
     ]);
+  });
+});
+
+describe('map marker generation', () => {
+  it('uses real driver coordinates when they exist', () => {
+    const drivers = [{
+      id: 1,
+      first_name: 'Ava',
+      last_name: 'Ngcobo',
+      profile_image_url: '',
+      car_image_url: '',
+      car_seats: 4,
+      rating: 4.8,
+      latitude: -26.2041,
+      longitude: 28.0473,
+    }] as any[];
+
+    const markers = generateMarkersFromData({
+      data: drivers,
+      userLatitude: -26.2,
+      userLongitude: 28.04,
+    });
+
+    expect(markers[0]).toMatchObject({
+      id: 1,
+      latitude: -26.2041,
+      longitude: 28.0473,
+      title: 'Ava Ngcobo',
+    });
   });
 });
 
