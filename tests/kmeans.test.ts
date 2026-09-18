@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  findCarpoolGroups,
-  haversineDistanceKm,
-  runKMeans,
-  type PassengerLocation,
+    findCarpoolGroups,
+    haversineDistanceKm,
+    runKMeans,
+    type PassengerLocation,
 } from '@/services/kMeans';
 
 describe('k-means clustering', () => {
