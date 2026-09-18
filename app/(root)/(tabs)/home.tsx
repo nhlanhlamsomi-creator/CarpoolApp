@@ -141,6 +141,20 @@ const Home = () => {
               </View>
             </View>
 
+            <View className="mt-7 mb-2 flex-row items-center justify-between">
+              <Text className="text-[17px] font-JakartaExtraBold text-[#101814]">
+                Carpool groups
+              </Text>
+              <TouchableOpacity
+                onPress={() => router.push("/(root)/carpool-groups")}
+                activeOpacity={0.8}
+              >
+                <Text className="text-[13px] font-JakartaBold text-[#0E5C3F]">
+                  View groups
+                </Text>
+              </TouchableOpacity>
+            </View>
+
             {/* ── Recent rides ── */}
             <View className="mb-3 mt-7 flex-row items-center justify-between">
               <Text className="text-[17px] font-JakartaExtraBold text-[#101814]">

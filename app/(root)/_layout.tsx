@@ -18,6 +18,7 @@ const Layout = () => {
 
       {/* ── Booking flow ── */}
       <Stack.Screen name="find-ride" />
+      <Stack.Screen name="carpool-groups" />
       <Stack.Screen name="confirm-ride" />
       <Stack.Screen
         name="book-ride"
