@@ -168,11 +168,25 @@ const SignUp = () => {
   // ── Clerk sign-up — unchanged ──────────────────────────────────────────────
   const onSignUpPress = async () => {
     if (!isLoaded) return;
+
+    const email = form.email.trim().toLowerCase();
+    if (
+      !form.name.trim() ||
+      !email ||
+      !/^\S+@\S+\.\S+$/.test(email) ||
+      form.password.length < 8 ||
+      !/[A-Z]/.test(form.password) ||
+      !/\d/.test(form.password)
+    ) {
+      Alert.alert("Error", "Please enter a valid name, email, and password.");
+      return;
+    }
+
     setLoading(true);
 
     try {
       await signUp.create({
-        emailAddress: form.email,
+        emailAddress: email,
         password: form.password,
       });
 
@@ -184,14 +198,8 @@ const SignUp = () => {
         ...verification,
         state: "pending",
       });
-    } catch (err: any) {
-      console.log("SIGN UP ERROR");
-      console.log(err);
-
-      Alert.alert(
-        "Error",
-        err?.errors?.[0]?.longMessage || "Something went wrong."
-      );
+    } catch {
+      Alert.alert("Error", "Unable to create account. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -207,21 +215,15 @@ const SignUp = () => {
       });
 
       if (completeSignUp.status === "complete") {
-        console.log("Clerk User Created");
-        console.log(completeSignUp);
-
         // Save user in Neon
-        const response = await fetchAPI("/(api)/user", {
+        await fetchAPI("/(api)/user", {
           method: "POST",
           body: JSON.stringify({
             name: form.name,
-            email: form.email,
+            email: form.email.trim().toLowerCase(),
             clerkId: completeSignUp.createdUserId,
           }),
         });
-
-        console.log("========== USER API RESPONSE ==========");
-        console.log(response);
 
         await setActive({
           session: completeSignUp.createdSessionId,
@@ -232,23 +234,17 @@ const SignUp = () => {
           state: "success",
         });
       } else {
-        console.log("Verification not complete");
-        console.log(completeSignUp);
-
         setVerification({
           ...verification,
           state: "failed",
           error: "Verification failed.",
         });
       }
-    } catch (err: any) {
-      console.log("VERIFY ERROR");
-      console.log(err);
-
+    } catch {
       setVerification({
         ...verification,
         state: "failed",
-        error: err?.errors?.[0]?.longMessage || "Something went wrong.",
+        error: "Verification failed. Please try again.",
       });
     } finally {
       setVerifying(false);

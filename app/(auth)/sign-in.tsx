@@ -154,11 +154,18 @@ const SignIn = () => {
   // ── Clerk sign-in — unchanged ──────────────────────────────────────────────
   const onSignInPress = useCallback(async () => {
     if (!isLoaded) return;
+
+    const email = form.email.trim().toLowerCase();
+    if (!email || !/^\S+@\S+\.\S+$/.test(email) || !form.password) {
+      Alert.alert("Error", "Invalid email or password");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const signInAttempt = await signIn.create({
-        identifier: form.email,
+        identifier: email,
         password: form.password,
       });
 
@@ -166,12 +173,10 @@ const SignIn = () => {
         await setActive({ session: signInAttempt.createdSessionId });
         router.replace("/(root)/(tabs)/home");
       } else {
-        console.log(JSON.stringify(signInAttempt, null, 2));
-        Alert.alert("Error", "Log in failed. Please try again.");
+        Alert.alert("Error", "Invalid email or password");
       }
-    } catch (err: any) {
-      console.log(JSON.stringify(err, null, 2));
-      Alert.alert("Error", err.errors[0].longMessage);
+    } catch {
+      Alert.alert("Error", "Invalid email or password");
     } finally {
       setLoading(false);
     }

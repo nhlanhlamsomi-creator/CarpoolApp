@@ -2,6 +2,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export const fetchAPI = async (url: string, options?: RequestInit) => {
   try {
+    if (/^http:/i.test(url)) {
+      throw new Error("Insecure HTTP requests are not allowed");
+    }
+
     const response = await fetch(url, options);
 
     if (!response.ok) {
@@ -11,7 +15,6 @@ export const fetchAPI = async (url: string, options?: RequestInit) => {
 
     return await response.json();
   } catch (error) {
-    console.warn("Fetch error:", error);
     throw error;
   }
 };

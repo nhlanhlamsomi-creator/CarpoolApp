@@ -24,6 +24,7 @@
     "@react-navigation/native": "^7.1.8",
     "@stripe/stripe-react-native": "0.64.0",
     "@supabase/supabase-js": "^2.109.0",
+    "argon2": "^0.45.1",
     "babel-preset-expo": "~57.0.0",
     "base64-arraybuffer": "^1.0.2",
     "dotenv": "^17.4.2",
