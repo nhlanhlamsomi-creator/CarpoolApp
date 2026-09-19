@@ -2,9 +2,9 @@ import argon2 from "argon2";
 import { describe, expect, it } from "vitest";
 
 import {
-  hashPassword,
-  passwordHashOptions,
-  verifyPassword,
+    hashPassword,
+    passwordHashOptions,
+    verifyPassword,
 } from "../lib/server/passwordHash";
 
 describe("server password hashing", () => {
