@@ -1,7 +1,6 @@
-# CarpoolGo — DevSphere Inc.
+# Lyft Carpool App — DevSphere Inc.
 
-A carpooling platform (Lyft-style) for South African commuters, built as a University of Johannesburg project. It has three connected parts: a **Passenger** app, a **Driver** app and an **Admin** dashboard.
-
+A Lyft-style carpooling platform for South African commuters, built as a University of Johannesburg project. It has three connected parts: a **Passenger** app, a **Driver** app and an **Admin** dashboard.
 **University of Johannesburg · Department of Applied Information Systems**
 **Current phase:** Sprint 5–6 — MVP integration and testing
 **Status as at:** 03 September 2026
