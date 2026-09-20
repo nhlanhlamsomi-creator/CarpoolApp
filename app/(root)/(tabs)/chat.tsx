@@ -16,6 +16,19 @@ import { EmptyState } from "@/components/Cards";
 import { useFetch } from "@/lib/fetch";
 import { Ride } from "@/types/type";
 
+// ─── Palette ─────────────────────────────────────────────────────────────────
+const WARM = {
+  cream:    "#FBF7F0",
+  sand:     "#F4EDE1",
+  gold:     "#F5B93C",
+  goldDeep: "#E0A11E",
+  goldSoft: "#FCEBC4",
+  charcoal: "#2B2722",
+  graphite: "#4A443D",
+  muted:    "#9A928A",
+  line:     "#E7DECF",
+};
+
 // PASSENGER APP — the Chat tab: one conversation per trip that has a driver
 // attached. Reuses the rides endpoint, so no new API is needed for the list.
 
@@ -44,7 +57,7 @@ const Chat = () => {
   }, [data]);
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F5F8F6]">
+    <SafeAreaView style={{ flex: 1, backgroundColor: WARM.cream }}>
       <FlatList
         data={threads}
         keyExtractor={(item: any, i) => `${item.ride_id ?? i}`}
@@ -65,52 +78,113 @@ const Chat = () => {
                   params: { rideId: String(item.ride_id) },
                 })
               }
-              className="mb-3 flex-row items-center rounded-2xl border border-[#E2E9E5] bg-white p-4 active:opacity-80"
+              style={{
+                marginBottom: 12,
+                flexDirection: "row",
+                alignItems: "center",
+                borderRadius: 20,
+                borderWidth: 1,
+                borderColor: WARM.line,
+                backgroundColor: "#FFFFFF",
+                padding: 16,
+                shadowColor: WARM.charcoal,
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.05,
+                shadowRadius: 12,
+                elevation: 2,
+              }}
             >
               {item.driver?.profile_image_url ? (
                 <Image
                   source={{ uri: item.driver.profile_image_url }}
-                  className="h-12 w-12 rounded-full bg-[#EEF1F0]"
+                  style={{
+                    height: 48,
+                    width: 48,
+                    borderRadius: 24,
+                    backgroundColor: WARM.sand,
+                  }}
                 />
               ) : (
-                <View className="h-12 w-12 items-center justify-center rounded-full bg-[#E6F2EC]">
-                  <Ionicons name="person" size={20} color="#0E5C3F" />
+                <View
+                  style={{
+                    height: 48,
+                    width: 48,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 24,
+                    backgroundColor: WARM.goldSoft,
+                  }}
+                >
+                  <Ionicons name="person" size={20} color={WARM.goldDeep} />
                 </View>
               )}
 
-              <View className="ml-3 flex-1">
-                <View className="flex-row items-center gap-2">
+              <View style={{ marginLeft: 12, flex: 1 }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 8,
+                  }}
+                >
                   <Text
-                    className="text-[14.5px] font-JakartaBold text-[#101814]"
+                    style={{
+                      fontSize: 14.5,
+                      fontFamily: "Jakarta-Bold",
+                      color: WARM.charcoal,
+                    }}
                     numberOfLines={1}
                   >
                     {driverName}
                   </Text>
                   {active && (
-                    <View className="h-2 w-2 rounded-full bg-[#1FB574]" />
+                    <View
+                      style={{
+                        height: 8,
+                        width: 8,
+                        borderRadius: 4,
+                        backgroundColor: WARM.gold,
+                      }}
+                    />
                   )}
                 </View>
                 <Text
-                  className="mt-0.5 text-[12px] font-Jakarta text-[#68756F]"
+                  style={{
+                    marginTop: 2,
+                    fontSize: 12,
+                    fontFamily: "Jakarta",
+                    color: WARM.muted,
+                  }}
                   numberOfLines={1}
                 >
                   {item.destination_address}
                 </Text>
               </View>
 
-              <Ionicons name="chevron-forward" size={18} color="#9BA6A1" />
+              <Ionicons
+                name="chevron-forward"
+                size={18}
+                color={WARM.muted}
+              />
             </Pressable>
           );
         }}
         ListHeaderComponent={
-          <Text className="my-5 text-2xl font-JakartaExtraBold text-[#101814]">
+          <Text
+            style={{
+              marginVertical: 20,
+              fontSize: 24,
+              fontFamily: "Jakarta-ExtraBold",
+              color: WARM.charcoal,
+            }}
+          >
             Messages
           </Text>
         }
         ListEmptyComponent={
           loading ? (
-            <View className="items-center py-12">
-              <ActivityIndicator size="large" color="#0E5C3F" />
+            <View style={{ alignItems: "center", paddingVertical: 48 }}>
+              <ActivityIndicator size="large" color={WARM.gold} />
             </View>
           ) : (
             <EmptyState

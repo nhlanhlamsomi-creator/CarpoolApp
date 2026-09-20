@@ -3,6 +3,19 @@ import { Pressable, Text, View } from "react-native";
 
 import { OfferTrip } from "@/types/type";
 
+// ─── Palette ─────────────────────────────────────────────────────────────────
+const WARM = {
+  cream:    "#FBF7F0",
+  sand:     "#F4EDE1",
+  gold:     "#F5B93C",
+  goldDeep: "#E0A11E",
+  goldSoft: "#FCEBC4",
+  charcoal: "#2B2722",
+  graphite: "#4A443D",
+  muted:    "#9A928A",
+  line:     "#E7DECF",
+};
+
 const formatDeparture = (date: string, time: string) => {
   const parsed = new Date(`${date}T${time}`);
 
@@ -34,22 +47,74 @@ const OfferTripCard = ({
   const seatsLeft = Math.max(0, trip.seats_available - trip.seats_booked);
 
   return (
-    <View className="mb-3 rounded-2xl border border-[#E2E9E5] bg-white p-4">
-      <View className="flex-row items-start justify-between">
-        <View className="flex-1 pr-3">
-          <View className="mb-2 flex-row items-center gap-2">
-            <Ionicons name="navigate-outline" size={16} color="#0E5C3F" />
+    <View
+      style={{
+        marginBottom: 12,
+        borderRadius: 22,
+        borderWidth: 1,
+        borderColor: WARM.line,
+        backgroundColor: "#FFFFFF",
+        padding: 16,
+        shadowColor: WARM.charcoal,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.05,
+        shadowRadius: 14,
+        elevation: 2,
+      }}
+    >
+      {/* ── Header: from/to + price ── */}
+      <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between" }}>
+        <View style={{ flex: 1, paddingRight: 12 }}>
+          {/* From */}
+          <View style={{ marginBottom: 8, flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <View
+              style={{
+                height: 26,
+                width: 26,
+                borderRadius: 9,
+                backgroundColor: WARM.goldSoft,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Ionicons name="navigate-outline" size={14} color={WARM.goldDeep} />
+            </View>
             <Text
-              className="flex-1 text-[15px] font-JakartaBold text-[#101814]"
+              style={{
+                flex: 1,
+                fontSize: 15,
+                fontFamily: "Jakarta-Bold",
+                color: WARM.charcoal,
+              }}
               numberOfLines={1}
             >
               {trip.leaving_from}
             </Text>
           </View>
-          <View className="flex-row items-center gap-2">
-            <Ionicons name="location-outline" size={16} color="#0E5C3F" />
+
+          {/* To */}
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <View
+              style={{
+                height: 26,
+                width: 26,
+                borderRadius: 9,
+                backgroundColor: WARM.cream,
+                borderWidth: 1,
+                borderColor: WARM.line,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Ionicons name="location-outline" size={14} color={WARM.graphite} />
+            </View>
             <Text
-              className="flex-1 text-[15px] font-JakartaBold text-[#101814]"
+              style={{
+                flex: 1,
+                fontSize: 15,
+                fontFamily: "Jakarta-Bold",
+                color: WARM.charcoal,
+              }}
               numberOfLines={1}
             >
               {trip.going_to}
@@ -57,43 +122,118 @@ const OfferTripCard = ({
           </View>
         </View>
 
-        <Text className="text-[16px] font-JakartaExtraBold text-[#0E5C3F]">
-          R{Number(trip.price_per_seat).toFixed(2)}
-        </Text>
+        {/* Price chip */}
+        <View
+          style={{
+            paddingHorizontal: 10,
+            paddingVertical: 6,
+            borderRadius: 12,
+            backgroundColor: WARM.goldSoft,
+            borderWidth: 1,
+            borderColor: WARM.gold,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 14,
+              fontFamily: "Jakarta-ExtraBold",
+              color: WARM.goldDeep,
+              letterSpacing: -0.2,
+            }}
+          >
+            R{Number(trip.price_per_seat).toFixed(2)}
+          </Text>
+        </View>
       </View>
 
-      <View className="mt-3 flex-row flex-wrap items-center gap-x-4 gap-y-2 border-t border-[#E2E9E5] pt-3">
-        <View className="flex-row items-center gap-1.5">
-          <Ionicons name="calendar-outline" size={14} color="#68756F" />
-          <Text className="text-[11.5px] font-Jakarta text-[#68756F]">
+      {/* ── Meta row: date · seats · driver ── */}
+      <View
+        style={{
+          marginTop: 12,
+          paddingTop: 12,
+          borderTopWidth: 1,
+          borderTopColor: WARM.line,
+          flexDirection: "row",
+          flexWrap: "wrap",
+          columnGap: 16,
+          rowGap: 8,
+        }}
+      >
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <Ionicons name="calendar-outline" size={14} color={WARM.muted} />
+          <Text style={{ fontSize: 11.5, fontFamily: "Jakarta", color: WARM.graphite }}>
             {formatDeparture(trip.departure_date, trip.departure_time)}
           </Text>
         </View>
-        <View className="flex-row items-center gap-1.5">
-          <Ionicons name="people-outline" size={14} color="#68756F" />
-          <Text className="text-[11.5px] font-Jakarta text-[#68756F]">
+
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <Ionicons name="people-outline" size={14} color={WARM.muted} />
+          <Text style={{ fontSize: 11.5, fontFamily: "Jakarta", color: WARM.graphite }}>
             {seatsLeft} {seatsLeft === 1 ? "seat" : "seats"} left
           </Text>
         </View>
+
         {driverName && (
-          <View className="flex-row items-center gap-1.5">
-            <Ionicons name="person-outline" size={14} color="#68756F" />
-            <Text className="text-[11.5px] font-Jakarta text-[#68756F]">
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+            <Ionicons name="person-outline" size={14} color={WARM.muted} />
+            <Text style={{ fontSize: 11.5, fontFamily: "Jakarta", color: WARM.graphite }}>
               {driverName}
             </Text>
           </View>
         )}
       </View>
+
+      {/* ── Book ride button — GOLD ── */}
       <Pressable
         onPress={onBook}
         disabled={booking}
         accessibilityRole="button"
         accessibilityLabel={`Book ride from ${trip.leaving_from} to ${trip.going_to}`}
-        className={`mt-4 items-center rounded-xl bg-[#0E5C3F] py-3 ${booking ? "opacity-60" : "active:opacity-80"}`}
+        style={{
+          marginTop: 16,
+          height: 48,
+          borderRadius: 16,
+          backgroundColor: booking ? WARM.goldSoft : WARM.gold,
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 8,
+          borderWidth: 1.5,
+          borderColor: booking ? WARM.gold : WARM.goldDeep,
+          shadowColor: WARM.goldDeep,
+          shadowOffset: { width: 0, height: 8 },
+          shadowOpacity: booking ? 0.1 : 0.3,
+          shadowRadius: 14,
+          elevation: booking ? 2 : 6,
+          opacity: booking ? 0.65 : 1,
+        }}
       >
-        <Text className="text-[13px] font-JakartaBold text-white">
-          {booking ? "Booking..." : "Book ride"}
+        <Text
+          style={{
+            fontSize: 14,
+            fontFamily: "Jakarta-Bold",
+            color: WARM.charcoal,
+            letterSpacing: 0.2,
+            opacity: booking ? 0.65 : 1,
+          }}
+        >
+          {booking ? "Booking…" : "Book ride"}
         </Text>
+
+        {!booking && (
+          <View
+            style={{
+              height: 22,
+              width: 22,
+              borderRadius: 11,
+              backgroundColor: "rgba(255,255,255,0.55)",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Ionicons name="arrow-forward" size={13} color={WARM.charcoal} />
+          </View>
+        )}
       </Pressable>
     </View>
   );

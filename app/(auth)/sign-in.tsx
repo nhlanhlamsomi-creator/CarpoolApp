@@ -23,18 +23,25 @@ import OAuth from "@/components/OAuth";
 const { width } = Dimensions.get("window");
 
 // ─── Palette ─────────────────────────────────────────────────────────────────
-const GREEN = {
-  deep:   "#06231A",
-  dark:   "#0E5C3F",
-  mid:    "#12724F",
-  accent: "#1FB574",
-  mint:   "#6FEFB4",
-  tint:   "#E6F2EC",
+// Matches the welcome + sign-up screens exactly.
+const WARM = {
+  cream:     "#FBF7F0", // page background
+  sand:      "#F4EDE1", // cards, pills, secondary surfaces
+  beige:     "#EDE3D2", // dividers, inactive tracks
+  gold:      "#F5B93C", // primary accent — CTAs, focus, highlights
+  goldDeep:  "#E0A11E", // pressed state, icons-on-tint, shadows
+  goldSoft:  "#FCEBC4", // tinted backgrounds behind icons/badges
+  charcoal:  "#2B2722", // primary text & icons
+  graphite:  "#4A443D", // secondary text
+  muted:     "#9A928A", // tertiary text, placeholders, divider label
+  line:      "#E7DECF", // hairline borders
+  taupe:     "#B8AE9E", // idle field icons
+  taupeSoft: "#BCB2A2", // placeholder text
 };
 
-const INK    = "#101814";
-const MUTED  = "#68756F";
-const BORDER = "#E2E9E5";
+const INK    = WARM.charcoal;
+const MUTED  = WARM.muted;
+const BORDER = WARM.line;
 const DANGER = "#E04545";
 
 // ─── Field ───────────────────────────────────────────────────────────────────
@@ -65,12 +72,12 @@ function Field({ label, icon, error, secure, ...props }: FieldProps) {
         <Ionicons
           name={icon}
           size={19}
-          color={error ? DANGER : focused ? GREEN.dark : "#A7B2AD"}
+          color={error ? DANGER : focused ? WARM.goldDeep : WARM.taupe}
         />
 
         <TextInput
           style={styles.fieldInput}
-          placeholderTextColor="#B4BEB9"
+          placeholderTextColor={WARM.taupeSoft}
           autoCapitalize="none"
           secureTextEntry={hidden}
           onFocus={() => setFocused(true)}
@@ -83,7 +90,7 @@ function Field({ label, icon, error, secure, ...props }: FieldProps) {
             <Ionicons
               name={hidden ? "eye-outline" : "eye-off-outline"}
               size={19}
-              color="#A7B2AD"
+              color={WARM.taupe}
             />
           </TouchableOpacity>
         )}
@@ -113,6 +120,10 @@ const SignIn = () => {
   const footerFade  = useRef(new Animated.Value(0)).current;
   const ringSpin    = useRef(new Animated.Value(0)).current;
 
+  // Badge float + glow
+  const badgeBob  = useRef(new Animated.Value(0)).current;
+  const badgeGlow = useRef(new Animated.Value(1)).current;
+
   useEffect(() => {
     Animated.loop(
       Animated.timing(ringSpin, {
@@ -121,6 +132,40 @@ const SignIn = () => {
         easing: Easing.linear,
         useNativeDriver: true,
       })
+    ).start();
+
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(badgeBob, {
+          toValue: 1,
+          duration: 2400,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+        Animated.timing(badgeBob, {
+          toValue: 0,
+          duration: 2400,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(badgeGlow, {
+          toValue: 1.15,
+          duration: 2600,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+        Animated.timing(badgeGlow, {
+          toValue: 1,
+          duration: 2600,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+      ])
     ).start();
 
     Animated.sequence([
@@ -149,6 +194,11 @@ const SignIn = () => {
   const spin = ringSpin.interpolate({
     inputRange: [0, 1],
     outputRange: ["0deg", "360deg"],
+  });
+
+  const badgeY = badgeBob.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -6],
   });
 
   // ── Clerk sign-in — unchanged ──────────────────────────────────────────────
@@ -187,7 +237,7 @@ const SignIn = () => {
       style={styles.root}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <StatusBar barStyle="light-content" backgroundColor={GREEN.deep} />
+      <StatusBar barStyle="dark-content" backgroundColor={WARM.cream} />
 
       <ScrollView
         contentContainerStyle={styles.scroll}
@@ -212,12 +262,25 @@ const SignIn = () => {
               onPress={() => router.back()}
               activeOpacity={0.75}
             >
-              <Ionicons name="chevron-back" size={21} color="rgba(255,255,255,0.9)" />
+              <Ionicons name="chevron-back" size={21} color={WARM.charcoal} />
             </TouchableOpacity>
 
-            <View style={styles.logoBadge}>
-              <Ionicons name="car-sport" size={30} color={GREEN.dark} />
-            </View>
+            <Animated.View
+              style={[
+                styles.logoBadgeWrap,
+                { transform: [{ translateY: badgeY }] },
+              ]}
+            >
+              <Animated.View
+                style={[
+                  styles.logoBadgeGlow,
+                  { transform: [{ scale: badgeGlow }] },
+                ]}
+              />
+              <View style={styles.logoBadge}>
+                <Ionicons name="car-sport" size={30} color={WARM.charcoal} />
+              </View>
+            </Animated.View>
 
             <Text style={styles.headerTitle}>Welcome back</Text>
             <Text style={styles.headerSub}>Log in to keep riding and saving</Text>
@@ -262,7 +325,11 @@ const SignIn = () => {
             disabled={loading}
           >
             <Text style={styles.ctaText}>{loading ? "Logging in…" : "Log in"}</Text>
-            {!loading && <Ionicons name="arrow-forward" size={19} color="#fff" />}
+            {!loading && (
+              <View style={styles.ctaIconWrap}>
+                <Ionicons name="arrow-forward" size={16} color={WARM.charcoal} />
+              </View>
+            )}
           </TouchableOpacity>
 
           <View style={styles.dividerRow}>
@@ -277,7 +344,7 @@ const SignIn = () => {
         {/* ── Footer ── */}
         <Animated.View style={[styles.footer, { opacity: footerFade }]}>
           <View style={styles.trustRow}>
-            <Ionicons name="shield-checkmark-outline" size={15} color={GREEN.dark} />
+            <Ionicons name="shield-checkmark-outline" size={15} color={WARM.goldDeep} />
             <Text style={styles.trustText}>Every driver is verified before they drive</Text>
           </View>
 
@@ -298,16 +365,16 @@ export default SignIn;
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: "#F5F8F6",
+    backgroundColor: WARM.cream,
   },
   scroll: {
     paddingBottom: 40,
   },
 
-  // Header
+  // Header — soft cream with golden depth layers
   header: {
     height: 300,
-    backgroundColor: GREEN.deep,
+    backgroundColor: WARM.cream,
     borderBottomLeftRadius: 38,
     borderBottomRightRadius: 38,
     overflow: "hidden",
@@ -317,8 +384,8 @@ const styles = StyleSheet.create({
     width: width * 1.2,
     height: width * 1.2,
     borderRadius: width * 0.6,
-    backgroundColor: GREEN.dark,
-    opacity: 0.5,
+    backgroundColor: WARM.goldSoft,
+    opacity: 0.7,
     top: -width * 0.72,
     right: -width * 0.3,
   },
@@ -327,8 +394,8 @@ const styles = StyleSheet.create({
     width: width * 0.8,
     height: width * 0.8,
     borderRadius: width * 0.4,
-    backgroundColor: GREEN.mid,
-    opacity: 0.2,
+    backgroundColor: WARM.sand,
+    opacity: 0.9,
     bottom: -width * 0.5,
     left: -width * 0.3,
   },
@@ -339,8 +406,8 @@ const styles = StyleSheet.create({
     borderRadius: 130,
     borderWidth: 1.5,
     borderColor: "transparent",
-    borderTopColor: "rgba(111,239,180,0.4)",
-    borderRightColor: "rgba(31,181,116,0.15)",
+    borderTopColor: "rgba(245,185,60,0.5)",
+    borderRightColor: "rgba(245,185,60,0.15)",
     alignSelf: "center",
     top: 62,
   },
@@ -357,49 +424,66 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 14,
-    backgroundColor: "rgba(255,255,255,0.14)",
+    backgroundColor: WARM.sand,
+    borderWidth: 1,
+    borderColor: WARM.line,
     alignItems: "center",
     justifyContent: "center",
+  },
+  logoBadgeWrap: {
+    marginTop: 6,
+    marginBottom: 18,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  logoBadgeGlow: {
+    position: "absolute",
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: WARM.goldSoft,
+    opacity: 0.85,
   },
   logoBadge: {
     width: 72,
     height: 72,
     borderRadius: 24,
-    backgroundColor: "#fff",
+    backgroundColor: WARM.gold,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 6,
-    marginBottom: 18,
-    shadowColor: GREEN.accent,
+    shadowColor: WARM.goldDeep,
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.4,
+    shadowOpacity: 0.35,
     shadowRadius: 22,
     elevation: 14,
   },
   headerTitle: {
     fontSize: 27,
     fontFamily: "Jakarta-ExtraBold",
-    color: "#fff",
+    color: WARM.charcoal,
     letterSpacing: -0.6,
     marginBottom: 6,
   },
   headerSub: {
     fontSize: 13.5,
     fontFamily: "Jakarta",
-    color: "rgba(255,255,255,0.62)",
+    color: WARM.graphite,
+    opacity: 0.85,
   },
 
-  // Card
+  // Card — warm white card with hairline border
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
     marginHorizontal: 20,
     marginTop: -34,
-    borderRadius: 26,
+    borderRadius: 28,
     padding: 22,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.08,
-    shadowRadius: 20,
+    borderWidth: 1,
+    borderColor: WARM.line,
+    shadowColor: WARM.charcoal,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.06,
+    shadowRadius: 22,
     elevation: 6,
   },
 
@@ -410,7 +494,7 @@ const styles = StyleSheet.create({
   fieldLabel: {
     fontSize: 12.5,
     fontFamily: "Jakarta-SemiBold",
-    color: "#4A5450",
+    color: WARM.graphite,
     marginBottom: 8,
   },
   fieldBox: {
@@ -419,14 +503,14 @@ const styles = StyleSheet.create({
     gap: 11,
     height: 54,
     paddingHorizontal: 15,
-    borderRadius: 16,
+    borderRadius: 18,
     borderWidth: 1.5,
-    borderColor: BORDER,
-    backgroundColor: "#F8FAF9",
+    borderColor: WARM.line,
+    backgroundColor: WARM.cream,
   },
   fieldBoxFocused: {
-    borderColor: GREEN.dark,
-    backgroundColor: "#fff",
+    borderColor: WARM.gold,
+    backgroundColor: "#FFFFFF",
   },
   fieldBoxError: {
     borderColor: DANGER,
@@ -455,29 +539,37 @@ const styles = StyleSheet.create({
   forgotText: {
     fontSize: 13,
     fontFamily: "Jakarta-SemiBold",
-    color: GREEN.dark,
+    color: WARM.goldDeep,
   },
 
-  // CTA
+  // CTA — golden yellow, matching sign-up
   cta: {
     height: 56,
-    borderRadius: 17,
-    backgroundColor: GREEN.dark,
+    borderRadius: 20,
+    backgroundColor: WARM.gold,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 10,
-    shadowColor: GREEN.dark,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 14,
+    shadowColor: WARM.goldDeep,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.32,
+    shadowRadius: 16,
     elevation: 7,
   },
   ctaText: {
-    color: "#fff",
+    color: WARM.charcoal,
     fontSize: 16,
     fontFamily: "Jakarta-Bold",
     letterSpacing: 0.2,
+  },
+  ctaIconWrap: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: "rgba(255,255,255,0.55)",
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   // Divider
@@ -486,17 +578,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
     marginTop: 22,
-    marginBottom: 6,
+    marginBottom: 14,
   },
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: BORDER,
+    backgroundColor: WARM.line,
   },
   dividerText: {
     fontSize: 11.5,
     fontFamily: "Jakarta-Medium",
-    color: "#9BA6A1",
+    color: WARM.muted,
   },
 
   // Footer
@@ -510,7 +602,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    backgroundColor: GREEN.tint,
+    backgroundColor: WARM.goldSoft,
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 999,
@@ -518,7 +610,7 @@ const styles = StyleSheet.create({
   trustText: {
     fontSize: 12,
     fontFamily: "Jakarta-Medium",
-    color: GREEN.dark,
+    color: WARM.graphite,
   },
   signupLink: {
     textAlign: "center",
@@ -531,6 +623,6 @@ const styles = StyleSheet.create({
   signupAction: {
     fontSize: 14,
     fontFamily: "Jakarta-Bold",
-    color: GREEN.dark,
+    color: WARM.charcoal,
   },
 });

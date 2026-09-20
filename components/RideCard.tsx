@@ -4,11 +4,25 @@ import { Image, Pressable, Text, View } from "react-native";
 import { formatDate, formatTime } from "@/lib/utils";
 import { Ride } from "@/types/type";
 
+// ─── Palette ─────────────────────────────────────────────────────────────────
+const WARM = {
+  cream:    "#FBF7F0",
+  sand:     "#F4EDE1",
+  gold:     "#F5B93C",
+  goldDeep: "#E0A11E",
+  goldSoft: "#FCEBC4",
+  charcoal: "#2B2722",
+  graphite: "#4A443D",
+  muted:    "#9A928A",
+  line:     "#E7DECF",
+};
+
+// Status → warm tint mapping
 const STATUS: Record<string, { bg: string; text: string }> = {
-  paid: { bg: "bg-[#E6F2EC]", text: "text-[#0E5C3F]" },
-  pending: { bg: "bg-[#FDF4E3]", text: "text-[#8A6100]" },
-  failed: { bg: "bg-[#FEF3F3]", text: "text-[#B02A2A]" },
-  refunded: { bg: "bg-[#EEF1F0]", text: "text-[#68756F]" },
+  paid:     { bg: "#FCEBC4", text: "#E0A11E" }, // gold soft / gold deep
+  pending:  { bg: "#FDF4E3", text: "#8A6100" }, // unchanged amber
+  failed:   { bg: "#FEF3F3", text: "#B02A2A" }, // unchanged red
+  refunded: { bg: "#F4EDE1", text: "#9A928A" }, // warm sand / muted
 };
 
 type Props = {
@@ -35,12 +49,31 @@ const Action = ({
   onPress?: () => void;
   tone?: "default" | "primary" | "danger";
 }) => {
+  // Warm tones:
+  // primary → gold fill, charcoal text
+  // danger  → soft red fill, red text
+  // default → cream fill, graphite text
   const styles =
     tone === "primary"
-      ? { box: "bg-[#0E5C3F]", text: "text-white", icon: "#FFFFFF" }
+      ? {
+          bg: WARM.gold,
+          border: WARM.goldDeep,
+          text: WARM.charcoal,
+          icon: WARM.charcoal,
+        }
       : tone === "danger"
-        ? { box: "bg-[#FEF3F3]", text: "text-[#B02A2A]", icon: "#B02A2A" }
-        : { box: "bg-[#F5F8F6]", text: "text-[#4A5450]", icon: "#4A5450" };
+        ? {
+            bg: "#FEF3F3",
+            border: "#F5D5D5",
+            text: "#B02A2A",
+            icon: "#B02A2A",
+          }
+        : {
+            bg: WARM.cream,
+            border: WARM.line,
+            text: WARM.graphite,
+            icon: WARM.graphite,
+          };
 
   return (
     <Pressable
@@ -48,12 +81,28 @@ const Action = ({
       disabled={!onPress}
       accessibilityRole="button"
       accessibilityLabel={label}
-      className={`flex-1 flex-row items-center justify-center gap-1.5 rounded-xl py-3 ${styles.box} ${
-        onPress ? "active:opacity-75" : "opacity-40"
-      }`}
+      style={{
+        flex: 1,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 6,
+        paddingVertical: 12,
+        borderRadius: 14,
+        backgroundColor: styles.bg,
+        borderWidth: 1,
+        borderColor: styles.border,
+        opacity: onPress ? 1 : 0.4,
+      }}
     >
       <Ionicons name={icon} size={15} color={styles.icon} />
-      <Text className={`text-[12.5px] font-JakartaBold ${styles.text}`}>
+      <Text
+        style={{
+          fontSize: 12.5,
+          fontFamily: "Jakarta-Bold",
+          color: styles.text,
+        }}
+      >
         {label}
       </Text>
     </Pressable>
@@ -78,116 +127,332 @@ const RideCard = ({
 
   const upcoming = variant === "upcoming";
 
-  // ride_time is a timestamp, not a number of minutes — the duration lives in
-  // duration_minutes. Older rows may have neither.
   const duration = (ride as any).duration_minutes ?? null;
   const whenDate = (ride as any).scheduled_for ?? ride.created_at;
 
   return (
-    <View className="mb-4 overflow-hidden rounded-3xl border border-[#E2E9E5] bg-white">
-      {/* Map preview */}
-      <View className="relative">
+    <View
+      style={{
+        marginBottom: 16,
+        overflow: "hidden",
+        borderRadius: 24,
+        borderWidth: 1,
+        borderColor: WARM.line,
+        backgroundColor: "#FFFFFF",
+        shadowColor: WARM.charcoal,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.05,
+        shadowRadius: 18,
+        elevation: 3,
+      }}
+    >
+      {/* ── Map preview ── */}
+      <View style={{ position: "relative" }}>
         <Image
           source={{
             uri: `https://maps.geoapify.com/v1/staticmap?style=osm-bright&width=600&height=400&center=lonlat:${ride.destination_longitude},${ride.destination_latitude}&zoom=14&apiKey=${process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY}`,
           }}
-          className="h-32 w-full bg-[#EEF1F0]"
+          style={{
+            height: 128,
+            width: "100%",
+            backgroundColor: WARM.sand,
+          }}
         />
 
         {upcoming ? (
-          <View className="absolute left-3 top-3 flex-row items-center gap-1.5 rounded-full bg-[#0E5C3F] px-3 py-1.5">
-            <View className="h-1.5 w-1.5 rounded-full bg-[#6FEFB4]" />
-            <Text className="text-[11px] font-JakartaBold text-white">
+          <View
+            style={{
+              position: "absolute",
+              left: 12,
+              top: 12,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 6,
+              borderRadius: 999,
+              backgroundColor: WARM.gold,
+              paddingHorizontal: 12,
+              paddingVertical: 6,
+              borderWidth: 1,
+              borderColor: WARM.goldDeep,
+              shadowColor: WARM.goldDeep,
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 3,
+            }}
+          >
+            <View
+              style={{
+                height: 6,
+                width: 6,
+                borderRadius: 3,
+                backgroundColor: WARM.charcoal,
+              }}
+            />
+            <Text
+              style={{
+                fontSize: 11,
+                fontFamily: "Jakarta-Bold",
+                color: WARM.charcoal,
+              }}
+            >
               Upcoming
             </Text>
           </View>
         ) : null}
 
-        <View className={`absolute right-3 top-3 rounded-full px-3 py-1.5 ${status.bg}`}>
-          <Text className={`text-[11px] font-JakartaBold capitalize ${status.text}`}>
+        <View
+          style={{
+            position: "absolute",
+            right: 12,
+            top: 12,
+            borderRadius: 999,
+            paddingHorizontal: 12,
+            paddingVertical: 6,
+            backgroundColor: status.bg,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 11,
+              fontFamily: "Jakarta-Bold",
+              color: status.text,
+              textTransform: "capitalize",
+            }}
+          >
             {ride.payment_status}
           </Text>
         </View>
       </View>
 
-      <View className="p-4">
-        {/* Route */}
-        <View className="flex-row">
-          <View className="mr-3 items-center pt-1.5">
-            <View className="h-2.5 w-2.5 rounded-full bg-[#1FB574]" />
-            <View className="my-1 w-[1.5px] flex-1 bg-[#E2E9E5]" />
-            <View className="h-2.5 w-2.5 rounded-[3px] bg-[#0E5C3F]" />
+      <View style={{ padding: 16 }}>
+        {/* ── Route ── */}
+        <View style={{ flexDirection: "row" }}>
+          <View
+            style={{
+              marginRight: 12,
+              alignItems: "center",
+              paddingTop: 6,
+            }}
+          >
+            <View
+              style={{
+                height: 10,
+                width: 10,
+                borderRadius: 5,
+                backgroundColor: WARM.gold,
+              }}
+            />
+            <View
+              style={{
+                width: 1.5,
+                flex: 1,
+                marginVertical: 4,
+                backgroundColor: WARM.line,
+              }}
+            />
+            <View
+              style={{
+                height: 10,
+                width: 10,
+                borderRadius: 3,
+                backgroundColor: WARM.charcoal,
+              }}
+            />
           </View>
 
-          <View className="flex-1">
+          <View style={{ flex: 1 }}>
             <Text
-              className="text-[13.5px] font-JakartaSemiBold text-[#101814]"
+              style={{
+                fontSize: 13.5,
+                fontFamily: "Jakarta-SemiBold",
+                color: WARM.charcoal,
+              }}
               numberOfLines={1}
             >
               {ride.origin_address}
             </Text>
-            <Text className="mb-3 mt-0.5 text-[11px] font-Jakarta text-[#9BA6A1]">
+            <Text
+              style={{
+                marginTop: 2,
+                marginBottom: 12,
+                fontSize: 11,
+                fontFamily: "Jakarta",
+                color: WARM.muted,
+              }}
+            >
               Pickup
             </Text>
 
             <Text
-              className="text-[13.5px] font-JakartaSemiBold text-[#101814]"
+              style={{
+                fontSize: 13.5,
+                fontFamily: "Jakarta-SemiBold",
+                color: WARM.charcoal,
+              }}
               numberOfLines={1}
             >
               {ride.destination_address}
             </Text>
-            <Text className="mt-0.5 text-[11px] font-Jakarta text-[#9BA6A1]">
+            <Text
+              style={{
+                marginTop: 2,
+                fontSize: 11,
+                fontFamily: "Jakarta",
+                color: WARM.muted,
+              }}
+            >
               Drop-off
             </Text>
           </View>
         </View>
 
-        {/* Facts strip — duration is what people actually want to know */}
-        <View className="mt-4 flex-row items-center justify-around rounded-2xl bg-[#F5F8F6] py-3">
-          <View className="items-center">
-            <Ionicons name="time-outline" size={15} color="#0E5C3F" />
-            <Text className="mt-1 text-[12.5px] font-JakartaBold text-[#101814]">
+        {/* ── Facts strip ── */}
+        <View
+          style={{
+            marginTop: 16,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-around",
+            borderRadius: 18,
+            backgroundColor: WARM.cream,
+            borderWidth: 1,
+            borderColor: WARM.line,
+            paddingVertical: 12,
+          }}
+        >
+          <View style={{ alignItems: "center" }}>
+            <Ionicons name="time-outline" size={15} color={WARM.goldDeep} />
+            <Text
+              style={{
+                marginTop: 4,
+                fontSize: 12.5,
+                fontFamily: "Jakarta-Bold",
+                color: WARM.charcoal,
+              }}
+            >
               {duration != null ? formatTime(duration) : "—"}
             </Text>
-            <Text className="text-[10px] font-Jakarta text-[#9BA6A1]">
+            <Text
+              style={{
+                fontSize: 10,
+                fontFamily: "Jakarta",
+                color: WARM.muted,
+              }}
+            >
               Duration
             </Text>
           </View>
 
-          <View className="h-8 w-[1px] bg-[#E2E9E5]" />
+          <View
+            style={{
+              height: 32,
+              width: 1,
+              backgroundColor: WARM.line,
+            }}
+          />
 
-          <View className="items-center">
-            <Ionicons name="calendar-outline" size={15} color="#0E5C3F" />
-            <Text className="mt-1 text-[12.5px] font-JakartaBold text-[#101814]">
+          <View style={{ alignItems: "center" }}>
+            <Ionicons name="calendar-outline" size={15} color={WARM.goldDeep} />
+            <Text
+              style={{
+                marginTop: 4,
+                fontSize: 12.5,
+                fontFamily: "Jakarta-Bold",
+                color: WARM.charcoal,
+              }}
+            >
               {formatDate(whenDate)}
             </Text>
-            <Text className="text-[10px] font-Jakarta text-[#9BA6A1]">
+            <Text
+              style={{
+                fontSize: 10,
+                fontFamily: "Jakarta",
+                color: WARM.muted,
+              }}
+            >
               {upcoming ? "Departs" : "Travelled"}
             </Text>
           </View>
 
-          <View className="h-8 w-[1px] bg-[#E2E9E5]" />
+          <View
+            style={{
+              height: 32,
+              width: 1,
+              backgroundColor: WARM.line,
+            }}
+          />
 
-          <View className="items-center">
-            <Ionicons name="wallet-outline" size={15} color="#0E5C3F" />
-            <Text className="mt-1 text-[12.5px] font-JakartaBold text-[#101814]">
+          <View style={{ alignItems: "center" }}>
+            <Ionicons name="wallet-outline" size={15} color={WARM.goldDeep} />
+            <Text
+              style={{
+                marginTop: 4,
+                fontSize: 12.5,
+                fontFamily: "Jakarta-Bold",
+                color: WARM.charcoal,
+              }}
+            >
               R{((ride.fare_price ?? 0) / 100).toFixed(2)}
             </Text>
-            <Text className="text-[10px] font-Jakarta text-[#9BA6A1]">Fare</Text>
+            <Text
+              style={{
+                fontSize: 10,
+                fontFamily: "Jakarta",
+                color: WARM.muted,
+              }}
+            >
+              Fare
+            </Text>
           </View>
         </View>
 
-        {/* Driver */}
-        <View className="mt-4 flex-row items-center justify-between">
-          <View className="flex-1 flex-row items-center gap-2.5">
-            <View className="h-9 w-9 items-center justify-center rounded-full bg-[#E6F2EC]">
-              <Ionicons name="person" size={16} color="#0E5C3F" />
+        {/* ── Driver ── */}
+        <View
+          style={{
+            marginTop: 16,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <View
+            style={{
+              flex: 1,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 10,
+            }}
+          >
+            <View
+              style={{
+                height: 36,
+                width: 36,
+                borderRadius: 18,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: WARM.goldSoft,
+              }}
+            >
+              <Ionicons name="person" size={16} color={WARM.goldDeep} />
             </View>
-            <View className="flex-1">
-              <Text className="text-[13px] font-JakartaBold text-[#101814]">
+            <View style={{ flex: 1 }}>
+              <Text
+                style={{
+                  fontSize: 13,
+                  fontFamily: "Jakarta-Bold",
+                  color: WARM.charcoal,
+                }}
+              >
                 {driverName}
               </Text>
-              <Text className="text-[11px] font-Jakarta text-[#68756F]">
+              <Text
+                style={{
+                  fontSize: 11,
+                  fontFamily: "Jakarta",
+                  color: WARM.muted,
+                }}
+              >
                 {ride.driver?.car_seats ?? "—"} seats
               </Text>
             </View>
@@ -198,15 +463,30 @@ const RideCard = ({
               onPress={onReport}
               hitSlop={8}
               accessibilityLabel="Report a problem with this trip"
-              className="h-9 w-9 items-center justify-center rounded-full bg-[#F5F8F6] active:opacity-70"
+              style={{
+                height: 36,
+                width: 36,
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: 18,
+                backgroundColor: WARM.cream,
+                borderWidth: 1,
+                borderColor: WARM.line,
+              }}
             >
-              <Ionicons name="flag-outline" size={15} color="#68756F" />
+              <Ionicons name="flag-outline" size={15} color={WARM.graphite} />
             </Pressable>
           )}
         </View>
 
-        {/* Actions */}
-        <View className="mt-4 flex-row gap-2">
+        {/* ── Actions ── */}
+        <View
+          style={{
+            marginTop: 16,
+            flexDirection: "row",
+            gap: 8,
+          }}
+        >
           {upcoming ? (
             <>
               <Action

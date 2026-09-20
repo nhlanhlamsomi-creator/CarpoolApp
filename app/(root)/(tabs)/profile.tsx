@@ -30,10 +30,23 @@ import {
   uploadAvatar,
 } from "@/lib/verification";
 
-// ─── Support contacts — replace with your real details ───────────────────────
+// ─── Palette ─────────────────────────────────────────────────────────────────
+const WARM = {
+  cream:    "#FBF7F0",
+  sand:     "#F4EDE1",
+  gold:     "#F5B93C",
+  goldDeep: "#E0A11E",
+  goldSoft: "#FCEBC4",
+  charcoal: "#2B2722",
+  graphite: "#4A443D",
+  muted:    "#9A928A",
+  line:     "#E7DECF",
+};
+
+// ─── Support contacts ───────────────────────────────────────────────────────
 const SUPPORT_EMAIL = "support@lyftcarpool.co.za";
 const SUPPORT_PHONE = "+27110000000";
-const SUPPORT_WHATSAPP = "27110000000"; // no + or spaces
+const SUPPORT_WHATSAPP = "27110000000";
 
 const openLink = async (url: string) => {
   const supported = await Linking.canOpenURL(url);
@@ -84,7 +97,6 @@ const Profile = () => {
   const [sheet, setSheet] = useState<null | "gender" | "language" | "vehicle">(
     null,
   );
-  // Collapsible sections state
   const [expandedSections, setExpandedSections] = useState<{
     identitySecurity: boolean;
     personalInfo: boolean;
@@ -99,7 +111,6 @@ const Profile = () => {
     support: false,
   });
 
-  // Emergency contact editing state
   const [editingEmergency, setEditingEmergency] = useState(false);
   const [emergencyName, setEmergencyName] = useState("");
   const [emergencyPhone, setEmergencyPhone] = useState("");
@@ -140,9 +151,7 @@ const Profile = () => {
   );
 
   const saveProfile = async (payload: Record<string, unknown>) => {
-    if (!user?.id) {
-      return;
-    }
+    if (!user?.id) return;
 
     setSaving(true);
 
@@ -215,7 +224,6 @@ const Profile = () => {
     ]);
   };
 
-  // Save emergency contact
   const saveEmergencyContact = async () => {
     if (!emergencyName.trim()) {
       Alert.alert("Error", "Please enter a contact name");
@@ -238,7 +246,7 @@ const Profile = () => {
   };
 
   const toggleSection = (section: keyof typeof expandedSections) => {
-    setExpandedSections(prev => ({
+    setExpandedSections((prev) => ({
       ...prev,
       [section]: !prev[section],
     }));
@@ -257,7 +265,8 @@ const Profile = () => {
     user?.primaryPhoneNumber?.phoneNumber ||
     "Add a phone number";
   const rating = typeof profile?.rating === "number" ? profile.rating : 5.0;
-  const totalTrips = typeof profile?.total_trips === "number" ? profile.total_trips : 0;
+  const totalTrips =
+    typeof profile?.total_trips === "number" ? profile.total_trips : 0;
   const verification =
     typeof profile?.verification_percentage === "number"
       ? profile.verification_percentage
@@ -268,7 +277,9 @@ const Profile = () => {
   );
   const hasPhone = Boolean(phoneNumber && phoneNumber !== "Add a phone number");
   const hasId = Boolean(profile?.government_id_url || profileData.government_id_url);
-  const hasSelfie = Boolean(profile?.selfie_image_url || profileData.selfie_image_url);
+  const hasSelfie = Boolean(
+    profile?.selfie_image_url || profileData.selfie_image_url,
+  );
 
   const steps = [
     { label: "Profile photo", done: hasPhoto },
@@ -279,9 +290,11 @@ const Profile = () => {
   const completedSteps = steps.filter((s) => s.done).length;
   const progressValue = Math.round((completedSteps / steps.length) * 100);
 
-  // Parse emergency contact data
   let emergencyContact = { name: "Nobody added yet", phone: "" };
-  if (profileData.emergency_contact && profileData.emergency_contact !== "Nobody added yet") {
+  if (
+    profileData.emergency_contact &&
+    profileData.emergency_contact !== "Nobody added yet"
+  ) {
     try {
       const parsed = JSON.parse(profileData.emergency_contact);
       emergencyContact = {
@@ -294,46 +307,111 @@ const Profile = () => {
   }
 
   const renderSkeleton = () => (
-    <View className="px-1 py-3">
-      <View className="mb-5 h-28 w-full rounded-3xl bg-[#E9EEEB]" />
-      <View className="mb-4 h-24 rounded-3xl bg-[#E9EEEB]" />
-      <View className="mb-4 h-32 rounded-3xl bg-[#E9EEEB]" />
-      <View className="mb-4 h-24 rounded-3xl bg-[#E9EEEB]" />
+    <View style={{ paddingHorizontal: 4, paddingVertical: 12 }}>
+      <View
+        style={{
+          marginBottom: 20,
+          height: 112,
+          width: "100%",
+          borderRadius: 24,
+          backgroundColor: WARM.sand,
+        }}
+      />
+      <View
+        style={{
+          marginBottom: 16,
+          height: 96,
+          borderRadius: 24,
+          backgroundColor: WARM.sand,
+        }}
+      />
+      <View
+        style={{
+          marginBottom: 16,
+          height: 128,
+          borderRadius: 24,
+          backgroundColor: WARM.sand,
+        }}
+      />
+      <View
+        style={{
+          marginBottom: 16,
+          height: 96,
+          borderRadius: 24,
+          backgroundColor: WARM.sand,
+        }}
+      />
     </View>
   );
 
-  // Render collapsible section header with icon
+  // Section header — warm palette
   const renderSectionHeader = (
-    title: string, 
+    title: string,
     section: keyof typeof expandedSections,
     iconName: string,
-    iconBgColor: string = "#E6F2EC",
-    iconColor: string = "#0E5C3F"
+    iconBgColor: string = WARM.goldSoft,
+    iconColor: string = WARM.goldDeep,
   ) => (
     <Pressable
       onPress={() => toggleSection(section)}
-      className="mb-3 flex-row items-center justify-between rounded-2xl border border-[#E2E9E5] bg-white px-4 py-3 active:opacity-70"
+      style={{
+        marginBottom: 12,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: WARM.line,
+        backgroundColor: "#FFFFFF",
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+      }}
     >
-      <View className="flex-row items-center gap-3">
-        <View className={`h-10 w-10 items-center justify-center rounded-xl ${iconBgColor}`}>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+        <View
+          style={{
+            height: 40,
+            width: 40,
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: 14,
+            backgroundColor: iconBgColor,
+          }}
+        >
           <Ionicons name={iconName as any} size={20} color={iconColor} />
         </View>
-        <Text className="text-[15px] font-JakartaExtraBold text-[#101814]">
+        <Text
+          style={{
+            fontSize: 15,
+            fontFamily: "Jakarta-ExtraBold",
+            color: WARM.charcoal,
+          }}
+        >
           {title}
         </Text>
       </View>
       <Ionicons
         name={expandedSections[section] ? "chevron-up" : "chevron-down"}
         size={22}
-        color="#68756F"
+        color={WARM.muted}
       />
     </Pressable>
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F5F8F6]">
-      <ScrollView className="px-5" contentContainerStyle={{ paddingBottom: 140 }}>
-        <Text className="my-5 text-2xl font-JakartaExtraBold text-[#101814]">
+    <SafeAreaView style={{ flex: 1, backgroundColor: WARM.cream }}>
+      <ScrollView
+        className="px-5"
+        contentContainerStyle={{ paddingBottom: 140 }}
+      >
+        <Text
+          style={{
+            marginVertical: 20,
+            fontSize: 24,
+            fontFamily: "Jakarta-ExtraBold",
+            color: WARM.charcoal,
+          }}
+        >
           My profile
         </Text>
 
@@ -342,8 +420,25 @@ const Profile = () => {
         ) : (
           <>
             {/* ── Identity header ── */}
-            <View className="mb-5 items-center rounded-3xl border border-[#E2E9E5] bg-white px-5 pb-5 pt-6">
-              <View className="relative">
+            <View
+              style={{
+                marginBottom: 20,
+                alignItems: "center",
+                borderRadius: 24,
+                borderWidth: 1,
+                borderColor: WARM.line,
+                backgroundColor: "#FFFFFF",
+                paddingHorizontal: 20,
+                paddingBottom: 20,
+                paddingTop: 24,
+                shadowColor: WARM.charcoal,
+                shadowOffset: { width: 0, height: 10 },
+                shadowOpacity: 0.06,
+                shadowRadius: 22,
+                elevation: 5,
+              }}
+            >
+              <View style={{ position: "relative" }}>
                 <Image
                   source={{
                     uri:
@@ -352,27 +447,66 @@ const Profile = () => {
                       user?.imageUrl ||
                       "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=240&q=80",
                   }}
-                  className="h-[104px] w-[104px] rounded-full border-[3px] border-[#E6F2EC] bg-[#EEF1F0]"
+                  style={{
+                    height: 104,
+                    width: 104,
+                    borderRadius: 52,
+                    borderWidth: 3,
+                    borderColor: WARM.goldSoft,
+                    backgroundColor: WARM.sand,
+                  }}
                 />
                 <Pressable
                   onPress={handlePickProfilePhoto}
                   accessibilityLabel="Change profile photo"
-                  className="absolute bottom-0 right-0 h-10 w-10 items-center justify-center rounded-full border-[3px] border-white bg-[#0E5C3F] active:opacity-80"
+                  style={{
+                    position: "absolute",
+                    bottom: 0,
+                    right: 0,
+                    height: 40,
+                    width: 40,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 20,
+                    borderWidth: 3,
+                    borderColor: "#FFFFFF",
+                    backgroundColor: WARM.gold,
+                    shadowColor: WARM.goldDeep,
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.3,
+                    shadowRadius: 8,
+                    elevation: 3,
+                  }}
                 >
-                  <Ionicons name="camera" size={17} color="white" />
+                  <Ionicons name="camera" size={17} color={WARM.charcoal} />
                 </Pressable>
               </View>
 
-              <Text className="mt-4 text-xl font-JakartaExtraBold text-[#101814]">
+              <Text
+                style={{
+                  marginTop: 16,
+                  fontSize: 20,
+                  fontFamily: "Jakarta-ExtraBold",
+                  color: WARM.charcoal,
+                  letterSpacing: -0.3,
+                }}
+              >
                 {fullName}
               </Text>
-              <Text className="mt-1 text-[13px] font-Jakarta text-[#68756F]">
+              <Text
+                style={{
+                  marginTop: 4,
+                  fontSize: 13,
+                  fontFamily: "Jakarta",
+                  color: WARM.muted,
+                }}
+              >
                 {emailAddress}
               </Text>
             </View>
 
             {/* ── Stats ── */}
-            <View className="mb-5 flex-row gap-3">
+            <View style={{ marginBottom: 20, flexDirection: "row", gap: 12 }}>
               <StatCard icon="star" label="Rating" value={rating.toFixed(1)} />
               <StatCard icon="car-sport" label="Trips" value={String(totalTrips)} />
               <StatCard
@@ -385,51 +519,117 @@ const Profile = () => {
             {/* ── Verification progress ── */}
             <Pressable
               onPress={() => router.push("/(root)/verification")}
-              className="mb-5 rounded-3xl border border-[#E2E9E5] bg-white p-5 active:opacity-80"
+              style={{
+                marginBottom: 20,
+                borderRadius: 24,
+                borderWidth: 1,
+                borderColor: WARM.line,
+                backgroundColor: "#FFFFFF",
+                padding: 20,
+                shadowColor: WARM.charcoal,
+                shadowOffset: { width: 0, height: 8 },
+                shadowOpacity: 0.05,
+                shadowRadius: 18,
+                elevation: 4,
+              }}
             >
-              <View className="flex-row items-start justify-between">
-                <View className="flex-1 pr-3">
-                  <Text className="text-[16px] font-JakartaExtraBold text-[#101814]">
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "flex-start",
+                  justifyContent: "space-between",
+                }}
+              >
+                <View style={{ flex: 1, paddingRight: 12 }}>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontFamily: "Jakarta-ExtraBold",
+                      color: WARM.charcoal,
+                    }}
+                  >
                     {progressValue === 100
                       ? "Your profile is complete"
                       : "Complete your verification"}
                   </Text>
-                  <Text className="mt-1 text-[13px] font-Jakarta leading-5 text-[#68756F]">
+                  <Text
+                    style={{
+                      marginTop: 4,
+                      fontSize: 13,
+                      fontFamily: "Jakarta",
+                      lineHeight: 20,
+                      color: WARM.graphite,
+                    }}
+                  >
                     {progressValue === 100
                       ? "Everything is set up. Nothing further is needed."
                       : "Verified riders get matched faster and can book premium trips."}
                   </Text>
                 </View>
-                <Text className="text-[20px] font-JakartaExtraBold text-[#0E5C3F]">
+                <Text
+                  style={{
+                    fontSize: 20,
+                    fontFamily: "Jakarta-ExtraBold",
+                    color: WARM.goldDeep,
+                  }}
+                >
                   {progressValue}%
                 </Text>
               </View>
 
-              <View className="mt-4 h-2 overflow-hidden rounded-full bg-[#EEF1F0]">
+              <View
+                style={{
+                  marginTop: 16,
+                  height: 8,
+                  overflow: "hidden",
+                  borderRadius: 4,
+                  backgroundColor: WARM.cream,
+                }}
+              >
                 <View
-                  className="h-2 rounded-full bg-[#1FB574]"
-                  style={{ width: `${progressValue}%` }}
+                  style={{
+                    height: 8,
+                    borderRadius: 4,
+                    backgroundColor: WARM.gold,
+                    width: `${progressValue}%`,
+                  }}
                 />
               </View>
 
-              <View className="mt-4 gap-2.5">
+              <View style={{ marginTop: 16, gap: 10 }}>
                 {steps.map((step) => (
-                  <View key={step.label} className="flex-row items-center gap-2.5">
+                  <View
+                    key={step.label}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 10,
+                    }}
+                  >
                     <View
-                      className={`h-[18px] w-[18px] items-center justify-center rounded-full ${
-                        step.done ? "bg-[#1FB574]" : "bg-[#EEF1F0]"
-                      }`}
+                      style={{
+                        height: 18,
+                        width: 18,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        borderRadius: 9,
+                        backgroundColor: step.done ? WARM.gold : WARM.sand,
+                      }}
                     >
                       {step.done ? (
-                        <Ionicons name="checkmark" size={11} color="#fff" />
+                        <Ionicons
+                          name="checkmark"
+                          size={11}
+                          color={WARM.charcoal}
+                        />
                       ) : null}
                     </View>
                     <Text
-                      className={`text-[13px] ${
-                        step.done
-                          ? "font-JakartaMedium text-[#101814]"
-                          : "font-Jakarta text-[#68756F]"
-                      }`}
+                      style={{
+                        fontSize: 13,
+                        fontFamily: step.done ? "Jakarta-Medium" : "Jakarta",
+                        color: step.done ? WARM.charcoal : WARM.muted,
+                      }}
                     >
                       {step.label}
                     </Text>
@@ -438,19 +638,42 @@ const Profile = () => {
               </View>
 
               {progressValue < 100 && (
-                <View className="mt-4 flex-row items-center gap-1.5">
-                  <Text className="text-[13px] font-JakartaBold text-[#0E5C3F]">
+                <View
+                  style={{
+                    marginTop: 16,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 6,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      fontFamily: "Jakarta-Bold",
+                      color: WARM.goldDeep,
+                    }}
+                  >
                     Continue verification
                   </Text>
-                  <Ionicons name="arrow-forward" size={14} color="#0E5C3F" />
+                  <Ionicons
+                    name="arrow-forward"
+                    size={14}
+                    color={WARM.goldDeep}
+                  />
                 </View>
               )}
             </Pressable>
 
-            {/* ── Identity & security (Collapsible) ── */}
-            {renderSectionHeader("Identity & security", "identitySecurity", "shield-checkmark", "bg-[#E6F2EC]", "#0E5C3F")}
+            {/* ── Identity & security ── */}
+            {renderSectionHeader(
+              "Identity & security",
+              "identitySecurity",
+              "shield-checkmark",
+              WARM.goldSoft,
+              WARM.goldDeep,
+            )}
             {expandedSections.identitySecurity && (
-              <View className="mb-5">
+              <View style={{ marginBottom: 20 }}>
                 <SectionCard
                   title="Identity verification"
                   value="ID document and selfie"
@@ -478,10 +701,16 @@ const Profile = () => {
               </View>
             )}
 
-            {/* ── Personal information (Collapsible) ── */}
-            {renderSectionHeader("Personal information", "personalInfo", "person", "bg-[#F0F4FF]", "#4A6FA5")}
+            {/* ── Personal information ── */}
+            {renderSectionHeader(
+              "Personal information",
+              "personalInfo",
+              "person",
+              "#E8EEF7",
+              "#4A6FA5",
+            )}
             {expandedSections.personalInfo && (
-              <View className="mb-5">
+              <View style={{ marginBottom: 20 }}>
                 <SectionCard
                   title="Full name"
                   value={fullName}
@@ -522,43 +751,112 @@ const Profile = () => {
                   icon="male-female-outline"
                   onPress={() => setSheet("gender")}
                 />
-                
-                {/* ── Emergency Contact with separate name and phone ── */}
-                <View className="mb-2.5 rounded-2xl border border-[#E2E9E5] bg-white overflow-hidden">
+
+                {/* ── Emergency contact ── */}
+                <View
+                  style={{
+                    marginBottom: 10,
+                    borderRadius: 20,
+                    borderWidth: 1,
+                    borderColor: WARM.line,
+                    backgroundColor: "#FFFFFF",
+                    overflow: "hidden",
+                  }}
+                >
                   {editingEmergency ? (
-                    <View className="p-4">
-                      <Text className="mb-3 text-[14px] font-JakartaSemiBold text-[#101814]">
+                    <View style={{ padding: 16 }}>
+                      <Text
+                        style={{
+                          marginBottom: 12,
+                          fontSize: 14,
+                          fontFamily: "Jakarta-SemiBold",
+                          color: WARM.charcoal,
+                        }}
+                      >
                         Add Emergency Contact
                       </Text>
-                      
-                      <Text className="mb-1 text-[12px] font-Jakarta text-[#68756F]">
+
+                      <Text
+                        style={{
+                          marginBottom: 4,
+                          fontSize: 12,
+                          fontFamily: "Jakarta",
+                          color: WARM.muted,
+                        }}
+                      >
                         Contact Name
                       </Text>
                       <TextInput
-                        className="mb-3 rounded-xl border border-[#E2E9E5] px-3 py-2 text-[14px] font-Jakarta"
+                        style={{
+                          marginBottom: 12,
+                          borderRadius: 14,
+                          borderWidth: 1,
+                          borderColor: WARM.line,
+                          backgroundColor: WARM.cream,
+                          paddingHorizontal: 12,
+                          paddingVertical: 10,
+                          fontSize: 14,
+                          fontFamily: "Jakarta",
+                          color: WARM.charcoal,
+                        }}
                         placeholder="e.g., John Doe"
+                        placeholderTextColor={WARM.muted}
                         value={emergencyName}
                         onChangeText={setEmergencyName}
                       />
-                      
-                      <Text className="mb-1 text-[12px] font-Jakarta text-[#68756F]">
+
+                      <Text
+                        style={{
+                          marginBottom: 4,
+                          fontSize: 12,
+                          fontFamily: "Jakarta",
+                          color: WARM.muted,
+                        }}
+                      >
                         Phone Number (10+ digits)
                       </Text>
                       <TextInput
-                        className="mb-3 rounded-xl border border-[#E2E9E5] px-3 py-2 text-[14px] font-Jakarta"
+                        style={{
+                          marginBottom: 12,
+                          borderRadius: 14,
+                          borderWidth: 1,
+                          borderColor: WARM.line,
+                          backgroundColor: WARM.cream,
+                          paddingHorizontal: 12,
+                          paddingVertical: 10,
+                          fontSize: 14,
+                          fontFamily: "Jakarta",
+                          color: WARM.charcoal,
+                        }}
                         placeholder="e.g., 0712345678"
+                        placeholderTextColor={WARM.muted}
                         value={emergencyPhone}
                         onChangeText={setEmergencyPhone}
                         keyboardType="phone-pad"
                         maxLength={15}
                       />
-                      
-                      <View className="flex-row gap-2">
+
+                      <View style={{ flexDirection: "row", gap: 8 }}>
                         <Pressable
                           onPress={saveEmergencyContact}
-                          className="flex-1 rounded-xl bg-[#0E5C3F] py-3 active:opacity-80"
+                          style={{
+                            flex: 1,
+                            borderRadius: 14,
+                            backgroundColor: WARM.gold,
+                            borderWidth: 1.5,
+                            borderColor: WARM.goldDeep,
+                            paddingVertical: 12,
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
                         >
-                          <Text className="text-center text-[14px] font-JakartaBold text-white">
+                          <Text
+                            style={{
+                              fontSize: 14,
+                              fontFamily: "Jakarta-Bold",
+                              color: WARM.charcoal,
+                            }}
+                          >
                             Save
                           </Text>
                         </Pressable>
@@ -568,9 +866,24 @@ const Profile = () => {
                             setEmergencyName("");
                             setEmergencyPhone("");
                           }}
-                          className="flex-1 rounded-xl border border-[#E2E9E5] py-3 active:opacity-80"
+                          style={{
+                            flex: 1,
+                            borderRadius: 14,
+                            borderWidth: 1,
+                            borderColor: WARM.line,
+                            backgroundColor: "#FFFFFF",
+                            paddingVertical: 12,
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
                         >
-                          <Text className="text-center text-[14px] font-JakartaBold text-[#68756F]">
+                          <Text
+                            style={{
+                              fontSize: 14,
+                              fontFamily: "Jakarta-Bold",
+                              color: WARM.graphite,
+                            }}
+                          >
                             Cancel
                           </Text>
                         </Pressable>
@@ -579,45 +892,107 @@ const Profile = () => {
                   ) : (
                     <Pressable
                       onPress={() => setEditingEmergency(true)}
-                      className="flex-row items-center justify-between px-4 py-3.5 active:opacity-70"
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        paddingHorizontal: 16,
+                        paddingVertical: 14,
+                      }}
                     >
-                      <View className="flex-1 flex-row items-center gap-3">
-                        <View className="h-10 w-10 items-center justify-center rounded-xl bg-[#FFF3E0]">
-                          <Ionicons name="alert-circle-outline" size={18} color="#E65100" />
+                      <View
+                        style={{
+                          flex: 1,
+                          flexDirection: "row",
+                          alignItems: "center",
+                          gap: 12,
+                        }}
+                      >
+                        <View
+                          style={{
+                            height: 40,
+                            width: 40,
+                            alignItems: "center",
+                            justifyContent: "center",
+                            borderRadius: 14,
+                            backgroundColor: "#FCEBC4",
+                          }}
+                        >
+                          <Ionicons
+                            name="alert-circle-outline"
+                            size={18}
+                            color="#E0A11E"
+                          />
                         </View>
-                        <View className="flex-1">
-                          <Text className="text-[14px] font-JakartaSemiBold text-[#101814]">
+                        <View style={{ flex: 1 }}>
+                          <Text
+                            style={{
+                              fontSize: 14,
+                              fontFamily: "Jakarta-SemiBold",
+                              color: WARM.charcoal,
+                            }}
+                          >
                             Emergency contact
                           </Text>
                           {emergencyContact.name !== "Nobody added yet" ? (
                             <>
-                              <Text className="mt-0.5 text-[13px] font-JakartaMedium text-[#101814]">
+                              <Text
+                                style={{
+                                  marginTop: 2,
+                                  fontSize: 13,
+                                  fontFamily: "Jakarta-Medium",
+                                  color: WARM.charcoal,
+                                }}
+                              >
                                 {emergencyContact.name}
                               </Text>
                               {emergencyContact.phone && (
-                                <Text className="text-[12px] font-Jakarta text-[#68756F]">
+                                <Text
+                                  style={{
+                                    fontSize: 12,
+                                    fontFamily: "Jakarta",
+                                    color: WARM.muted,
+                                  }}
+                                >
                                   {emergencyContact.phone}
                                 </Text>
                               )}
                             </>
                           ) : (
-                            <Text className="mt-0.5 text-[13px] font-Jakarta text-[#68756F]">
+                            <Text
+                              style={{
+                                marginTop: 2,
+                                fontSize: 13,
+                                fontFamily: "Jakarta",
+                                color: WARM.muted,
+                              }}
+                            >
                               Add emergency contact
                             </Text>
                           )}
                         </View>
                       </View>
-                      <Ionicons name="chevron-forward" size={20} color="#A0AFA8" />
+                      <Ionicons
+                        name="chevron-forward"
+                        size={20}
+                        color={WARM.muted}
+                      />
                     </Pressable>
                   )}
                 </View>
               </View>
             )}
 
-            {/* ── Ride preferences (Collapsible) ── */}
-            {renderSectionHeader("Ride preferences", "ridePreferences", "car", "bg-[#E8F5E9]", "#2E7D32")}
+            {/* ── Ride preferences ── */}
+            {renderSectionHeader(
+              "Ride preferences",
+              "ridePreferences",
+              "car",
+              "#EEF7EE",
+              "#2E7D32",
+            )}
             {expandedSections.ridePreferences && (
-              <View className="mb-5">
+              <View style={{ marginBottom: 20 }}>
                 <SectionCard
                   title="Preferred vehicle"
                   value={profileData.preferred_vehicle || "Any vehicle"}
@@ -637,21 +1012,70 @@ const Profile = () => {
                   onPress={() =>
                     router.push({
                       pathname: "/(root)/edit-profile",
-                      params: { field: "favorite_locations", label: "Favourite locations" },
+                      params: {
+                        field: "favorite_locations",
+                        label: "Favourite locations",
+                      },
                     })
                   }
                 />
 
-                <View className="mb-2.5 flex-row items-center justify-between rounded-2xl border border-[#E2E9E5] bg-white px-4 py-3.5">
-                  <View className="flex-1 flex-row items-center gap-3">
-                    <View className="h-10 w-10 items-center justify-center rounded-xl bg-[#E6F2EC]">
-                      <Ionicons name="notifications-outline" size={18} color="#0E5C3F" />
+                <View
+                  style={{
+                    marginBottom: 10,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    borderRadius: 20,
+                    borderWidth: 1,
+                    borderColor: WARM.line,
+                    backgroundColor: "#FFFFFF",
+                    paddingHorizontal: 16,
+                    paddingVertical: 14,
+                  }}
+                >
+                  <View
+                    style={{
+                      flex: 1,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 12,
+                    }}
+                  >
+                    <View
+                      style={{
+                        height: 40,
+                        width: 40,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        borderRadius: 14,
+                        backgroundColor: WARM.goldSoft,
+                      }}
+                    >
+                      <Ionicons
+                        name="notifications-outline"
+                        size={18}
+                        color={WARM.goldDeep}
+                      />
                     </View>
-                    <View className="flex-1">
-                      <Text className="text-[14px] font-JakartaSemiBold text-[#101814]">
+                    <View style={{ flex: 1 }}>
+                      <Text
+                        style={{
+                          fontSize: 14,
+                          fontFamily: "Jakarta-SemiBold",
+                          color: WARM.charcoal,
+                        }}
+                      >
                         Trip notifications
                       </Text>
-                      <Text className="mt-0.5 text-[12px] font-Jakarta text-[#68756F]">
+                      <Text
+                        style={{
+                          marginTop: 2,
+                          fontSize: 12,
+                          fontFamily: "Jakarta",
+                          color: WARM.muted,
+                        }}
+                      >
                         Driver updates and booking confirmations
                       </Text>
                     </View>
@@ -662,7 +1086,7 @@ const Profile = () => {
                     onValueChange={(value) =>
                       handleTogglePreference("notifications_enabled", value)
                     }
-                    trackColor={{ false: "#DFE6E2", true: "#1FB574" }}
+                    trackColor={{ false: WARM.line, true: WARM.gold }}
                     thumbColor="#FFFFFF"
                   />
                 </View>
@@ -676,10 +1100,16 @@ const Profile = () => {
               </View>
             )}
 
-            {/* ── Trips (Collapsible) ── */}
-            {renderSectionHeader("Trips", "trips", "time", "bg-[#F3E5F5]", "#7B1FA2")}
+            {/* ── Trips ── */}
+            {renderSectionHeader(
+              "Trips",
+              "trips",
+              "time",
+              "#F3E5F5",
+              "#7B1FA2",
+            )}
             {expandedSections.trips && (
-              <View className="mb-5">
+              <View style={{ marginBottom: 20 }}>
                 <SectionCard
                   title="Trip history"
                   value={
@@ -697,17 +1127,21 @@ const Profile = () => {
               </View>
             )}
 
-            {/* ── Support (Collapsible) ── */}
-            {renderSectionHeader("Support", "support", "help-circle", "bg-[#FFEBEE]", "#C62828")}
+            {/* ── Support ── */}
+            {renderSectionHeader(
+              "Support",
+              "support",
+              "help-circle",
+              "#FFEBEE",
+              "#C62828",
+            )}
             {expandedSections.support && (
-              <View className="mb-5">
+              <View style={{ marginBottom: 20 }}>
                 <SectionCard
                   title="WhatsApp support"
                   value="Fastest reply, usually within an hour"
                   icon="logo-whatsapp"
-                  onPress={() =>
-                    openLink(`https://wa.me/${SUPPORT_WHATSAPP}`)
-                  }
+                  onPress={() => openLink(`https://wa.me/${SUPPORT_WHATSAPP}`)}
                 />
                 <SectionCard
                   title="Email us"
@@ -769,15 +1203,38 @@ const Profile = () => {
       </ScrollView>
 
       {saving ? (
-        <View className="absolute bottom-28 self-center flex-row items-center gap-2 rounded-full bg-[#06231A] px-4 py-2.5">
-          <ActivityIndicator size="small" color="white" />
-          <Text className="text-[12px] font-JakartaSemiBold text-white">
+        <View
+          style={{
+            position: "absolute",
+            bottom: 112,
+            alignSelf: "center",
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 8,
+            borderRadius: 999,
+            backgroundColor: WARM.charcoal,
+            paddingHorizontal: 16,
+            paddingVertical: 10,
+            shadowColor: WARM.charcoal,
+            shadowOffset: { width: 0, height: 8 },
+            shadowOpacity: 0.25,
+            shadowRadius: 14,
+            elevation: 6,
+          }}
+        >
+          <ActivityIndicator size="small" color={WARM.gold} />
+          <Text
+            style={{
+              fontSize: 12,
+              fontFamily: "Jakarta-SemiBold",
+              color: "#FFFFFF",
+            }}
+          >
             Saving…
           </Text>
         </View>
       ) : null}
 
-      {/* ── Pickers ── */}
       <OptionSheet
         visible={sheet === "gender"}
         title="Gender"

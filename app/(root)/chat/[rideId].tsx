@@ -17,6 +17,19 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { fetchAPI } from "@/lib/fetch";
 
+// ─── Palette ─────────────────────────────────────────────────────────────────
+const WARM = {
+  cream:    "#FBF7F0",
+  sand:     "#F4EDE1",
+  gold:     "#F5B93C",
+  goldDeep: "#E0A11E",
+  goldSoft: "#FCEBC4",
+  charcoal: "#2B2722",
+  graphite: "#4A443D",
+  muted:    "#9A928A",
+  line:     "#E7DECF",
+};
+
 // One conversation, tied to one trip. Identical file in both apps — the API
 // works out which side you are and labels the other person accordingly.
 
@@ -116,46 +129,100 @@ const ChatThread = () => {
   const done = thread?.status === "completed";
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F5F8F6]" edges={["top"]}>
-      {/* Header */}
-      <View className="flex-row items-center gap-3 border-b border-[#E2E9E5] bg-white px-4 pb-3 pt-2">
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: WARM.cream }}
+      edges={["top"]}
+    >
+      {/* ── Header ── */}
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 12,
+          borderBottomWidth: 1,
+          borderBottomColor: WARM.line,
+          backgroundColor: "#FFFFFF",
+          paddingHorizontal: 16,
+          paddingBottom: 12,
+          paddingTop: 8,
+        }}
+      >
         <Pressable
           onPress={() => router.back()}
           hitSlop={8}
-          className="h-10 w-10 items-center justify-center rounded-xl border border-[#E2E9E5] bg-white active:opacity-70"
+          style={{
+            height: 40,
+            width: 40,
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: 14,
+            backgroundColor: WARM.sand,
+            borderWidth: 1,
+            borderColor: WARM.line,
+          }}
         >
-          <Ionicons name="chevron-back" size={20} color="#101814" />
+          <Ionicons name="chevron-back" size={20} color={WARM.charcoal} />
         </Pressable>
 
         {thread?.other.image ? (
           <Image
             source={{ uri: thread.other.image }}
-            className="h-10 w-10 rounded-full bg-[#EEF1F0]"
+            style={{
+              height: 40,
+              width: 40,
+              borderRadius: 20,
+              backgroundColor: WARM.sand,
+            }}
           />
         ) : (
-          <View className="h-10 w-10 items-center justify-center rounded-full bg-[#E6F2EC]">
-            <Ionicons name="person" size={17} color="#0E5C3F" />
+          <View
+            style={{
+              height: 40,
+              width: 40,
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: 20,
+              backgroundColor: WARM.goldSoft,
+            }}
+          >
+            <Ionicons name="person" size={17} color={WARM.goldDeep} />
           </View>
         )}
 
-        <View className="flex-1">
-          <Text className="text-[15px] font-JakartaBold text-[#101814]" numberOfLines={1}>
+        <View style={{ flex: 1 }}>
+          <Text
+            style={{
+              fontSize: 15,
+              fontFamily: "Jakarta-Bold",
+              color: WARM.charcoal,
+            }}
+            numberOfLines={1}
+          >
             {thread?.other.name ?? "…"}
           </Text>
-          <Text className="text-[11px] font-Jakarta capitalize text-[#68756F]">
+          <Text
+            style={{
+              fontSize: 11,
+              fontFamily: "Jakarta",
+              color: WARM.muted,
+              textTransform: "capitalize",
+            }}
+          >
             {thread ? `Your ${thread.other.role} · trip #${thread.ride_id}` : ""}
           </Text>
         </View>
       </View>
 
       <KeyboardAvoidingView
-        className="flex-1"
+        style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={0}
       >
         {loading ? (
-          <View className="flex-1 items-center justify-center">
-            <ActivityIndicator size="large" color="#0E5C3F" />
+          <View
+            style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+          >
+            <ActivityIndicator size="large" color={WARM.gold} />
           </View>
         ) : (
           <FlatList
@@ -169,23 +236,44 @@ const ChatThread = () => {
             }
             renderItem={({ item }) => (
               <View
-                className={`mb-2 max-w-[78%] rounded-2xl px-3.5 py-2.5 ${
-                  item.mine
-                    ? "self-end rounded-br-md bg-[#0E5C3F]"
-                    : "self-start rounded-bl-md border border-[#E2E9E5] bg-white"
-                }`}
+                style={{
+                  marginBottom: 8,
+                  maxWidth: "78%",
+                  borderRadius: 18,
+                  paddingHorizontal: 14,
+                  paddingVertical: 10,
+                  alignSelf: item.mine ? "flex-end" : "flex-start",
+                  borderBottomRightRadius: item.mine ? 8 : 18,
+                  borderBottomLeftRadius: item.mine ? 18 : 8,
+                  backgroundColor: item.mine ? WARM.gold : "#FFFFFF",
+                  borderWidth: item.mine ? 0 : 1,
+                  borderColor: WARM.line,
+                  shadowColor: item.mine ? WARM.goldDeep : WARM.charcoal,
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: item.mine ? 0.2 : 0.04,
+                  shadowRadius: 10,
+                  elevation: item.mine ? 3 : 1,
+                }}
               >
                 <Text
-                  className={`text-[14px] font-Jakarta leading-5 ${
-                    item.mine ? "text-white" : "text-[#101814]"
-                  }`}
+                  style={{
+                    fontSize: 14,
+                    fontFamily: "Jakarta",
+                    lineHeight: 20,
+                    color: item.mine ? WARM.charcoal : WARM.charcoal,
+                  }}
                 >
                   {item.body}
                 </Text>
                 <Text
-                  className={`mt-1 text-[9.5px] font-Jakarta ${
-                    item.mine ? "text-white/60" : "text-[#9BA6A1]"
-                  }`}
+                  style={{
+                    marginTop: 4,
+                    fontSize: 9.5,
+                    fontFamily: "Jakarta",
+                    color: item.mine
+                      ? "rgba(43,39,34,0.55)"
+                      : WARM.muted,
+                  }}
                 >
                   {new Date(item.created_at).toLocaleTimeString("en-ZA", {
                     hour: "2-digit",
@@ -195,11 +283,39 @@ const ChatThread = () => {
               </View>
             )}
             ListEmptyComponent={
-              <View className="items-center px-8 py-14">
-                <View className="h-14 w-14 items-center justify-center rounded-full bg-[#E6F2EC]">
-                  <Ionicons name="chatbubble-ellipses-outline" size={24} color="#0E5C3F" />
+              <View
+                style={{
+                  alignItems: "center",
+                  paddingHorizontal: 32,
+                  paddingVertical: 56,
+                }}
+              >
+                <View
+                  style={{
+                    height: 56,
+                    width: 56,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 28,
+                    backgroundColor: WARM.goldSoft,
+                  }}
+                >
+                  <Ionicons
+                    name="chatbubble-ellipses-outline"
+                    size={24}
+                    color={WARM.goldDeep}
+                  />
                 </View>
-                <Text className="mt-3 text-center text-[13px] font-Jakarta leading-5 text-[#68756F]">
+                <Text
+                  style={{
+                    marginTop: 12,
+                    textAlign: "center",
+                    fontSize: 13,
+                    fontFamily: "Jakarta",
+                    lineHeight: 20,
+                    color: WARM.graphite,
+                  }}
+                >
                   Say hello and confirm the pickup point. Messages stay in the
                   app for everyone&apos;s safety.
                 </Text>
@@ -208,41 +324,108 @@ const ChatThread = () => {
           />
         )}
 
-        {/* Composer */}
+        {/* ── Composer ── */}
         {closed ? (
-          <View className="border-t border-[#E2E9E5] bg-white px-5 py-4">
-            <Text className="text-center text-[12.5px] font-Jakarta text-[#68756F]">
+          <View
+            style={{
+              borderTopWidth: 1,
+              borderTopColor: WARM.line,
+              backgroundColor: "#FFFFFF",
+              paddingHorizontal: 20,
+              paddingVertical: 16,
+            }}
+          >
+            <Text
+              style={{
+                textAlign: "center",
+                fontSize: 12.5,
+                fontFamily: "Jakarta",
+                color: WARM.muted,
+              }}
+            >
               This trip was cancelled, so its chat is closed.
             </Text>
           </View>
         ) : (
-          <View className="border-t border-[#E2E9E5] bg-white px-3 py-2.5">
+          <View
+            style={{
+              borderTopWidth: 1,
+              borderTopColor: WARM.line,
+              backgroundColor: "#FFFFFF",
+              paddingHorizontal: 12,
+              paddingVertical: 10,
+            }}
+          >
             {done && (
-              <Text className="mb-2 text-center text-[11px] font-Jakarta text-[#9BA6A1]">
+              <Text
+                style={{
+                  marginBottom: 8,
+                  textAlign: "center",
+                  fontSize: 11,
+                  fontFamily: "Jakarta",
+                  color: WARM.muted,
+                }}
+              >
                 Trip completed — you can still message about lost items.
               </Text>
             )}
-            <View className="flex-row items-end gap-2">
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "flex-end",
+                gap: 8,
+              }}
+            >
               <TextInput
                 value={draft}
                 onChangeText={setDraft}
                 placeholder="Type a message"
-                placeholderTextColor="#B4BEB9"
+                placeholderTextColor={WARM.muted}
                 multiline
                 maxLength={2000}
-                className="max-h-28 flex-1 rounded-2xl border-[1.5px] border-[#E2E9E5] bg-[#F8FAF9] px-4 py-3 text-[14.5px] font-Jakarta text-[#101814]"
+                style={{
+                  maxHeight: 112,
+                  flex: 1,
+                  borderRadius: 18,
+                  borderWidth: 1.5,
+                  borderColor: WARM.line,
+                  backgroundColor: WARM.cream,
+                  paddingHorizontal: 16,
+                  paddingVertical: 12,
+                  fontSize: 14.5,
+                  fontFamily: "Jakarta",
+                  color: WARM.charcoal,
+                }}
               />
               <Pressable
                 onPress={send}
                 disabled={!draft.trim() || sending}
-                className={`h-12 w-12 items-center justify-center rounded-2xl ${
-                  draft.trim() && !sending ? "bg-[#0E5C3F]" : "bg-[#DFE6E2]"
-                } active:opacity-80`}
+                style={{
+                  height: 48,
+                  width: 48,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: 18,
+                  backgroundColor:
+                    draft.trim() && !sending ? WARM.gold : WARM.sand,
+                  borderWidth: 1.5,
+                  borderColor:
+                    draft.trim() && !sending ? WARM.goldDeep : WARM.line,
+                  shadowColor: WARM.goldDeep,
+                  shadowOffset: { width: 0, height: 6 },
+                  shadowOpacity: draft.trim() && !sending ? 0.3 : 0,
+                  shadowRadius: 12,
+                  elevation: draft.trim() && !sending ? 5 : 0,
+                }}
               >
                 {sending ? (
-                  <ActivityIndicator size="small" color="#fff" />
+                  <ActivityIndicator size="small" color={WARM.charcoal} />
                 ) : (
-                  <Ionicons name="arrow-up" size={20} color="#fff" />
+                  <Ionicons
+                    name="arrow-up"
+                    size={20}
+                    color={WARM.charcoal}
+                  />
                 )}
               </Pressable>
             </View>
