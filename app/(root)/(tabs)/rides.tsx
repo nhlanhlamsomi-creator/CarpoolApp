@@ -1,16 +1,16 @@
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  Linking,
-  Pressable,
-  RefreshControl,
-  Text,
-  View,
+    ActivityIndicator,
+    Alert,
+    FlatList,
+    Linking,
+    Pressable,
+    RefreshControl,
+    Text,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -29,6 +29,7 @@ const Rides = () => {
   const { setUserLocation, setDestinationLocation } = useLocationStore();
 
   const [tab, setTab] = useState<Tab>("upcoming");
+  const [safetyAlerts, setSafetyAlerts] = useState<Record<string, any>>({});
 
   const fetchState = useFetch<Ride[]>(`/(api)/ride/${user?.id}`);
   const { data: recentRides, loading, error } = fetchState;
@@ -68,7 +69,9 @@ const Rides = () => {
     const status = (ride as any).status;
 
     if (status) {
-      return ["booked", "scheduled", "accepted", "in_progress"].includes(status);
+      return ["booked", "scheduled", "accepted", "in_progress"].includes(
+        status,
+      );
     }
 
     const scheduled = (ride as any).scheduled_for;
@@ -80,6 +83,36 @@ const Rides = () => {
   const upcoming = useMemo(() => rides.filter(isUpcoming), [rides]);
   const history = useMemo(() => rides.filter((r) => !isUpcoming(r)), [rides]);
   const visible = tab === "upcoming" ? upcoming : history;
+
+  const activeRides = useMemo(
+    () =>
+      upcoming.filter((ride) =>
+        ["accepted", "in_progress"].includes((ride as any).status),
+      ),
+    [upcoming],
+  );
+
+  const pollSafetyAlerts = useCallback(async () => {
+    if (!user?.id || activeRides.length === 0) return;
+    const results = await Promise.all(
+      activeRides.map(async (ride) => {
+        const rideId = String((ride as any).ride_id);
+        const response = await fetch(
+          `/(api)/safety/${rideId}?passenger_id=${encodeURIComponent(user.id)}`,
+        );
+        if (!response.ok) return [rideId, null] as const;
+        const json = await response.json();
+        return [rideId, json.data] as const;
+      }),
+    );
+    setSafetyAlerts(Object.fromEntries(results.filter(([, alert]) => alert)));
+  }, [activeRides, user?.id]);
+
+  useEffect(() => {
+    pollSafetyAlerts();
+    const interval = setInterval(pollSafetyAlerts, 15000);
+    return () => clearInterval(interval);
+  }, [pollSafetyAlerts]);
 
   // ── Actions ────────────────────────────────────────────────────────────────
 
@@ -118,14 +151,20 @@ const Rides = () => {
               const res = await fetch("/(api)/ride/cancel", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ride_id: (ride as any).ride_id, user_id: user?.id }),
+                body: JSON.stringify({
+                  ride_id: (ride as any).ride_id,
+                  user_id: user?.id,
+                }),
               });
 
               const json = await res.json();
 
               if (!res.ok) {
                 console.error("Cancel failed:", json);
-                Alert.alert("Cancel failed", json?.error || "Unable to cancel trip");
+                Alert.alert(
+                  "Cancel failed",
+                  json?.error || "Unable to cancel trip",
+                );
                 return;
               }
 
@@ -160,11 +199,71 @@ const Rides = () => {
 
   const handleReport = (ride: Ride) => {
     Alert.alert("Report a problem", "What went wrong?", [
-      { text: "Driver behaviour", onPress: () => emailReport(ride, "Driver behaviour") },
-      { text: "Fare or payment", onPress: () => emailReport(ride, "Fare or payment") },
-      { text: "Safety concern", onPress: () => emailReport(ride, "Safety concern") },
+      {
+        text: "Driver behaviour",
+        onPress: () => emailReport(ride, "Driver behaviour"),
+      },
+      {
+        text: "Fare or payment",
+        onPress: () => emailReport(ride, "Fare or payment"),
+      },
+      {
+        text: "Safety concern",
+        onPress: () => emailReport(ride, "Safety concern"),
+      },
       { text: "Cancel", style: "cancel" },
     ]);
+  };
+
+  const handleManualSOS = (ride: Ride) => {
+    Alert.alert(
+      "Send SOS?",
+      "This creates an urgent safety incident for this active ride.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Send SOS",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const response = await fetch("/(api)/safety/manual", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  ride_id: (ride as any).ride_id,
+                  passenger_id: user?.id,
+                }),
+              });
+              if (!response.ok) throw new Error("SOS request failed");
+              await pollSafetyAlerts();
+              Alert.alert(
+                "SOS sent",
+                "Your safety incident has been created. Help is being notified.",
+              );
+            } catch {
+              Alert.alert(
+                "SOS failed",
+                "Please call emergency services if you are in immediate danger.",
+              );
+            }
+          },
+        },
+      ],
+    );
+  };
+
+  const handleSafetyResponse = async (
+    ride: Ride,
+    response: string,
+    status: "acknowledged" | "dismissed",
+  ) => {
+    const rideId = String((ride as any).ride_id);
+    await fetch(`/(api)/safety/${rideId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ passenger_id: user?.id, response, status }),
+    });
+    setSafetyAlerts((current) => ({ ...current, [rideId]: null }));
   };
 
   const emailReport = (ride: Ride, reason: string) => {
@@ -217,6 +316,15 @@ const Rides = () => {
             onCancel={() => handleCancel(item)}
             onRebook={() => handleRebook(item)}
             onReport={() => handleReport(item)}
+            safetyAlert={safetyAlerts[String((item as any).ride_id)] ?? null}
+            onSafetyResponse={(response, status) =>
+              handleSafetyResponse(item, response, status)
+            }
+            onManualSOS={
+              ["accepted", "in_progress"].includes((item as any).status)
+                ? () => handleManualSOS(item)
+                : undefined
+            }
           />
         )}
         ListHeaderComponent={
@@ -229,7 +337,11 @@ const Rides = () => {
             <View className="mb-5 flex-row rounded-2xl bg-[#EEF1F0] p-1">
               {(
                 [
-                  { key: "upcoming", label: "Upcoming", count: upcoming.length },
+                  {
+                    key: "upcoming",
+                    label: "Upcoming",
+                    count: upcoming.length,
+                  },
                   { key: "history", label: "History", count: history.length },
                 ] as const
               ).map((item) => {
@@ -305,10 +417,15 @@ const Rides = () => {
         ListFooterComponent={
           tab === "history" && history.length > 0 ? (
             <View className="mt-2 flex-row gap-2.5 rounded-2xl border border-[#E2E9E5] bg-white p-4">
-              <Ionicons name="information-circle-outline" size={16} color="#0E5C3F" />
+              <Ionicons
+                name="information-circle-outline"
+                size={16}
+                color="#0E5C3F"
+              />
               <Text className="flex-1 text-[11.5px] font-Jakarta leading-4 text-[#68756F]">
-                Past trips can&apos;t be deleted. We keep them as payment records,
-                and they&apos;re what we rely on if you ever report a problem.
+                Past trips can&apos;t be deleted. We keep them as payment
+                records, and they&apos;re what we rely on if you ever report a
+                problem.
               </Text>
             </View>
           ) : null

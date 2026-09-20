@@ -6,22 +6,22 @@ import { Ride } from "@/types/type";
 
 // ─── Palette ─────────────────────────────────────────────────────────────────
 const WARM = {
-  cream:    "#FBF7F0",
-  sand:     "#F4EDE1",
-  gold:     "#F5B93C",
+  cream: "#FBF7F0",
+  sand: "#F4EDE1",
+  gold: "#F5B93C",
   goldDeep: "#E0A11E",
   goldSoft: "#FCEBC4",
   charcoal: "#2B2722",
   graphite: "#4A443D",
-  muted:    "#9A928A",
-  line:     "#E7DECF",
+  muted: "#9A928A",
+  line: "#E7DECF",
 };
 
 // Status → warm tint mapping
 const STATUS: Record<string, { bg: string; text: string }> = {
-  paid:     { bg: "#FCEBC4", text: "#E0A11E" }, // gold soft / gold deep
-  pending:  { bg: "#FDF4E3", text: "#8A6100" }, // unchanged amber
-  failed:   { bg: "#FEF3F3", text: "#B02A2A" }, // unchanged red
+  paid: { bg: "#FCEBC4", text: "#E0A11E" }, // gold soft / gold deep
+  pending: { bg: "#FDF4E3", text: "#8A6100" }, // unchanged amber
+  failed: { bg: "#FEF3F3", text: "#B02A2A" }, // unchanged red
   refunded: { bg: "#F4EDE1", text: "#9A928A" }, // warm sand / muted
 };
 
@@ -34,6 +34,16 @@ type Props = {
   onCancel?: () => void;
   onRebook?: () => void;
   onReport?: () => void;
+  safetyAlert?: {
+    reason: string;
+    trigger_source: "MANUAL" | "AUTOMATED";
+    severity: string;
+  } | null;
+  onSafetyResponse?: (
+    response: string,
+    status: "acknowledged" | "dismissed",
+  ) => void;
+  onManualSOS?: () => void;
 };
 
 // ─── Action button ───────────────────────────────────────────────────────────
@@ -119,6 +129,9 @@ const RideCard = ({
   onCancel,
   onRebook,
   onReport,
+  safetyAlert,
+  onSafetyResponse,
+  onManualSOS,
 }: Props) => {
   const status = STATUS[ride.payment_status] ?? STATUS.pending;
   const driverName = ride.driver
@@ -519,6 +532,58 @@ const RideCard = ({
             </>
           )}
         </View>
+
+        {safetyAlert ? (
+          <View className="mt-3 rounded-2xl border border-[#F3C4C4] bg-[#FFF5F5] p-3">
+            <View className="flex-row items-start gap-2">
+              <Ionicons name="warning" size={18} color="#B02A2A" />
+              <View className="flex-1">
+                <Text className="text-[13px] font-JakartaBold text-[#8F2020]">
+                  {safetyAlert.trigger_source === "AUTOMATED"
+                    ? "Unusual activity detected"
+                    : "Safety alert active"}
+                </Text>
+                <Text className="mt-1 text-[12px] leading-5 text-[#6F3A3A]">
+                  {safetyAlert.trigger_source === "AUTOMATED"
+                    ? "Are you safe? A safety incident has already been created."
+                    : safetyAlert.reason}
+                </Text>
+              </View>
+            </View>
+            <View className="mt-3 flex-row gap-2">
+              <Action
+                icon="checkmark-circle-outline"
+                label="I'm safe"
+                onPress={() => onSafetyResponse?.("SAFE", "acknowledged")}
+              />
+              <Action
+                icon="call-outline"
+                label="Get help"
+                onPress={() => onSafetyResponse?.("HELP", "acknowledged")}
+                tone="danger"
+              />
+              <Action
+                icon="close-outline"
+                label="Dismiss"
+                onPress={() => onSafetyResponse?.("DISMISSED", "dismissed")}
+              />
+            </View>
+          </View>
+        ) : null}
+
+        {upcoming && onManualSOS ? (
+          <Pressable
+            onPress={onManualSOS}
+            accessibilityRole="button"
+            accessibilityLabel="Send manual SOS"
+            className="mt-3 flex-row items-center justify-center gap-2 rounded-xl border border-[#D94A4A] py-3 active:opacity-75"
+          >
+            <Ionicons name="alert-circle-outline" size={16} color="#B02A2A" />
+            <Text className="text-[12.5px] font-JakartaBold text-[#B02A2A]">
+              SOS
+            </Text>
+          </Pressable>
+        ) : null}
       </View>
     </View>
   );
