@@ -2,27 +2,29 @@ import { useAuth, useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { router } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    FlatList,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { EmptyState } from "@/components/Cards";
 import GoogleTextInput from "@/components/GoogleTextInput";
 import Map from "@/components/Map";
+import OfferTripCard from "@/components/OfferTripCard";
 import RideCard from "@/components/RideCard";
 import { useFetch } from "@/lib/fetch";
 import { useLocationStore } from "@/store";
-import { Ride } from "@/types/type";
+import { OfferTrip, Ride } from "@/types/type";
 
 const Home = () => {
   const { user } = useUser();
-  const { signOut } = useAuth();
+  const { signOut, userId } = useAuth();
 
   const {
     setUserLocation,
@@ -32,11 +34,20 @@ const Home = () => {
     userLongitude,
   } = useLocationStore();
 
-  const { data: recentRides, loading } = useFetch<Ride[]>(
-    `/(api)/ride/${user?.id}`,
-  );
+  const {
+    data: recentRides,
+    loading,
+    refetch: refetchRecentRides,
+  } = useFetch<Ride[]>(`/(api)/ride/${user?.id}`);
+  const {
+    data: availableTrips,
+    loading: availableTripsLoading,
+    refetch: refetchAvailableTrips,
+  } = useFetch<OfferTrip[]>("/(api)/offer-trip");
 
   const rides = recentRides || [];
+  const offerTrips = availableTrips || [];
+  const [bookingTripId, setBookingTripId] = useState<number | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -66,6 +77,37 @@ const Home = () => {
   }) => {
     setDestinationLocation(location);
     router.push("/(root)/find-ride");
+  };
+
+  const handleBookOfferTrip = async (trip: OfferTrip) => {
+    if (!userId) {
+      Alert.alert("Sign in required", "Please sign in before booking a ride.");
+      return;
+    }
+
+    setBookingTripId(trip.id);
+
+    try {
+      const response = await fetchAPI("/(api)/offer-trip", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tripId: trip.id, userId }),
+      });
+
+      await Promise.all([refetchAvailableTrips(), refetchRecentRides()]);
+      Alert.alert(
+        "Ride booked",
+        `Your seat from ${trip.leaving_from} to ${trip.going_to} is reserved.`,
+      );
+      return response;
+    } catch (error: any) {
+      const message = error?.message?.includes("409")
+        ? "This ride is no longer available."
+        : "Unable to book this ride right now.";
+      Alert.alert("Booking failed", message);
+    } finally {
+      setBookingTripId(null);
+    }
   };
 
   return (
@@ -140,6 +182,38 @@ const Home = () => {
                 </View>
               </View>
             </View>
+
+            <View className="mb-2 mt-7 flex-row items-center justify-between">
+              <Text className="text-[17px] font-JakartaExtraBold text-[#101814]">
+                Available rides
+              </Text>
+              {offerTrips.length > 0 && (
+                <Text className="text-[12px] font-JakartaMedium text-[#68756F]">
+                  {offerTrips.length} {offerTrips.length === 1 ? "ride" : "rides"}
+                </Text>
+              )}
+            </View>
+
+            {availableTripsLoading ? (
+              <View className="mb-2 items-center rounded-2xl border border-[#E2E9E5] bg-white py-5">
+                <ActivityIndicator size="small" color="#0E5C3F" />
+              </View>
+            ) : offerTrips.length > 0 ? (
+              offerTrips.slice(0, 5).map((trip) => (
+                <OfferTripCard
+                  key={trip.id}
+                  trip={trip}
+                  booking={bookingTripId === trip.id}
+                  onBook={() => handleBookOfferTrip(trip)}
+                />
+              ))
+            ) : (
+              <View className="mb-2 rounded-2xl border border-[#E2E9E5] bg-white px-4 py-5">
+                <Text className="text-center text-[12.5px] font-Jakarta text-[#68756F]">
+                  No rides are available right now.
+                </Text>
+              </View>
+            )}
 
             <View className="mt-7 mb-2 flex-row items-center justify-between">
               <Text className="text-[17px] font-JakartaExtraBold text-[#101814]">

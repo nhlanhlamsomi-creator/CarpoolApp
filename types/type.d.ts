@@ -68,6 +68,36 @@ declare interface Ride {
   } | null;
 }
 
+declare interface OfferTrip {
+  id: number;
+  driver_id: number;
+  leaving_from: string;
+  going_to: string;
+  leaving_from_lat: number | null;
+  leaving_from_lng: number | null;
+  going_to_lat: number | null;
+  going_to_lng: number | null;
+  departure_date: string;
+  departure_time: string;
+  repeat_weekly: boolean | null;
+  repeat_days: string[] | null;
+  seats_available: number;
+  seats_booked: number;
+  price_per_seat: number | string;
+  service_fee_percentage: number | string | null;
+  status: "active" | "full" | "completed" | "cancelled" | string;
+  created_at: string | null;
+  updated_at: string | null;
+  drivers?: {
+    id: number;
+    first_name: string | null;
+    last_name: string | null;
+    profile_image_url: string | null;
+    car_seats: number | null;
+    rating: number | null;
+  } | null;
+}
+
 declare interface ButtonProps extends TouchableOpacityProps {
   title: string;
   bgVariant?: "primary" | "secondary" | "danger" | "outline" | "success";
