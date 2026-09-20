@@ -289,7 +289,7 @@ invalid/empty passwords, and the configured cost parameters.
 | N.S. Msomi | Frontend Developer | UI components and screens |
 | L.P. Nama | Business Analyst | Requirements gathering |
 | T. Macholo | UX/UI Designer | Figma design and navigation |
-| G.P. Makwarela | Database Administrator | Firestore database design |
+| G.P. Makwarela | Backend Developer & Database Administrator | Firestore database design and SOS safety features |
 
 ---
 
