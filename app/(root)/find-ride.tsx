@@ -32,12 +32,22 @@ const WARM = {
   line:     "#E7DECF",
 };
 
-const formatDate = (d: Date) =>
-  d.toLocaleDateString(undefined, {
+const formatDate = (d: Date) => {
+  const today = new Date();
+  const isToday = d.toDateString() === today.toDateString();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+  const isTomorrow = d.toDateString() === tomorrow.toDateString();
+
+  if (isToday) return "Today";
+  if (isTomorrow) return "Tomorrow";
+
+  return d.toLocaleDateString(undefined, {
     weekday: "short",
     month: "short",
     day: "numeric",
   });
+};
 
 const formatTime = (d: Date) =>
   d.toLocaleTimeString(undefined, {
@@ -56,6 +66,10 @@ const FindRide = () => {
     setDestinationLocation,
     setUserLocation,
   } = useLocationStore();
+
+  // ── GoogleTextInput expects `number | undefined`, store has `number | null`
+  const biasLat = userLatitude ?? undefined;
+  const biasLng = userLongitude ?? undefined;
 
   const [timeSlot, setTimeSlot] = useState<"now" | "later">("now");
   const [scheduledDate, setScheduledDate] = useState<Date>(new Date());
@@ -76,6 +90,8 @@ const FindRide = () => {
 
   const scheduleAnim = useRef(new Animated.Value(0)).current;
   const ctaScale     = useRef(new Animated.Value(1)).current;
+  const toggleScale  = useRef(new Animated.Value(1)).current;
+  const swapRotate   = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.parallel([
@@ -164,7 +180,6 @@ const FindRide = () => {
 
   // ── Picker handlers ────────────────────────────────────────────────────────
   const onDateChange = (event: any, selected?: Date) => {
-    // Android closes the dialog on any interaction (set or cancel)
     if (Platform.OS === "android") {
       setShowDatePicker(false);
     }
@@ -203,6 +218,20 @@ const FindRide = () => {
       return;
     }
 
+    Animated.sequence([
+      Animated.timing(swapRotate, {
+        toValue: 1,
+        duration: 260,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(swapRotate, {
+        toValue: 0,
+        duration: 0,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
     const pickup = {
       latitude: userLatitude,
       longitude: userLongitude,
@@ -217,6 +246,11 @@ const FindRide = () => {
     setDestinationLocation(pickup);
   };
 
+  const swapSpin = swapRotate.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "180deg"],
+  });
+
   const onCtaPressIn = () =>
     Animated.spring(ctaScale, {
       toValue: 0.97,
@@ -229,6 +263,22 @@ const FindRide = () => {
     Animated.spring(ctaScale, {
       toValue: 1,
       tension: 120,
+      friction: 8,
+      useNativeDriver: true,
+    }).start();
+
+  const onTogglePressIn = () =>
+    Animated.spring(toggleScale, {
+      toValue: 0.96,
+      tension: 140,
+      friction: 8,
+      useNativeDriver: true,
+    }).start();
+
+  const onTogglePressOut = () =>
+    Animated.spring(toggleScale, {
+      toValue: 1,
+      tension: 140,
       friction: 8,
       useNativeDriver: true,
     }).start();
@@ -270,20 +320,39 @@ const FindRide = () => {
         </TouchableOpacity>
 
         <View style={{ flex: 1 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+            <Text
+              style={{
+                fontSize: 11,
+                fontFamily: "Jakarta-Bold",
+                color: WARM.goldDeep,
+                letterSpacing: 1.4,
+                textTransform: "uppercase",
+              }}
+            >
+              Step 1 of 3
+            </Text>
+            <View
+              style={{ flexDirection: "row", gap: 3, marginLeft: 2 }}
+              accessibilityElementsHidden
+              importantForAccessibility="no"
+            >
+              {[0, 1, 2].map((i) => (
+                <View
+                  key={i}
+                  style={{
+                    height: 3,
+                    width: i === 0 ? 14 : 8,
+                    borderRadius: 2,
+                    backgroundColor: i === 0 ? WARM.gold : WARM.line,
+                  }}
+                />
+              ))}
+            </View>
+          </View>
           <Text
             style={{
-              fontSize: 11,
-              fontFamily: "Jakarta-Bold",
-              color: WARM.muted,
-              letterSpacing: 1.4,
-              textTransform: "uppercase",
-            }}
-          >
-            Step 1 of 3
-          </Text>
-          <Text
-            style={{
-              marginTop: 2,
+              marginTop: 3,
               fontSize: 22,
               fontFamily: "Jakarta-ExtraBold",
               color: WARM.charcoal,
@@ -297,6 +366,7 @@ const FindRide = () => {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 32 }}
       >
         {/* ── Booking card ── */}
@@ -308,11 +378,11 @@ const FindRide = () => {
             borderRadius: 28,
             borderWidth: 1,
             borderColor: WARM.line,
-            padding: 18,
+            padding: 20,
             shadowColor: WARM.charcoal,
-            shadowOffset: { width: 0, height: 12 },
-            shadowOpacity: 0.08,
-            shadowRadius: 24,
+            shadowOffset: { width: 0, height: 14 },
+            shadowOpacity: 0.07,
+            shadowRadius: 28,
             elevation: 6,
           }}
         >
@@ -323,7 +393,7 @@ const FindRide = () => {
                 flexDirection: "row",
                 alignItems: "center",
                 gap: 8,
-                marginBottom: 8,
+                marginBottom: 9,
               }}
             >
               <View
@@ -370,8 +440,8 @@ const FindRide = () => {
 
             <GoogleTextInput
               initialLocation={userAddress ?? "Your current location"}
-              biasLat={userLatitude}
-              biasLng={userLongitude}
+              biasLat={biasLat}
+              biasLng={biasLng}
               handlePress={(location) => setUserLocation(location)}
             />
           </View>
@@ -381,41 +451,50 @@ const FindRide = () => {
             style={{
               flexDirection: "row",
               alignItems: "center",
-              marginVertical: 8,
+              marginVertical: 10,
             }}
           >
             <View
               style={{
                 marginLeft: 5,
-                height: 34,
+                height: 36,
                 width: 1.5,
                 backgroundColor: WARM.line,
+                borderStyle: "dashed",
               }}
             />
-            <TouchableOpacity
-              onPress={swap}
-              disabled={!ready}
-              activeOpacity={0.75}
+            <Animated.View
               style={{
                 marginLeft: "auto",
-                height: 38,
-                width: 38,
-                borderRadius: 19,
-                borderWidth: 1.5,
-                borderColor: WARM.gold,
-                backgroundColor: "#FFFFFF",
-                alignItems: "center",
-                justifyContent: "center",
-                opacity: ready ? 1 : 0.4,
-                shadowColor: WARM.goldDeep,
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.15,
-                shadowRadius: 8,
-                elevation: 2,
+                transform: [{ rotate: swapSpin }],
               }}
             >
-              <Ionicons name="swap-vertical" size={16} color={WARM.goldDeep} />
-            </TouchableOpacity>
+              <TouchableOpacity
+                onPress={swap}
+                disabled={!ready}
+                activeOpacity={0.75}
+                accessibilityRole="button"
+                accessibilityLabel="Swap pickup and drop-off locations"
+                style={{
+                  height: 40,
+                  width: 40,
+                  borderRadius: 20,
+                  borderWidth: 1.5,
+                  borderColor: WARM.gold,
+                  backgroundColor: WARM.cream,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  opacity: ready ? 1 : 0.4,
+                  shadowColor: WARM.goldDeep,
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.15,
+                  shadowRadius: 8,
+                  elevation: 2,
+                }}
+              >
+                <Ionicons name="swap-vertical" size={17} color={WARM.goldDeep} />
+              </TouchableOpacity>
+            </Animated.View>
           </View>
 
           {/* Drop-off */}
@@ -425,7 +504,7 @@ const FindRide = () => {
                 flexDirection: "row",
                 alignItems: "center",
                 gap: 8,
-                marginBottom: 8,
+                marginBottom: 9,
               }}
             >
               <View
@@ -472,14 +551,24 @@ const FindRide = () => {
 
             <GoogleTextInput
               initialLocation={destinationAddress ?? "Where are you going?"}
-              biasLat={userLatitude}
-              biasLng={userLongitude}
+              biasLat={biasLat}
+              biasLng={biasLng}
               handlePress={(location) => setDestinationLocation(location)}
             />
           </View>
 
+          {/* Divider */}
+          <View
+            style={{
+              height: 1,
+              backgroundColor: WARM.line,
+              marginTop: 18,
+              marginBottom: 16,
+            }}
+          />
+
           {/* When — Now / Schedule */}
-          <View style={{ marginTop: 16 }}>
+          <View>
             <Text
               style={{
                 fontSize: 11,
@@ -487,7 +576,7 @@ const FindRide = () => {
                 color: WARM.muted,
                 letterSpacing: 1.4,
                 textTransform: "uppercase",
-                marginBottom: 8,
+                marginBottom: 9,
               }}
             >
               When
@@ -500,43 +589,53 @@ const FindRide = () => {
               ].map((opt) => {
                 const active = timeSlot === opt.key;
                 return (
-                  <TouchableOpacity
+                  <Animated.View
                     key={opt.key}
-                    onPress={() => setTimeSlot(opt.key)}
-                    activeOpacity={0.85}
                     style={{
                       flex: 1,
-                      height: 46,
-                      borderRadius: 14,
-                      flexDirection: "row",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 7,
-                      backgroundColor: active ? WARM.goldSoft : WARM.cream,
-                      borderWidth: 1.5,
-                      borderColor: active ? WARM.gold : WARM.line,
-                      shadowColor: active ? WARM.goldDeep : "transparent",
-                      shadowOffset: { width: 0, height: 6 },
-                      shadowOpacity: active ? 0.2 : 0,
-                      shadowRadius: 10,
-                      elevation: active ? 3 : 0,
+                      transform: [{ scale: active ? toggleScale : 1 }],
                     }}
                   >
-                    <Ionicons
-                      name={opt.icon}
-                      size={15}
-                      color={active ? WARM.goldDeep : WARM.muted}
-                    />
-                    <Text
+                    <TouchableOpacity
+                      onPress={() => setTimeSlot(opt.key)}
+                      onPressIn={onTogglePressIn}
+                      onPressOut={onTogglePressOut}
+                      activeOpacity={0.85}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: active }}
                       style={{
-                        fontSize: 13,
-                        fontFamily: "Jakarta-SemiBold",
-                        color: active ? WARM.charcoal : WARM.graphite,
+                        height: 46,
+                        borderRadius: 14,
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 7,
+                        backgroundColor: active ? WARM.goldSoft : WARM.cream,
+                        borderWidth: 1.5,
+                        borderColor: active ? WARM.gold : WARM.line,
+                        shadowColor: active ? WARM.goldDeep : "transparent",
+                        shadowOffset: { width: 0, height: 6 },
+                        shadowOpacity: active ? 0.2 : 0,
+                        shadowRadius: 10,
+                        elevation: active ? 3 : 0,
                       }}
                     >
-                      {opt.label}
-                    </Text>
-                  </TouchableOpacity>
+                      <Ionicons
+                        name={opt.icon}
+                        size={15}
+                        color={active ? WARM.goldDeep : WARM.muted}
+                      />
+                      <Text
+                        style={{
+                          fontSize: 13,
+                          fontFamily: "Jakarta-SemiBold",
+                          color: active ? WARM.charcoal : WARM.graphite,
+                        }}
+                      >
+                        {opt.label}
+                      </Text>
+                    </TouchableOpacity>
+                  </Animated.View>
                 );
               })}
             </View>
@@ -554,9 +653,11 @@ const FindRide = () => {
                 <TouchableOpacity
                   onPress={() => setShowDatePicker(true)}
                   activeOpacity={0.85}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Pickup date, ${formatDate(scheduledDate)}`}
                   style={{
                     flex: 1,
-                    height: 52,
+                    height: 54,
                     borderRadius: 14,
                     backgroundColor: WARM.cream,
                     borderWidth: 1.5,
@@ -607,15 +708,22 @@ const FindRide = () => {
                       {formatDate(scheduledDate)}
                     </Text>
                   </View>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={14}
+                    color={WARM.muted}
+                  />
                 </TouchableOpacity>
 
                 {/* Time chip */}
                 <TouchableOpacity
                   onPress={() => setShowTimePicker(true)}
                   activeOpacity={0.85}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Pickup time, ${formatTime(scheduledDate)}`}
                   style={{
                     flex: 1,
-                    height: 52,
+                    height: 54,
                     borderRadius: 14,
                     backgroundColor: WARM.cream,
                     borderWidth: 1.5,
@@ -666,6 +774,11 @@ const FindRide = () => {
                       {formatTime(scheduledDate)}
                     </Text>
                   </View>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={14}
+                    color={WARM.muted}
+                  />
                 </TouchableOpacity>
               </View>
             </Animated.View>
@@ -674,7 +787,7 @@ const FindRide = () => {
           {/* CTA */}
           <Animated.View
             style={{
-              marginTop: 18,
+              marginTop: 20,
               transform: [{ scale: ctaScale }],
             }}
           >
@@ -684,6 +797,9 @@ const FindRide = () => {
               onPressOut={ready ? onCtaPressOut : undefined}
               disabled={!ready}
               activeOpacity={1}
+              accessibilityRole="button"
+              accessibilityLabel={ready ? "Find drivers" : "Set both locations to continue"}
+              accessibilityState={{ disabled: !ready }}
               style={{
                 height: 58,
                 borderRadius: 20,
@@ -738,11 +854,12 @@ const FindRide = () => {
         {/* ── Helper hint ── */}
         <View
           style={{
-            marginTop: 16,
+            marginTop: 18,
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "center",
             gap: 6,
+            paddingHorizontal: 12,
           }}
         >
           <Ionicons
@@ -755,6 +872,7 @@ const FindRide = () => {
               fontSize: 12,
               fontFamily: "Jakarta-Medium",
               color: WARM.muted,
+              textAlign: "center",
             }}
           >
             Set both locations to find drivers on your route
@@ -762,7 +880,7 @@ const FindRide = () => {
         </View>
       </ScrollView>
 
-      {/* ═══ ANDROID PICKERS — native dialogs, rendered outside ScrollView ═══ */}
+      {/* ═══ ANDROID PICKERS ═══ */}
       {Platform.OS === "android" && showDatePicker && (
         <DateTimePicker
           value={scheduledDate}
@@ -782,7 +900,7 @@ const FindRide = () => {
         />
       )}
 
-      {/* ═══ iOS PICKERS — presented inside a bottom-sheet Modal ═══ */}
+      {/* ═══ iOS PICKERS ═══ */}
       {Platform.OS === "ios" && (
         <>
           <Modal
@@ -810,7 +928,6 @@ const FindRide = () => {
                 }}
                 onPress={(e) => e.stopPropagation()}
               >
-                {/* Grab handle */}
                 <View
                   style={{
                     alignSelf: "center",
@@ -822,7 +939,6 @@ const FindRide = () => {
                   }}
                 />
 
-                {/* Header row */}
                 <View
                   style={{
                     flexDirection: "row",

@@ -1,9 +1,11 @@
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
+import * as Linking from "expo-linking";
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
     ActivityIndicator,
+    Alert,
     FlatList,
     Image,
     KeyboardAvoidingView,
@@ -43,7 +45,14 @@ type Message = {
 type Thread = {
   ride_id: number;
   status: string;
-  other: { name: string; image: string | null; role: "driver" | "passenger" };
+  other: {
+    name: string;
+    image: string | null;
+    role: "driver" | "passenger";
+    // Optional — add these on your API if you want the call button to work
+    phone?: string | null;
+    phone_number?: string | null;
+  };
   messages: Message[];
 };
 
@@ -57,6 +66,7 @@ const ChatThread = () => {
   const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
+  const [calling, setCalling] = useState(false);
 
   const listRef = useRef<FlatList>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -125,8 +135,48 @@ const ChatThread = () => {
     }
   };
 
+  // ── Call handler ───────────────────────────────────────────────────────────
+  // Uses the native dialer via tel: — no extra packages required.
+  const handleCall = async () => {
+    const phone = thread?.other?.phone ?? thread?.other?.phone_number ?? null;
+
+    if (!phone) {
+      Alert.alert(
+        "Phone number unavailable",
+        "We don't have a contact number for this person yet. Try messaging instead.",
+      );
+      return;
+    }
+
+    // Strip spaces, dashes, parens — keep leading + for country code
+    const cleaned = phone.replace(/[^\d+]/g, "");
+    const url = `tel:${cleaned}`;
+
+    try {
+      setCalling(true);
+      const supported = await Linking.canOpenURL(url);
+
+      if (!supported) {
+        Alert.alert(
+          "Can't place the call",
+          "This device doesn't support phone calls.",
+        );
+        return;
+      }
+
+      await Linking.openURL(url);
+    } catch (error) {
+      Alert.alert("Call failed", "Something went wrong. Please try again.");
+    } finally {
+      setCalling(false);
+    }
+  };
+
   const closed = thread?.status === "cancelled";
   const done = thread?.status === "completed";
+  const hasPhone = Boolean(
+    thread?.other?.phone ?? thread?.other?.phone_number,
+  );
 
   return (
     <SafeAreaView
@@ -211,6 +261,37 @@ const ChatThread = () => {
             {thread ? `Your ${thread.other.role} · trip #${thread.ride_id}` : ""}
           </Text>
         </View>
+
+        {/* ── Call button ── */}
+        <Pressable
+          onPress={handleCall}
+          disabled={calling}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={`Call ${thread?.other.name ?? "contact"}`}
+          style={{
+            height: 40,
+            width: 40,
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: 14,
+            backgroundColor: calling ? WARM.goldSoft : WARM.gold,
+            borderWidth: 1.5,
+            borderColor: calling ? WARM.gold : WARM.goldDeep,
+            shadowColor: WARM.goldDeep,
+            shadowOffset: { width: 0, height: 6 },
+            shadowOpacity: calling ? 0.1 : 0.3,
+            shadowRadius: 12,
+            elevation: calling ? 2 : 5,
+            opacity: calling ? 0.65 : 1,
+          }}
+        >
+          {calling ? (
+            <ActivityIndicator size="small" color={WARM.charcoal} />
+          ) : (
+            <Ionicons name="call" size={18} color={WARM.charcoal} />
+          )}
+        </Pressable>
       </View>
 
       <KeyboardAvoidingView
@@ -260,7 +341,7 @@ const ChatThread = () => {
                     fontSize: 14,
                     fontFamily: "Jakarta",
                     lineHeight: 20,
-                    color: item.mine ? WARM.charcoal : WARM.charcoal,
+                    color: WARM.charcoal,
                   }}
                 >
                   {item.body}
@@ -319,6 +400,40 @@ const ChatThread = () => {
                   Say hello and confirm the pickup point. Messages stay in the
                   app for everyone&apos;s safety.
                 </Text>
+
+                {/* Quick-call prompt in empty state, if we have a number */}
+                {hasPhone ? (
+                  <Pressable
+                    onPress={handleCall}
+                    style={{
+                      marginTop: 16,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 8,
+                      paddingHorizontal: 16,
+                      paddingVertical: 10,
+                      borderRadius: 14,
+                      backgroundColor: WARM.cream,
+                      borderWidth: 1.5,
+                      borderColor: WARM.line,
+                    }}
+                  >
+                    <Ionicons
+                      name="call-outline"
+                      size={15}
+                      color={WARM.goldDeep}
+                    />
+                    <Text
+                      style={{
+                        fontSize: 13,
+                        fontFamily: "Jakarta-SemiBold",
+                        color: WARM.charcoal,
+                      }}
+                    >
+                      Or call instead
+                    </Text>
+                  </Pressable>
+                ) : null}
               </View>
             }
           />

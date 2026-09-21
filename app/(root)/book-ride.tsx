@@ -16,7 +16,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import Payment from "@/components/Payment";
-import { formatTime } from "@/lib/utils";
+import { formatDate, formatTime } from "@/lib/utils";
 import { useDriverStore, useLocationStore } from "@/store";
 
 // ─── Palette ─────────────────────────────────────────────────────────────────
@@ -46,6 +46,17 @@ const BookRide = () => {
     `${driverDetails?.first_name ?? ""} ${driverDetails?.last_name ?? ""}`.trim() ||
     "Your driver";
 
+  // Trip date & time — fall back to now if the driver record is missing them
+  const rideDate =
+    (driverDetails as any)?.ride_date ??
+    (driverDetails as any)?.scheduled_for ??
+    new Date().toISOString();
+
+  const rideTimeValue =
+    (driverDetails as any)?.trip_time ??
+    (driverDetails as any)?.time ??
+    0;
+
   // ── Animations ─────────────────────────────────────────────────────────────
   const headerFade  = useRef(new Animated.Value(0)).current;
   const headerSlide = useRef(new Animated.Value(-12)).current;
@@ -53,8 +64,8 @@ const BookRide = () => {
   const driverCardFade  = useRef(new Animated.Value(0)).current;
   const driverCardSlide = useRef(new Animated.Value(20)).current;
 
-  const routeCardFade  = useRef(new Animated.Value(0)).current;
-  const routeCardSlide = useRef(new Animated.Value(24)).current;
+  const tripCardFade  = useRef(new Animated.Value(0)).current;
+  const tripCardSlide = useRef(new Animated.Value(24)).current;
 
   const badgePulse = useRef(new Animated.Value(1)).current;
   const fareGlow   = useRef(new Animated.Value(1)).current;
@@ -71,8 +82,8 @@ const BookRide = () => {
     ]).start();
 
     Animated.parallel([
-      Animated.timing(routeCardFade, { toValue: 1, duration: 480, delay: 240, useNativeDriver: true }),
-      Animated.spring(routeCardSlide, { toValue: 0, tension: 62, friction: 11, delay: 240, useNativeDriver: true }),
+      Animated.timing(tripCardFade, { toValue: 1, duration: 480, delay: 220, useNativeDriver: true }),
+      Animated.spring(tripCardSlide, { toValue: 0, tension: 62, friction: 11, delay: 220, useNativeDriver: true }),
     ]).start();
 
     Animated.loop(
@@ -99,7 +110,7 @@ const BookRide = () => {
       <SafeAreaView style={{ flex: 1, backgroundColor: WARM.cream }}>
         <StatusBar barStyle="dark-content" backgroundColor={WARM.cream} />
 
-        {/* Header */}
+        {/* ── Header ── */}
         <Animated.View
           style={{
             opacity: headerFade,
@@ -159,7 +170,7 @@ const BookRide = () => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 32 }}
         >
-          {/* Driver card */}
+          {/* ═══ Driver card ═══ */}
           <Animated.View
             style={{
               opacity: driverCardFade,
@@ -274,7 +285,7 @@ const BookRide = () => {
               </View>
             </View>
 
-            {/* ── CAR DETAILS ── */}
+            {/* Car details */}
             <View
               style={{
                 marginTop: 16,
@@ -289,7 +300,6 @@ const BookRide = () => {
                 padding: 14,
               }}
             >
-              {/* Car image */}
               <View
                 style={{
                   height: 56,
@@ -312,7 +322,6 @@ const BookRide = () => {
                 )}
               </View>
 
-              {/* Model + plate */}
               <View style={{ flex: 1 }}>
                 <Text
                   style={{
@@ -410,11 +419,11 @@ const BookRide = () => {
             </View>
           </Animated.View>
 
-          {/* Route card */}
+          {/* ═══ Trip card — date, time, pickup, drop-off ═══ */}
           <Animated.View
             style={{
-              opacity: routeCardFade,
-              transform: [{ translateY: routeCardSlide }],
+              opacity: tripCardFade,
+              transform: [{ translateY: tripCardSlide }],
               marginTop: 16,
               borderRadius: 24,
               borderWidth: 1,
@@ -428,24 +437,87 @@ const BookRide = () => {
               elevation: 5,
             }}
           >
-            <Text
+            {/* Title — "Trip · Mon, 22 Sep" */}
+            <View
               style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
                 marginBottom: 16,
-                fontSize: 11,
-                fontFamily: "Jakarta-Bold",
-                color: WARM.muted,
-                letterSpacing: 1.4,
-                textTransform: "uppercase",
               }}
             >
-              Your route
-            </Text>
+              <Text
+                style={{
+                  fontSize: 11,
+                  fontFamily: "Jakarta-Bold",
+                  color: WARM.muted,
+                  letterSpacing: 1.4,
+                  textTransform: "uppercase",
+                }}
+              >
+                Trip · {formatDate(rideDate)}
+              </Text>
 
+              {/* Time chip */}
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 6,
+                  paddingHorizontal: 10,
+                  paddingVertical: 5,
+                  borderRadius: 999,
+                  backgroundColor: WARM.goldSoft,
+                  borderWidth: 1,
+                  borderColor: WARM.gold,
+                }}
+              >
+                <Ionicons name="time-outline" size={12} color={WARM.goldDeep} />
+                <Text
+                  style={{
+                    fontSize: 12,
+                    fontFamily: "Jakarta-Bold",
+                    color: WARM.goldDeep,
+                  }}
+                >
+                  {formatTime(rideTimeValue)}
+                </Text>
+              </View>
+            </View>
+
+            {/* Route rail with pickup + drop-off */}
             <View style={{ flexDirection: "row" }}>
-              <View style={{ marginRight: 12, alignItems: "center", paddingTop: 6 }}>
-                <View style={{ height: 10, width: 10, borderRadius: 5, backgroundColor: WARM.gold }} />
-                <View style={{ width: 1.5, flex: 1, marginVertical: 6, backgroundColor: WARM.line }} />
-                <View style={{ height: 10, width: 10, borderRadius: 3, backgroundColor: WARM.charcoal }} />
+              <View
+                style={{
+                  marginRight: 12,
+                  alignItems: "center",
+                  paddingTop: 6,
+                }}
+              >
+                <View
+                  style={{
+                    height: 10,
+                    width: 10,
+                    borderRadius: 5,
+                    backgroundColor: WARM.gold,
+                  }}
+                />
+                <View
+                  style={{
+                    width: 1.5,
+                    flex: 1,
+                    marginVertical: 6,
+                    backgroundColor: WARM.line,
+                  }}
+                />
+                <View
+                  style={{
+                    height: 10,
+                    width: 10,
+                    borderRadius: 3,
+                    backgroundColor: WARM.charcoal,
+                  }}
+                />
               </View>
 
               <View style={{ flex: 1 }}>
@@ -497,7 +569,7 @@ const BookRide = () => {
             </View>
           </Animated.View>
 
-          {/* Stripe Payment — this is what shows the "Confirm Ride" button */}
+          {/* ═══ Stripe Payment ═══ */}
           <Payment
             fullName={user?.fullName!}
             email={user?.emailAddresses[0].emailAddress!}

@@ -9,37 +9,48 @@ type Props = ButtonProps & {
   fullWidth?: boolean;
 };
 
+// ─── Palette ─────────────────────────────────────────────────────────────────
+const WARM = {
+  cream:    "#FBF7F0",
+  sand:     "#F4EDE1",
+  gold:     "#F5B93C",
+  goldDeep: "#E0A11E",
+  goldSoft: "#FCEBC4",
+  charcoal: "#2B2722",
+  graphite: "#4A443D",
+  muted:    "#9A928A",
+  line:     "#E7DECF",
+};
+
+// ─── Background variant ──────────────────────────────────────────────────────
 const getBgVariantStyle = (variant: ButtonProps["bgVariant"]) => {
   switch (variant) {
     case "secondary":
-      return "bg-[#12724F]";
+      return "bg-[#F4EDE1] border-[1.5px] border-[#E7DECF]";
     case "danger":
       return "bg-[#E04545]";
     case "success":
-      return "bg-[#1FB574]";
+      return "bg-[#F5B93C] border-[1.5px] border-[#E0A11E]";
     case "outline":
-      return "bg-white border-[1.5px] border-[#E2E9E5]";
-    case "ghost":
-      return "bg-[#E6F2EC]";
+      return "bg-white border-[1.5px] border-[#E7DECF]";
     default:
-      return "bg-[#0E5C3F]";
+      return "bg-[#F5B93C] border-[1.5px] border-[#E0A11E]";
   }
 };
 
+// ─── Text variant ────────────────────────────────────────────────────────────
 const getTextVariantStyle = (variant: ButtonProps["textVariant"]) => {
   switch (variant) {
     case "primary":
-      return "text-[#101814]";
+      return "text-[#2B2722]";
     case "secondary":
-      return "text-[#68756F]";
+      return "text-[#4A443D]";
     case "danger":
       return "text-white";
     case "success":
-      return "text-white";
-    case "brand":
-      return "text-[#0E5C3F]";
+      return "text-[#2B2722]";
     default:
-      return "text-white";
+      return "text-[#2B2722]";
   }
 };
 
@@ -81,12 +92,9 @@ const CustomButton = ({
 }: Props) => {
   const inactive = loading || disabled;
 
-  // Only the filled primary button carries a shadow — an outline button with a
-  // drop shadow reads as a mistake.
+  // Only filled variants carry a shadow — outline stays flat.
   const elevation =
-    bgVariant === "outline" || bgVariant === "ghost"
-      ? ""
-      : "shadow-lg shadow-[#0E5C3F]/25";
+    bgVariant === "outline" ? "" : "shadow-lg shadow-[#E0A11E]/30";
 
   return (
     <TouchableOpacity
@@ -105,11 +113,7 @@ const CustomButton = ({
       {loading ? (
         <ActivityIndicator
           size="small"
-          color={
-            bgVariant === "outline" || bgVariant === "ghost"
-              ? "#0E5C3F"
-              : "#FFFFFF"
-          }
+          color={bgVariant === "outline" ? "#E0A11E" : "#2B2722"}
         />
       ) : (
         IconLeft && <IconLeft />

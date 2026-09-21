@@ -440,7 +440,7 @@ These are not yet complete and should not be treated as working features:
 | Member | Role | Responsibility |
 | ------ | ---- | -------------- |
 | S. Mdala | Project Manager | Project management and process flows |
-| L.P. Nama | Business Analyst | Requirements gathering |
+| L.P. Nama | Business Analyst & Frontend Developer | Requirements gathering |
 | T. Macholo | UX/UI Designer | Figma design and navigation |
 | N.S. Msomi | Frontend Developer | UI components and screens |
 | M. Sithomola | Backend Developer | Supabase migrations, driver and trip APIs, Stripe payments, maps and routing |
