@@ -333,6 +333,43 @@ npx vitest run tests/passwordHash.test.ts
 
 The password tests cover Argon2id output, correct and incorrect verification, unique salts, invalid and empty passwords, and the configured cost parameters.
 
+### Check ID verification
+
+The existing identity-verification screen uses [`lib/checkIdService.ts`](lib/checkIdService.ts)
+to call Check ID's `GET /api/v1/validate/{idNumber}` endpoint after normalizing a 13-digit
+South African ID number.
+
+Add this development/test variable to `.env`:
+
+```env
+EXPO_PUBLIC_CHECK_ID_API_KEY=YOUR_CHECK_ID_TEST_KEY
+```
+
+Do not include `Bearer` in the value. The `.env` file is already git-ignored. Run
+[`migrations/profile-migration.sql`](migrations/profile-migration.sql) in Supabase; it adds
+`users.id_verified`, which is set to `true` after a successful Check ID response. No
+`drivers` table change is needed because the current identity-verification flow stores
+driver profile verification data in `users`.
+
+Start the app with:
+
+```bash
+npm install
+npx expo start -c
+```
+
+Enter a valid 13-digit ID and press **Verify ID** to see `ID Verified` and the returned
+date of birth, age, gender, and citizenship. Use a rejected 13-digit value to test the
+invalid-ID message; a malformed value tests the 400-style validation path. An invalid
+key tests the 401 message, and disabling the network tests the generic network message.
+
+This service validates the ID number and returns demographic information. It does not
+prove that the ID belongs to the person presenting it and does not perform physical or
+biometric identity verification. Because `EXPO_PUBLIC_*` variables are bundled into the
+mobile app, this development/test API key is not secret. For production, move the Check
+ID request to a Supabase Edge Function or another server-side API and keep the live key
+there.
+
 ### System test cases
 
 | ID | Module | Test case | Status |

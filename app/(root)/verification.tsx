@@ -15,6 +15,11 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import CustomButton from "@/components/CustomButton";
+import {
+  CheckIdServiceError,
+  CheckIdResponse,
+  verifySouthAfricanID,
+} from "@/lib/checkIdService";
 import { fetchAPI } from "@/lib/fetch";
 import {
     crossCheckProfile,
@@ -78,6 +83,13 @@ const Verification = () => {
 
   const [idInput, setIdInput] = useState("");
   const [idTouched, setIdTouched] = useState(false);
+  const [idVerification, setIdVerification] = useState<CheckIdResponse | null>(
+    null,
+  );
+  const [idVerificationError, setIdVerificationError] = useState<string | null>(
+    null,
+  );
+  const [verifyingId, setVerifyingId] = useState(false);
 
   const [picked, setPicked] = useState<Picked>({});
   const [loading, setLoading] = useState(true);
@@ -120,6 +132,14 @@ const Verification = () => {
         setRejectionReason(record.verification_rejection_reason ?? null);
         setProfileGender(record.profile_data?.gender ?? null);
         if (record.id_number) setIdInput(record.id_number);
+        if (record.id_verified) {
+          setIdVerification({
+            idNumber: record.id_number ?? "",
+            isValid: true,
+            dob: record.date_of_birth,
+            citizenship: record.id_citizenship,
+          });
+        }
       } catch (error) {
         console.warn("Could not load verification status", error);
       } finally {
@@ -157,10 +177,69 @@ const Verification = () => {
 
   // ── Submitting ─────────────────────────────────────────────────────────────
   const canSubmit =
-    idResult.valid && Boolean(picked.id_front && picked.selfie) && !submitting;
+    idResult.valid &&
+    idVerification?.isValid === true &&
+    Boolean(picked.id_front && picked.selfie) &&
+    !submitting;
+
+  const verifyId = async () => {
+    if (verifyingId) return;
+
+    const normalisedId = normaliseIdNumber(idInput);
+    setIdTouched(true);
+    setIdVerificationError(null);
+
+    if (!/^\d{13}$/.test(normalisedId)) {
+      setIdVerification(null);
+      setIdVerificationError("Enter exactly 13 digits before verifying.");
+      return;
+    }
+
+    setVerifyingId(true);
+    try {
+      const result = await verifySouthAfricanID(normalisedId);
+
+      if (!result.isValid) {
+        setIdVerification(null);
+        setIdVerificationError(
+          "ID could not be verified.\nPlease check the ID number and try again.",
+        );
+        return;
+      }
+
+      setIdVerification(result);
+    } catch (error) {
+      setIdVerification(null);
+
+      if (error instanceof CheckIdServiceError && error.status === 401) {
+        setIdVerificationError(
+          "ID verification service authentication failed.\nPlease try again later.",
+        );
+      } else if (
+        error instanceof CheckIdServiceError &&
+        error.status === 400
+      ) {
+        setIdVerificationError(
+          "ID could not be verified.\nPlease check the ID number and try again.",
+        );
+      } else {
+        setIdVerificationError(
+          "Unable to verify your ID right now.\nPlease check your internet connection and try again.",
+        );
+      }
+    } finally {
+      setVerifyingId(false);
+    }
+  };
 
   const submit = async () => {
-    if (!user?.id || !picked.id_front || !picked.selfie || !idResult.valid) {
+    if (
+      !user?.id ||
+      !picked.id_front ||
+      !picked.selfie ||
+      !idResult.valid ||
+      idVerification?.isValid !== true
+    ) {
       return;
     }
 
@@ -180,6 +259,7 @@ const Verification = () => {
         government_id_back_url: idBackPath,
         selfie_image_url: selfiePath,
         id_number: idResult.idNumber,
+        id_verified: true,
         date_of_birth: idResult.dateOfBirth,
         id_citizenship: idResult.citizenship,
         verification_warnings: warnings,
@@ -330,6 +410,8 @@ const Verification = () => {
                   onChangeText={(text) => {
                     setIdInput(normaliseIdNumber(text).slice(0, 13));
                     setIdTouched(true);
+                    setIdVerification(null);
+                    setIdVerificationError(null);
                   }}
                   editable={!locked}
                   placeholder="000000 0000 000"
@@ -344,6 +426,77 @@ const Verification = () => {
                         : "border-[#E2E9E5] bg-[#F8FAF9]"
                   }`}
                 />
+
+                <Pressable
+                  onPress={verifyId}
+                  disabled={verifyingId || locked}
+                  accessibilityRole="button"
+                  accessibilityLabel="Verify South African ID"
+                  className={`mt-3 items-center rounded-xl bg-[#0E5C3F] py-3 ${
+                    verifyingId || locked ? "opacity-60" : "active:opacity-80"
+                  }`}
+                >
+                  {verifyingId ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    <Text className="text-[13px] font-JakartaBold text-white">
+                      Verify ID
+                    </Text>
+                  )}
+                </Pressable>
+
+                {!!idVerificationError && (
+                  <View className="mt-2.5 rounded-xl bg-[#FEF3F3] p-3">
+                    <Text className="text-[12px] font-JakartaMedium leading-4 text-[#B02A2A]">
+                      {idVerificationError}
+                    </Text>
+                  </View>
+                )}
+
+                {idVerification?.isValid && (
+                  <View className="mt-3 rounded-xl bg-[#E6F2EC] p-3.5">
+                    <View className="mb-2 flex-row items-center gap-1.5">
+                      <Ionicons name="checkmark-circle" size={15} color="#0E5C3F" />
+                      <Text className="text-[12px] font-JakartaBold text-[#0E5C3F]">
+                        ✓ ID Verified
+                      </Text>
+                    </View>
+                    {[
+                      idVerification.dob
+                        ? {
+                            label: "Date of birth",
+                            value: idVerification.dob.slice(0, 10),
+                          }
+                        : null,
+                      idVerification.age !== undefined
+                        ? { label: "Age", value: String(idVerification.age) }
+                        : null,
+                      idVerification.gender
+                        ? { label: "Gender", value: idVerification.gender }
+                        : null,
+                      idVerification.citizenship
+                        ? {
+                            label: "Citizenship",
+                            value: idVerification.citizenship,
+                          }
+                        : null,
+                    ]
+                      .filter(Boolean)
+                      .map((row) => (
+                        <View
+                          key={row!.label}
+                          className="flex-row items-center justify-between py-0.5"
+                        >
+                          <Text className="text-[12px] font-Jakarta text-[#4A5450]">
+                            {row!.label}
+                          </Text>
+                          <Text className="text-[12px] font-JakartaBold text-[#101814]">
+                            {row!.value}
+                          </Text>
+                        </View>
+                      ))}
+                  </View>
+                )}
 
                 {showIdError && !idResult.valid && (
                   <View className="mt-2.5 flex-row items-center gap-1.5">
@@ -442,6 +595,8 @@ const Verification = () => {
                     <Text className="mt-2.5 text-center text-[11.5px] font-Jakarta text-[#9BA6A1]">
                       {!idResult.valid
                         ? "Enter a valid ID number to continue"
+                        : idVerification?.isValid !== true
+                          ? "Verify your ID number to continue"
                         : "Add your ID document and a selfie to continue"}
                     </Text>
                   )}

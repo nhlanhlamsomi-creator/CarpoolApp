@@ -11,6 +11,7 @@ const WRITABLE = [
   "government_id_back_url",
   "selfie_image_url",
   "id_number",
+  "id_verified",
   "id_citizenship",
   "date_of_birth",
   "verification_status",
@@ -40,6 +41,7 @@ const SELECT_COLUMNS = `
   government_id_back_url,
   selfie_image_url,
   id_number,
+  id_verified,
   id_citizenship,
   date_of_birth,
   profile_data

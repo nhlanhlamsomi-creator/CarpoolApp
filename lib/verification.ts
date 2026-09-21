@@ -165,6 +165,7 @@ export type VerificationPayload = {
   selfie_image_url?: string;
   /** Derived from the ID number itself, so it can't disagree with the document. */
   id_number?: string;
+  id_verified?: boolean;
   date_of_birth?: string;
   id_citizenship?: string;
   /** Anything the automatic checks flagged, for the reviewer to look at. */
