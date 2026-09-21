@@ -16,9 +16,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import CustomButton from "@/components/CustomButton";
 import {
-  CheckIdServiceError,
-  CheckIdResponse,
-  verifySouthAfricanID,
+    CheckIdResponse,
+    CheckIdServiceError,
+    verifySouthAfricanID,
 } from "@/lib/checkIdService";
 import { fetchAPI } from "@/lib/fetch";
 import {

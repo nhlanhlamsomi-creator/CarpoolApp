@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
-  CheckIdServiceError,
-  verifySouthAfricanID,
+    CheckIdServiceError,
+    verifySouthAfricanID,
 } from "../lib/checkIdService";
 
 const originalApiKey = process.env.EXPO_PUBLIC_CHECK_ID_API_KEY;
