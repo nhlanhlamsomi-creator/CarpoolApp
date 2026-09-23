@@ -73,6 +73,7 @@ type ProfileRecord = {
 };
 
 type RideSummary = {
+  total_trips: number;
   completed_trips: number;
   cancelled_trips: number;
   money_spent: number;
@@ -86,6 +87,7 @@ const Profile = () => {
   const router = useRouter();
   const [profile, setProfile] = useState<ProfileRecord | null>(null);
   const [rideSummary, setRideSummary] = useState<RideSummary>({
+    total_trips: 0,
     completed_trips: 0,
     cancelled_trips: 0,
     money_spent: 0,
@@ -265,8 +267,7 @@ const Profile = () => {
     user?.primaryPhoneNumber?.phoneNumber ||
     "Add a phone number";
   const rating = typeof profile?.rating === "number" ? profile.rating : 5.0;
-  const totalTrips =
-    typeof profile?.total_trips === "number" ? profile.total_trips : 0;
+  const totalTrips = rideSummary.total_trips;
   const verification =
     typeof profile?.verification_percentage === "number"
       ? profile.verification_percentage

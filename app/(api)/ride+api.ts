@@ -14,14 +14,20 @@ export async function GET(request: Request) {
       .from("rides")
       .select("*, drivers(first_name, last_name)")
       .eq("user_id", clerkId)
-      .order("created_at", { ascending: false })
-      .limit(10);
+      .order("created_at", { ascending: false });
 
     if (error) {
       throw error;
     }
 
-    const completedTrips = (rides ?? []).filter((ride: any) => ride.payment_status === "paid").length;
+    const totalTrips = (rides ?? []).filter(
+      (ride: any) =>
+        ride.status !== "cancelled" && ride.payment_status !== "cancelled",
+    ).length;
+    const completedTrips = (rides ?? []).filter(
+      (ride: any) =>
+        ride.status === "completed" || ride.payment_status === "paid",
+    ).length;
     const cancelledTrips = (rides ?? []).filter((ride: any) => ride.payment_status === "cancelled").length;
     const moneySpent = (rides ?? []).reduce((sum: number, ride: any) => sum + Number(ride.fare_price || 0), 0);
     const favoriteDriver = rides?.[0]?.drivers?.first_name && rides?.[0]?.drivers?.last_name
@@ -32,6 +38,7 @@ export async function GET(request: Request) {
     return Response.json({
       data: {
         completed_trips: completedTrips,
+        total_trips: totalTrips,
         cancelled_trips: cancelledTrips,
         money_spent: moneySpent,
         favorite_driver: favoriteDriver,
