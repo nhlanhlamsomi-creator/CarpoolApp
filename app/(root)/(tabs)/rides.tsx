@@ -24,6 +24,28 @@ const SUPPORT_EMAIL = "support@lyftcarpool.co.za";
 
 type Tab = "upcoming" | "history";
 
+const normalizeRide = (ride: Ride) => {
+  const rawRide = ride as Ride & {
+    drivers?: Ride["driver"] | Ride["driver"][] | null;
+  };
+  const relatedDriver = Array.isArray(rawRide.drivers)
+    ? rawRide.drivers[0]
+    : rawRide.drivers;
+  const driver = ride.driver ?? relatedDriver ?? null;
+
+  return {
+    ...ride,
+    driver: driver
+      ? {
+          ...driver,
+          car_seats: Number.isFinite(Number(driver.car_seats))
+            ? Number(driver.car_seats)
+            : null,
+        }
+      : null,
+  } as Ride;
+};
+
 const Rides = () => {
   const { user } = useUser();
   const { setUserLocation, setDestinationLocation } = useLocationStore();
@@ -59,25 +81,29 @@ const Rides = () => {
   };
 
   const rides = useMemo(
-    () => (Array.isArray(recentRides) ? recentRides : []),
+    () =>
+      Array.isArray(recentRides) ? recentRides.map(normalizeRide) : [],
     [recentRides],
   );
 
-  // "Upcoming" is a state, not a date calculation. The status column decides
-  // it; scheduled_for is only a fallback for rows created before that existed.
   const isUpcoming = (ride: Ride) => {
-    const status = (ride as any).status;
+    const rideData = ride as Ride & {
+      scheduled_for?: string | null;
+      status?: string | null;
+    };
+    const status = String(rideData.status ?? "").toLowerCase();
+    const scheduledTime = rideData.scheduled_for
+      ? new Date(rideData.scheduled_for).getTime()
+      : NaN;
 
-    if (status) {
-      return ["booked", "scheduled", "accepted", "in_progress"].includes(
-        status,
-      );
+    if (Number.isFinite(scheduledTime)) {
+      if (["cancelled", "completed"].includes(status)) return false;
+      // The schedule comparison must use the current time on each render.
+      // eslint-disable-next-line react-hooks/purity
+      return scheduledTime > Date.now();
     }
 
-    const scheduled = (ride as any).scheduled_for;
-    if (scheduled) return new Date(scheduled).getTime() > Date.now();
-
-    return false;
+    return ["booked", "scheduled", "accepted", "in_progress"].includes(status);
   };
 
   const upcoming = useMemo(() => rides.filter(isUpcoming), [rides]);

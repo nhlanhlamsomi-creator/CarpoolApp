@@ -135,8 +135,12 @@ const RideCard = ({
 }: Props) => {
   const status = STATUS[ride.payment_status] ?? STATUS.pending;
   const driverName = ride.driver
-    ? `${ride.driver.first_name ?? ""} ${ride.driver.last_name ?? ""}`.trim()
+    ? `${ride.driver.first_name ?? ""} ${ride.driver.last_name ?? ""}`.trim() ||
+      "Driver unavailable"
     : "Driver unavailable";
+  const carSeats = Number.isFinite(Number(ride.driver?.car_seats))
+    ? Number(ride.driver?.car_seats)
+    : null;
 
   const upcoming = variant === "upcoming";
 
@@ -466,7 +470,7 @@ const RideCard = ({
                   color: WARM.muted,
                 }}
               >
-                {ride.driver?.car_seats ?? "—"} seats
+                {carSeats ?? "—"} seats
               </Text>
             </View>
           </View>

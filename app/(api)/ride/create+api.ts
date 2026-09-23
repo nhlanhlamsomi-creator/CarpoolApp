@@ -26,6 +26,8 @@ export async function POST(request: Request) {
     const rideTimeNumber =
       typeof ride_time === "number" ? ride_time : Number(ride_time);
     const farePriceNumber = Number(fare_price);
+    const driverIdNumber = Number(driver_id);
+    const userId = String(user_id ?? "").trim();
 
     const durationMinutes = Number.isFinite(rideTimeNumber)
       ? Math.round(rideTimeNumber)
@@ -45,10 +47,14 @@ export async function POST(request: Request) {
       destination_latitude === undefined ||
       destination_longitude === undefined ||
       !rideTimeAsTimestamp ||
-      Number.isNaN(farePriceNumber) ||
+      !Number.isFinite(farePriceNumber) ||
+      farePriceNumber < 0 ||
+      !Number.isInteger(driverIdNumber) ||
+      driverIdNumber <= 0 ||
+      !userId ||
+      userId === "guest" ||
       !payment_status ||
-      !driver_id ||
-      !user_id
+      !userId
     ) {
       return Response.json({ error: "Missing required fields" }, { status: 400 });
     }
@@ -73,8 +79,8 @@ export async function POST(request: Request) {
         payment_status,
         payment_method: payment_method ?? "Mock Card",
         stripe_payment_id: stripe_payment_id ?? null,
-        driver_id,
-        user_id,
+        driver_id: driverIdNumber,
+        user_id: userId,
       })
       .select()
       .single();

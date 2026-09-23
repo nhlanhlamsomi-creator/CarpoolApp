@@ -37,8 +37,16 @@ export async function GET(request: Request, { id }: { id: string }) {
       throw error;
     }
 
-    const response = (data ?? []).map((ride: any) => ({
-      ...ride,
+    const response = (data ?? []).map((ride: any) => {
+      // Supabase can return a one-to-many relation as an array depending on
+      // the generated relationship metadata. Normalize it before the mobile
+      // card reads the driver fields.
+      const relatedDriver = Array.isArray(ride.drivers)
+        ? ride.drivers[0]
+        : ride.drivers;
+
+      return {
+        ...ride,
       // Old rows predate duration_minutes, so fall back to the gap between
       // creation and scheduled time rather than showing nothing.
       duration_minutes:
@@ -54,19 +62,22 @@ export async function GET(request: Request, { id }: { id: string }) {
             )
           : null),
       status: ride.status ?? "completed",
-      driver: ride.drivers
+      driver: relatedDriver
         ? {
-            driver_id: ride.drivers.id,
-            first_name: ride.drivers.first_name,
-            last_name: ride.drivers.last_name,
-            profile_image_url: ride.drivers.profile_image_url,
-            car_image_url: ride.drivers.car_image_url,
-            car_seats: ride.drivers.car_seats,
-            rating: ride.drivers.rating,
-            phone_number: ride.drivers.phone_number,
+            driver_id: relatedDriver.id,
+            first_name: relatedDriver.first_name ?? "",
+            last_name: relatedDriver.last_name ?? "",
+            profile_image_url: relatedDriver.profile_image_url,
+            car_image_url: relatedDriver.car_image_url,
+            car_seats: Number.isFinite(Number(relatedDriver.car_seats))
+              ? Number(relatedDriver.car_seats)
+              : null,
+            rating: relatedDriver.rating,
+            phone_number: relatedDriver.phone_number,
           }
         : null,
-    }));
+      };
+    });
 
     return Response.json({ data: response });
   } catch (error: any) {

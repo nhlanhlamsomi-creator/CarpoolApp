@@ -52,7 +52,7 @@ export async function POST(request: Request) {
     customer: customer.id,
     payment_method_types: ["card"],
     confirm: false,
-    description: `Ride booking for ${safeName}`,
+    description: `LYFT ride booking for ${safeName}`,
     receipt_email: safeEmail,
     metadata: {
       name: safeName,

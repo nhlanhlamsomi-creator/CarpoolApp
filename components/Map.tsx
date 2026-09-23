@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
 import { ActivityIndicator, Image, Platform, View } from "react-native";
 import MapView, {
     Circle,
@@ -29,6 +30,7 @@ export default function Map() {
     userLongitude,
     destinationLatitude,
     destinationLongitude,
+    setHubPickup,
   } = useLocationStore();
 
   const { selectedDriver, drivers: storeDrivers, setDrivers: setStoreDrivers } =
@@ -281,9 +283,9 @@ export default function Map() {
               longitude: hub.longitude,
             }}
             radius={hub.radius}
-            strokeColor="#0286FF"
-            strokeWidth={2}
-            fillColor="rgba(2, 134, 255, 0.12)"
+            strokeColor="#0E5C3F"
+            strokeWidth={1.5}
+            fillColor="rgba(14, 92, 63, 0.10)"
           />
           <Marker
             coordinate={{
@@ -292,8 +294,49 @@ export default function Map() {
             }}
             title={hub.name}
             description={hub.address}
-            pinColor="#0286FF"
-          />
+            onPress={() =>
+              setHubPickup({
+                id: hub.id,
+                name: hub.name,
+                latitude: hub.latitude,
+                longitude: hub.longitude,
+                address: hub.address,
+              })
+            }
+            anchor={{ x: 0.5, y: 0.5 }}
+            tracksViewChanges={false}
+          >
+            <View
+              style={{
+                height: 40,
+                width: 40,
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: 20,
+                backgroundColor: "#FFFFFF",
+                borderWidth: 2,
+                borderColor: "#F5B93C",
+                shadowColor: "#06231A",
+                shadowOffset: { width: 0, height: 3 },
+                shadowOpacity: 0.2,
+                shadowRadius: 5,
+                elevation: 5,
+              }}
+            >
+              <View
+                style={{
+                  height: 28,
+                  width: 28,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: 14,
+                  backgroundColor: "#0E5C3F",
+                }}
+              >
+                <Ionicons name="business-outline" size={16} color="#FFFFFF" />
+              </View>
+            </View>
+          </Marker>
         </React.Fragment>
       ))}
 

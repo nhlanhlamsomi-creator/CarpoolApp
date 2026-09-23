@@ -1,8 +1,8 @@
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
-import { router } from "expo-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
     ActivityIndicator,
     Alert,
@@ -22,6 +22,11 @@ import Map from "@/components/Map";
 import OfferTripCard from "@/components/OfferTripCard";
 import RideCard from "@/components/RideCard";
 import { fetchAPI, useFetch } from "@/lib/fetch";
+import {
+  HUB_PROMOTION_END_HOUR,
+  HUB_PROMOTION_START_HOUR,
+  isHubPromotionActive,
+} from "@/lib/promotions";
 import { findCarpoolGroups, type PassengerLocation } from "@/services/kMeans";
 import { useLocationStore } from "@/store";
 import { OfferTrip, Ride } from "@/types/type";
@@ -58,6 +63,30 @@ const PASSENGERS: PassengerLocation[] = [
   { id: "p6", latitude: -25.742,  longitude: 28.2205 },
 ];
 
+const normalizeRecentRide = (ride: Ride) => {
+  const rawRide = ride as Ride & {
+    drivers?: Ride["driver"] | Ride["driver"][] | null;
+  };
+  const relatedDriver = Array.isArray(rawRide.drivers)
+    ? rawRide.drivers[0]
+    : rawRide.drivers;
+  const driver = ride.driver ?? relatedDriver ?? null;
+
+  return {
+    ...ride,
+    driver: driver
+      ? {
+          ...driver,
+          first_name: driver.first_name ?? "",
+          last_name: driver.last_name ?? "",
+          car_seats: Number.isFinite(Number(driver.car_seats))
+            ? Number(driver.car_seats)
+            : null,
+        }
+      : null,
+  } as Ride;
+};
+
 const Home = () => {
   const { user } = useUser();
   const { signOut, userId } = useAuth();
@@ -68,6 +97,7 @@ const Home = () => {
     userAddress,
     userLatitude,
     userLongitude,
+    selectedHubName,
   } = useLocationStore();
 
   const {
@@ -81,9 +111,27 @@ const Home = () => {
     refetch: refetchAvailableTrips,
   } = useFetch<OfferTrip[]>("/(api)/offer-trip");
 
-  const rides = recentRides || [];
+  const rides = useMemo(
+    () =>
+      (Array.isArray(recentRides) ? recentRides : [])
+        .map(normalizeRecentRide)
+        .sort(
+          (left, right) =>
+            new Date(right.created_at).getTime() -
+            new Date(left.created_at).getTime(),
+        ),
+    [recentRides],
+  );
   const offerTrips = availableTrips || [];
   const [bookingTripId, setBookingTripId] = useState<number | null>(null);
+  const hubPromotionActive = isHubPromotionActive();
+
+  useFocusEffect(
+    useCallback(() => {
+      refetchRecentRides();
+      refetchAvailableTrips();
+    }, [refetchRecentRides, refetchAvailableTrips]),
+  );
 
   // ── Carpool clusters ──────────────────────────────────────────────────────
   const [vehicleCapacity] = useState(4);
@@ -194,7 +242,7 @@ const Home = () => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: WARM.cream }}>
       <FlatList
-        data={rides.slice(0, 5)}
+        data={rides.slice(0, 3)}
         renderItem={({ item }) => <RideCard ride={item} />}
         keyExtractor={(item, index) =>
           `${item.user_id}-${item.created_at}-${index}`
@@ -279,6 +327,25 @@ const Home = () => {
                 <View className="h-2 w-2 rounded-full bg-[#F5B93C]" />
               </View>
             </View>
+
+            {selectedHubName ? (
+              <View className="mt-3 flex-row items-center gap-3 rounded-2xl border border-[#F5D88A] bg-[#FFF8E8] px-4 py-3">
+                <View className="h-9 w-9 items-center justify-center rounded-full bg-[#FCEBC4]">
+                  <Ionicons name="pricetag-outline" size={17} color="#E0A11E" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-[11px] font-JakartaBold uppercase tracking-widest text-[#9A6B00]">
+                    {selectedHubName} pickup selected
+                  </Text>
+                  <Text className="mt-0.5 text-[12px] font-JakartaSemiBold text-[#4A443D]">
+                    {hubPromotionActive
+                      ? "10% off your ride until 4:00 PM"
+                      : `10% off from ${HUB_PROMOTION_START_HOUR}:00 to ${HUB_PROMOTION_END_HOUR}:00`}
+                  </Text>
+                </View>
+                <Ionicons name="checkmark-circle" size={19} color="#0E5C3F" />
+              </View>
+            ) : null}
 
             {/* ── Available rides heading ── */}
             <View className="mt-7 mb-3 flex-row items-center justify-between">

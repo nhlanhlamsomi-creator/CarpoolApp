@@ -146,6 +146,8 @@ declare interface LocationStore {
   userLatitude: number | null;
   userLongitude: number | null;
   userAddress: string | null;
+  selectedHubId: number | null;
+  selectedHubName: string | null;
   destinationLatitude: number | null;
   destinationLongitude: number | null;
   destinationAddress: string | null;
@@ -154,6 +156,13 @@ declare interface LocationStore {
     longitude,
     address,
   }: {
+    latitude: number;
+    longitude: number;
+    address: string;
+  }) => void;
+  setHubPickup: (hub: {
+    id: number;
+    name: string;
     latitude: number;
     longitude: number;
     address: string;

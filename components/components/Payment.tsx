@@ -66,7 +66,7 @@ const Payment = ({
 
   const initializePaymentSheet = async () => {
     const { error } = await initPaymentSheet({
-      merchantDisplayName: "Example, Inc.",
+      merchantDisplayName: "LYFT",
       intentConfiguration: {
         mode: {
           amount: Math.round(Number(amount) * 100),
