@@ -3,31 +3,31 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  Linking,
-  Pressable,
-  ScrollView,
-  Switch,
-  Text,
-  TextInput,
-  View,
+    ActivityIndicator,
+    Alert,
+    Image,
+    Linking,
+    Pressable,
+    ScrollView,
+    Switch,
+    Text,
+    TextInput,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { SectionCard, StatCard } from "@/components/Cards";
 import OptionSheet, {
-  GENDER_OPTIONS,
-  SA_LANGUAGES,
-  VEHICLE_OPTIONS,
+    GENDER_OPTIONS,
+    SA_LANGUAGES,
+    VEHICLE_OPTIONS,
 } from "@/components/OptionSheet";
 import { fetchAPI } from "@/lib/fetch";
 import {
-  PickedImage,
-  captureImage,
-  pickFromLibrary,
-  uploadAvatar,
+    PickedImage,
+    captureImage,
+    pickFromLibrary,
+    uploadAvatar,
 } from "@/lib/verification";
 
 // ─── Palette ─────────────────────────────────────────────────────────────────
