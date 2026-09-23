@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
+import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Image, Platform, View } from "react-native";
 import MapView, {
     Circle,

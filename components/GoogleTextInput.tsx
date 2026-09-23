@@ -1,13 +1,13 @@
-import {
-  ActivityIndicator,
-  Image,
-  Keyboard,
-  Pressable,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
 import { useEffect, useRef, useState } from "react";
+import {
+    ActivityIndicator,
+    Image,
+    Keyboard,
+    Pressable,
+    Text,
+    TextInput,
+    View,
+} from "react-native";
 
 import { icons } from "@/constants";
 import { GoogleInputProps } from "@/types/type";

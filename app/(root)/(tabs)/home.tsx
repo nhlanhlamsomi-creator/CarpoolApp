@@ -23,9 +23,9 @@ import OfferTripCard from "@/components/OfferTripCard";
 import RideCard from "@/components/RideCard";
 import { fetchAPI, useFetch } from "@/lib/fetch";
 import {
-  HUB_PROMOTION_END_HOUR,
-  HUB_PROMOTION_START_HOUR,
-  isHubPromotionActive,
+    HUB_PROMOTION_END_HOUR,
+    HUB_PROMOTION_START_HOUR,
+    isHubPromotionActive,
 } from "@/lib/promotions";
 import { findCarpoolGroups, type PassengerLocation } from "@/services/kMeans";
 import { useLocationStore } from "@/store";

@@ -2,7 +2,7 @@ import { useAuth } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useStripe } from "@stripe/stripe-react-native";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Alert, Image, Pressable, Text, View } from "react-native";
 import { ReactNativeModal } from "react-native-modal";
 

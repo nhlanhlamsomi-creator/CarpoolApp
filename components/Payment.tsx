@@ -1,9 +1,9 @@
 import { useAuth } from "@clerk/clerk-expo";
+import { Ionicons } from "@expo/vector-icons";
 import { LinkDisplay, useStripe } from "@stripe/stripe-react-native";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Alert, Image, Text, View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { ReactNativeModal } from "react-native-modal";
 
 import CustomButton from "@/components/CustomButton";
