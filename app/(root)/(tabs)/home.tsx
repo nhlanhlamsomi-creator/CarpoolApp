@@ -21,6 +21,7 @@ import GoogleTextInput from "@/components/GoogleTextInput";
 import Map from "@/components/Map";
 import OfferTripCard from "@/components/OfferTripCard";
 import RideCard from "@/components/RideCard";
+import { useApiFetch } from "@/lib/api";
 import { fetchAPI, useFetch } from "@/lib/fetch";
 import {
     HUB_PROMOTION_END_HOUR,
@@ -104,7 +105,7 @@ const Home = () => {
     data: recentRides,
     loading,
     refetch: refetchRecentRides,
-  } = useFetch<Ride[]>(`/(api)/ride/${user?.id}`);
+  } = useApiFetch<Ride[]>("/api/rides");
   const {
     data: availableTrips,
     loading: availableTripsLoading,

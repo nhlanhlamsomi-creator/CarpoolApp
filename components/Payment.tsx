@@ -8,7 +8,7 @@ import { ReactNativeModal } from "react-native-modal";
 
 import CustomButton from "@/components/CustomButton";
 import { images } from "@/constants";
-import { fetchAPI } from "@/lib/fetch";
+import { apiRequest } from "@/lib/api";
 import { getHubPromotionalFare, isHubPromotionActive } from "@/lib/promotions";
 import { useLocationStore } from "@/store";
 import { PaymentProps } from "@/types/type";
@@ -31,7 +31,7 @@ const Payment = ({
     selectedHubId,
   } = useLocationStore();
 
-  const { userId } = useAuth();
+  const { userId, getToken } = useAuth();
   const [success, setSuccess] = useState<boolean>(false);
   const [processing, setProcessing] = useState(false);
   const promotionDate = new Date();
@@ -79,7 +79,7 @@ const Payment = ({
     setProcessing(true);
 
     try {
-      await initializePaymentSheet(chargeAmount);
+      const paymentIntentId = await initializePaymentSheet(chargeAmount);
 
       const { error } = await presentPaymentSheet();
 
@@ -88,11 +88,11 @@ const Payment = ({
         return;
       }
 
-      const rideResult = await fetchAPI("/(api)/ride/create", {
+      const token = await getToken();
+      const rideResult = await apiRequest<{ data?: { ride_id?: number } }>(
+        "/api/rides",
+        {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({
           origin_address: userAddress,
           destination_address: destinationAddress,
@@ -102,12 +102,12 @@ const Payment = ({
           destination_longitude: destinationLongitude,
           ride_time: Math.round(rideTime),
           fare_price: Math.round(chargeAmount * 100),
-          payment_status: "paid",
-          payment_method: "Stripe",
           driver_id: driverId,
-          user_id: userId,
+          payment_intent_id: paymentIntentId,
         }),
-      });
+        },
+        token,
+      );
 
       if (!rideResult?.data?.ride_id) {
         throw new Error("The payment succeeded, but the ride was not created.");
@@ -127,25 +127,32 @@ const Payment = ({
 
   const initializePaymentSheet = async (paymentAmount: number) => {
     try {
-      const creationResponse = await fetchAPI("/(api)/(stripe)/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const token = await getToken();
+      const creationResponse = await apiRequest<{
+        paymentIntent?: { id?: string; client_secret?: string };
+        customer?: string;
+        ephemeralKey?: { secret?: string };
+      }>(
+        "/api/payments/intents",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            name: safeName,
+            email: safeEmail,
+            amount: paymentAmount,
+          }),
         },
-        body: JSON.stringify({
-          name: safeName,
-          email: safeEmail,
-          amount: paymentAmount,
-        }),
-      });
-
-      if (creationResponse?.error) {
-        throw new Error(creationResponse.error);
-      }
+        token,
+      );
 
       const { paymentIntent, customer, ephemeralKey } = creationResponse;
 
-      if (!paymentIntent?.client_secret || !customer || !ephemeralKey?.secret) {
+      if (
+        !paymentIntent?.id ||
+        !paymentIntent.client_secret ||
+        !customer ||
+        !ephemeralKey?.secret
+      ) {
         throw new Error("Stripe payment intent creation failed.");
       }
 
@@ -175,6 +182,7 @@ const Payment = ({
       if (error) {
         throw new Error(error.message);
       }
+      return paymentIntent.id;
     } catch (err: any) {
       console.error("Init PaymentSheet failed:", err);
       throw err;

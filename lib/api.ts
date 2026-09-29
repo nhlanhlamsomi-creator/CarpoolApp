@@ -1,0 +1,81 @@
+import { useAuth } from "@clerk/clerk-expo";
+import { useCallback, useState } from "react";
+
+const configuredApiUrl = process.env.EXPO_PUBLIC_API_URL?.trim().replace(/\/+$/, "");
+
+export async function apiRequest<T>(
+  path: string,
+  options: RequestInit = {},
+  token?: string | null,
+): Promise<T> {
+  if (!configuredApiUrl) {
+    throw new Error(
+      "Missing EXPO_PUBLIC_API_URL. Configure the backend URL and restart Expo.",
+    );
+  }
+
+  if (
+    configuredApiUrl.startsWith("http://") &&
+    !__DEV__
+  ) {
+    throw new Error("The backend URL must use HTTPS outside development.");
+  }
+
+  const headers = new Headers(options.headers);
+  if (options.body && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+
+  const response = await fetch(
+    `${configuredApiUrl}/${path.replace(/^\/+/, "")}`,
+    { ...options, headers },
+  );
+  const body = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(
+      typeof body?.error === "string"
+        ? body.error
+        : `API request failed with status ${response.status}`,
+    );
+  }
+
+  return body as T;
+}
+
+export function useApiFetch<T>(path: string) {
+  const { getToken, userId } = useAuth();
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const refetch = useCallback(async () => {
+    if (!userId) {
+      setData(null);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const token = await getToken();
+      const result = await apiRequest<{ data: T }>(
+        path,
+        { method: "GET" },
+        token,
+      );
+      setData(result.data ?? null);
+      setError(null);
+    } catch (requestError) {
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Unable to load data",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [getToken, path, userId]);
+
+  return { data, error, loading, refetch };
+}

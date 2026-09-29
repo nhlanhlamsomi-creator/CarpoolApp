@@ -1,4 +1,3 @@
-import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useMemo } from "react";
@@ -13,7 +12,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { EmptyState } from "@/components/Cards";
-import { useFetch } from "@/lib/fetch";
+import { useApiFetch } from "@/lib/api";
 import { Ride } from "@/types/type";
 
 // ─── Palette ─────────────────────────────────────────────────────────────────
@@ -33,11 +32,7 @@ const WARM = {
 // attached. Reuses the rides endpoint, so no new API is needed for the list.
 
 const Chat = () => {
-  const { user } = useUser();
-
-  const state = useFetch<Ride[]>(`/(api)/ride/${user?.id}`);
-  const { data, loading } = state;
-  const refetch = (state as any).refetch as (() => void) | undefined;
+  const { data, loading, refetch } = useApiFetch<Ride[]>("/api/rides");
 
   useFocusEffect(
     useCallback(() => {

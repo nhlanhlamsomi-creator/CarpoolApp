@@ -1,4 +1,4 @@
-import { useUser } from "@clerk/clerk-expo";
+import { useAuth, useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -16,7 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { EmptyState } from "@/components/Cards";
 import RideCard from "@/components/RideCard";
-import { useFetch } from "@/lib/fetch";
+import { apiRequest, useApiFetch } from "@/lib/api";
 import { useLocationStore } from "@/store";
 import { Ride } from "@/types/type";
 
@@ -48,18 +48,17 @@ const normalizeRide = (ride: Ride) => {
 
 const Rides = () => {
   const { user } = useUser();
+  const { getToken } = useAuth();
   const { setUserLocation, setDestinationLocation } = useLocationStore();
 
   const [tab, setTab] = useState<Tab>("upcoming");
   const [safetyAlerts, setSafetyAlerts] = useState<Record<string, any>>({});
-
-  const fetchState = useFetch<Ride[]>(`/(api)/ride/${user?.id}`);
-  const { data: recentRides, loading, error } = fetchState;
-
-  // The template's useFetch exposes refetch; guard in case yours doesn't.
-  const refetch = (fetchState as any).refetch as
-    | (() => Promise<void> | void)
-    | undefined;
+  const {
+    data: recentRides,
+    error,
+    loading,
+    refetch,
+  } = useApiFetch<Ride[]>("/api/rides");
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -120,24 +119,31 @@ const Rides = () => {
 
   const pollSafetyAlerts = useCallback(async () => {
     if (!user?.id || activeRides.length === 0) return;
+    const token = await getToken();
+    if (!token) return;
     const results = await Promise.all(
       activeRides.map(async (ride) => {
         const rideId = String((ride as any).ride_id);
-        const response = await fetch(
-          `/(api)/safety/${rideId}?passenger_id=${encodeURIComponent(user.id)}`,
+        const response = await apiRequest<{ data: unknown }>(
+          `/api/sos/${rideId}`,
+          { method: "GET" },
+          token,
         );
-        if (!response.ok) return [rideId, null] as const;
-        const json = await response.json();
-        return [rideId, json.data] as const;
+        return [rideId, response.data] as const;
       }),
     );
     setSafetyAlerts(Object.fromEntries(results.filter(([, alert]) => alert)));
-  }, [activeRides, user?.id]);
+  }, [activeRides, getToken, user?.id]);
 
   useEffect(() => {
-    pollSafetyAlerts();
+    const initialPoll = setTimeout(() => {
+      void pollSafetyAlerts();
+    }, 0);
     const interval = setInterval(pollSafetyAlerts, 15000);
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(initialPoll);
+      clearInterval(interval);
+    };
   }, [pollSafetyAlerts]);
 
   // ── Actions ────────────────────────────────────────────────────────────────
@@ -174,25 +180,12 @@ const Rides = () => {
           style: "destructive",
           onPress: async () => {
             try {
-              const res = await fetch("/(api)/ride/cancel", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  ride_id: (ride as any).ride_id,
-                  user_id: user?.id,
-                }),
-              });
-
-              const json = await res.json();
-
-              if (!res.ok) {
-                console.error("Cancel failed:", json);
-                Alert.alert(
-                  "Cancel failed",
-                  json?.error || "Unable to cancel trip",
-                );
-                return;
-              }
+              const token = await getToken();
+              await apiRequest(
+                `/api/rides/${(ride as any).ride_id}/cancel`,
+                { method: "POST" },
+                token,
+              );
 
               Alert.alert("Cancelled", "Your trip has been cancelled.");
               // Refresh list
@@ -252,15 +245,15 @@ const Rides = () => {
           style: "destructive",
           onPress: async () => {
             try {
-              const response = await fetch("/(api)/safety/manual", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  ride_id: (ride as any).ride_id,
-                  passenger_id: user?.id,
-                }),
-              });
-              if (!response.ok) throw new Error("SOS request failed");
+              const token = await getToken();
+              await apiRequest(
+                "/api/sos",
+                {
+                  method: "POST",
+                  body: JSON.stringify({ ride_id: (ride as any).ride_id }),
+                },
+                token,
+              );
               await pollSafetyAlerts();
               Alert.alert(
                 "SOS sent",
@@ -284,11 +277,12 @@ const Rides = () => {
     status: "acknowledged" | "dismissed",
   ) => {
     const rideId = String((ride as any).ride_id);
-    await fetch(`/(api)/safety/${rideId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ passenger_id: user?.id, response, status }),
-    });
+    const token = await getToken();
+    await apiRequest(
+      `/api/sos/${rideId}`,
+      { method: "PATCH", body: JSON.stringify({ response, status }) },
+      token,
+    );
     setSafetyAlerts((current) => ({ ...current, [rideId]: null }));
   };
 
