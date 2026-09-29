@@ -309,7 +309,7 @@
 &nbsp;
 const directionsAPI = <span class="cstat-no" title="statement not covered" >process.env.EXPO_PUBLIC_DIRECTIONS_API_KEY;</span>
 &nbsp;
-export const <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >generateMarkersFromData = ({</span></span>
+export const generateMarkersFromData = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >({</span></span>
   data,
   userLatitude,
   userLongitude,
@@ -318,9 +318,9 @@ export const <span class="cstat-no" title="statement not covered" ><span class="
   userLatitude: number;
   userLongitude: number;
 }): MarkerData[] =&gt; {
-<span class="cstat-no" title="statement not covered" >  return data.<span class="fstat-no" title="function not covered" >map((d</span>river) =&gt; {</span>
-    const <span class="cstat-no" title="statement not covered" >latOffset = (Math.random() - 0.5) * 0.01; // Random offset between -0.005 and 0.005</span>
-    const <span class="cstat-no" title="statement not covered" >lngOffset = (Math.random() - 0.5) * 0.01; // Random offset between -0.005 and 0.005</span>
+<span class="cstat-no" title="statement not covered" >  return data.map(<span class="fstat-no" title="function not covered" >(d</span>river) =&gt; {</span>
+    const latOffset = <span class="cstat-no" title="statement not covered" >(Math.random() - 0.5) * 0.01;</span> // Random offset between -0.005 and 0.005
+    const lngOffset = <span class="cstat-no" title="statement not covered" >(Math.random() - 0.5) * 0.01;</span> // Random offset between -0.005 and 0.005
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    return {</span>
       latitude: userLatitude + latOffset,
@@ -331,7 +331,7 @@ export const <span class="cstat-no" title="statement not covered" ><span class="
   });
 };
 &nbsp;
-export const <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >calculateRegion = ({</span></span>
+export const calculateRegion = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >({</span></span>
   userLatitude,
   userLongitude,
   destinationLatitude,
@@ -365,11 +365,11 @@ export const <span class="cstat-no" title="statement not covered" ><span class="
   const minLng = <span class="cstat-no" title="statement not covered" >Math.min(userLongitude, destinationLongitude);</span>
   const maxLng = <span class="cstat-no" title="statement not covered" >Math.max(userLongitude, destinationLongitude);</span>
 &nbsp;
-  const <span class="cstat-no" title="statement not covered" >latitudeDelta = (maxLat - minLat) * 1.3; // Adding some padding</span>
-  const <span class="cstat-no" title="statement not covered" >longitudeDelta = (maxLng - minLng) * 1.3; // Adding some padding</span>
+  const latitudeDelta = <span class="cstat-no" title="statement not covered" >(maxLat - minLat) * 1.3;</span> // Adding some padding
+  const longitudeDelta = <span class="cstat-no" title="statement not covered" >(maxLng - minLng) * 1.3;</span> // Adding some padding
 &nbsp;
-  const <span class="cstat-no" title="statement not covered" >latitude = (userLatitude + destinationLatitude) / 2;</span>
-  const <span class="cstat-no" title="statement not covered" >longitude = (userLongitude + destinationLongitude) / 2;</span>
+  const latitude = <span class="cstat-no" title="statement not covered" >(userLatitude + destinationLatitude) / 2;</span>
+  const longitude = <span class="cstat-no" title="statement not covered" >(userLongitude + destinationLongitude) / 2;</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  return {</span>
     latitude,
@@ -379,7 +379,7 @@ export const <span class="cstat-no" title="statement not covered" ><span class="
   };
 };
 &nbsp;
-export const calculateDriverTimes = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >async ({</span></span>
+export const calculateDriverTimes = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync ({</span>
   markers,
   userLatitude,
   userLongitude,
@@ -401,22 +401,22 @@ export const calculateDriverTimes = <span class="cstat-no" title="statement not 
 <span class="cstat-no" title="statement not covered" >    return;</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  try {</span>
-    const timesPromises = <span class="cstat-no" title="statement not covered" >markers.map(<span class="fstat-no" title="function not covered" >async (m</span>arker) =&gt; {</span>
+    const timesPromises = <span class="cstat-no" title="statement not covered" >markers.map(<span class="fstat-no" title="function not covered" >as</span>ync (marker) =&gt; {</span>
       const responseToUser = <span class="cstat-no" title="statement not covered" >await fetch(</span>
         `https://maps.googleapis.com/maps/api/directions/json?origin=${marker.latitude},${marker.longitude}&amp;destination=${userLatitude},${userLongitude}&amp;key=${directionsAPI}`,
       );
       const dataToUser = <span class="cstat-no" title="statement not covered" >await responseToUser.json();</span>
-      const timeToUser = <span class="cstat-no" title="statement not covered" >dataToUser.routes[0].legs[0].duration.value; // Time in seconds</span>
+      const timeToUser = <span class="cstat-no" title="statement not covered" >dataToUser.routes[0].legs[0].duration.value;</span> // Time in seconds
 &nbsp;
       const responseToDestination = <span class="cstat-no" title="statement not covered" >await fetch(</span>
         `https://maps.googleapis.com/maps/api/directions/json?origin=${userLatitude},${userLongitude}&amp;destination=${destinationLatitude},${destinationLongitude}&amp;key=${directionsAPI}`,
       );
       const dataToDestination = <span class="cstat-no" title="statement not covered" >await responseToDestination.json();</span>
       const timeToDestination =
-<span class="cstat-no" title="statement not covered" >        dataToDestination.routes[0].legs[0].duration.value; // Time in seconds</span>
+<span class="cstat-no" title="statement not covered" >        dataToDestination.routes[0].legs[0].duration.value;</span> // Time in seconds
 &nbsp;
-      const <span class="cstat-no" title="statement not covered" >totalTime = (timeToUser + timeToDestination) / 60; // Total time in minutes</span>
-      const <span class="cstat-no" title="statement not covered" >price = (totalTime * 0.5).toFixed(2); // Calculate price based on time</span>
+      const totalTime = <span class="cstat-no" title="statement not covered" >(timeToUser + timeToDestination) / 60;</span> // Total time in minutes
+      const price = <span class="cstat-no" title="statement not covered" >(totalTime * 0.5).toFixed(2);</span> // Calculate price based on time
 &nbsp;
 <span class="cstat-no" title="statement not covered" >      return { ...marker, time: totalTime, price };</span>
     });
@@ -433,7 +433,7 @@ export const calculateDriverTimes = <span class="cstat-no" title="statement not 
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-09-09T17:55:48.782Z
+                at 2026-09-29T22:29:12.335Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
