@@ -16,20 +16,21 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import Payment from "@/components/Payment";
-import { formatDate, formatTime } from "@/lib/utils";
+import { brand, ui } from "@/constants/theme";
+import { formatTime } from "@/lib/utils";
 import { useDriverStore, useLocationStore } from "@/store";
 
 // ─── Palette ─────────────────────────────────────────────────────────────────
-const WARM = {
-  cream:    "#FBF7F0",
-  sand:     "#F4EDE1",
-  gold:     "#F5B93C",
-  goldDeep: "#E0A11E",
-  goldSoft: "#FCEBC4",
-  charcoal: "#2B2722",
-  graphite: "#4A443D",
-  muted:    "#9A928A",
-  line:     "#E7DECF",
+const PALETTE = {
+  cream: ui.bg,
+  sand: ui.surface,
+  accent: brand.accent,
+  accentDeep: brand.dark,
+  accentSoft: brand.tint,
+  charcoal: ui.ink,
+  graphite: ui.muted,
+  muted: ui.muted,
+  line: ui.border,
 };
 
 const BookRide = () => {
@@ -46,58 +47,98 @@ const BookRide = () => {
     `${driverDetails?.first_name ?? ""} ${driverDetails?.last_name ?? ""}`.trim() ||
     "Your driver";
 
-  // Trip date & time — fall back to now if the driver record is missing them
-  const rideDate =
-    (driverDetails as any)?.ride_date ??
-    (driverDetails as any)?.scheduled_for ??
-    new Date().toISOString();
-
-  const rideTimeValue =
-    (driverDetails as any)?.trip_time ??
-    (driverDetails as any)?.time ??
-    0;
-
   // ── Animations ─────────────────────────────────────────────────────────────
-  const headerFade  = useRef(new Animated.Value(0)).current;
+  const headerFade = useRef(new Animated.Value(0)).current;
   const headerSlide = useRef(new Animated.Value(-12)).current;
 
-  const driverCardFade  = useRef(new Animated.Value(0)).current;
+  const driverCardFade = useRef(new Animated.Value(0)).current;
   const driverCardSlide = useRef(new Animated.Value(20)).current;
 
-  const tripCardFade  = useRef(new Animated.Value(0)).current;
-  const tripCardSlide = useRef(new Animated.Value(24)).current;
+  const routeCardFade = useRef(new Animated.Value(0)).current;
+  const routeCardSlide = useRef(new Animated.Value(24)).current;
 
   const badgePulse = useRef(new Animated.Value(1)).current;
-  const fareGlow   = useRef(new Animated.Value(1)).current;
+  const fareGlow = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(headerFade, { toValue: 1, duration: 400, useNativeDriver: true }),
-      Animated.spring(headerSlide, { toValue: 0, tension: 68, friction: 10, useNativeDriver: true }),
+      Animated.timing(headerFade, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+      Animated.spring(headerSlide, {
+        toValue: 0,
+        tension: 68,
+        friction: 10,
+        useNativeDriver: true,
+      }),
     ]).start();
 
     Animated.parallel([
-      Animated.timing(driverCardFade, { toValue: 1, duration: 460, delay: 100, useNativeDriver: true }),
-      Animated.spring(driverCardSlide, { toValue: 0, tension: 62, friction: 11, delay: 100, useNativeDriver: true }),
+      Animated.timing(driverCardFade, {
+        toValue: 1,
+        duration: 460,
+        delay: 100,
+        useNativeDriver: true,
+      }),
+      Animated.spring(driverCardSlide, {
+        toValue: 0,
+        tension: 62,
+        friction: 11,
+        delay: 100,
+        useNativeDriver: true,
+      }),
     ]).start();
 
     Animated.parallel([
-      Animated.timing(tripCardFade, { toValue: 1, duration: 480, delay: 220, useNativeDriver: true }),
-      Animated.spring(tripCardSlide, { toValue: 0, tension: 62, friction: 11, delay: 220, useNativeDriver: true }),
+      Animated.timing(routeCardFade, {
+        toValue: 1,
+        duration: 480,
+        delay: 240,
+        useNativeDriver: true,
+      }),
+      Animated.spring(routeCardSlide, {
+        toValue: 0,
+        tension: 62,
+        friction: 11,
+        delay: 240,
+        useNativeDriver: true,
+      }),
     ]).start();
 
     Animated.loop(
       Animated.sequence([
-        Animated.timing(badgePulse, { toValue: 1.15, duration: 1200, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
-        Animated.timing(badgePulse, { toValue: 1, duration: 1200, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
-      ])
+        Animated.timing(badgePulse, {
+          toValue: 1.15,
+          duration: 1200,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+        Animated.timing(badgePulse, {
+          toValue: 1,
+          duration: 1200,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+      ]),
     ).start();
 
     Animated.loop(
       Animated.sequence([
-        Animated.timing(fareGlow, { toValue: 1.03, duration: 2200, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
-        Animated.timing(fareGlow, { toValue: 1, duration: 2200, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
-      ])
+        Animated.timing(fareGlow, {
+          toValue: 1.03,
+          duration: 2200,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+        Animated.timing(fareGlow, {
+          toValue: 1,
+          duration: 2200,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+      ]),
     ).start();
   }, []);
 
@@ -107,10 +148,10 @@ const BookRide = () => {
       merchantIdentifier="merchant.com.lyft"
       urlScheme="myapp"
     >
-      <SafeAreaView style={{ flex: 1, backgroundColor: WARM.cream }}>
-        <StatusBar barStyle="dark-content" backgroundColor={WARM.cream} />
+      <SafeAreaView style={{ flex: 1, backgroundColor: PALETTE.cream }}>
+        <StatusBar barStyle="dark-content" backgroundColor={PALETTE.cream} />
 
-        {/* ── Header ── */}
+        {/* Header */}
         <Animated.View
           style={{
             opacity: headerFade,
@@ -130,14 +171,14 @@ const BookRide = () => {
               height: 42,
               width: 42,
               borderRadius: 14,
-              backgroundColor: WARM.sand,
+              backgroundColor: PALETTE.sand,
               borderWidth: 1,
-              borderColor: WARM.line,
+              borderColor: PALETTE.line,
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <Ionicons name="chevron-back" size={20} color={WARM.charcoal} />
+            <Ionicons name="chevron-back" size={20} color={PALETTE.charcoal} />
           </TouchableOpacity>
 
           <View style={{ flex: 1 }}>
@@ -145,7 +186,7 @@ const BookRide = () => {
               style={{
                 fontSize: 11,
                 fontFamily: "Jakarta-Bold",
-                color: WARM.muted,
+                color: PALETTE.muted,
                 letterSpacing: 1.4,
                 textTransform: "uppercase",
               }}
@@ -157,7 +198,7 @@ const BookRide = () => {
                 marginTop: 2,
                 fontSize: 22,
                 fontFamily: "Jakarta-ExtraBold",
-                color: WARM.charcoal,
+                color: PALETTE.charcoal,
                 letterSpacing: -0.5,
               }}
             >
@@ -170,7 +211,7 @@ const BookRide = () => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 32 }}
         >
-          {/* ═══ Driver card ═══ */}
+          {/* Driver card */}
           <Animated.View
             style={{
               opacity: driverCardFade,
@@ -178,12 +219,12 @@ const BookRide = () => {
               alignItems: "center",
               borderRadius: 24,
               borderWidth: 1,
-              borderColor: WARM.line,
+              borderColor: PALETTE.line,
               backgroundColor: "#FFFFFF",
               paddingHorizontal: 20,
               paddingBottom: 20,
               paddingTop: 24,
-              shadowColor: WARM.charcoal,
+              shadowColor: PALETTE.charcoal,
               shadowOffset: { width: 0, height: 10 },
               shadowOpacity: 0.06,
               shadowRadius: 22,
@@ -198,7 +239,7 @@ const BookRide = () => {
                   height: 96,
                   width: 96,
                   borderRadius: 48,
-                  backgroundColor: WARM.sand,
+                  backgroundColor: PALETTE.sand,
                 }}
               />
 
@@ -212,18 +253,18 @@ const BookRide = () => {
                   borderRadius: 14,
                   borderWidth: 3,
                   borderColor: "#FFFFFF",
-                  backgroundColor: WARM.gold,
+                  backgroundColor: PALETTE.accent,
                   alignItems: "center",
                   justifyContent: "center",
                   transform: [{ scale: badgePulse }],
-                  shadowColor: WARM.goldDeep,
+                  shadowColor: PALETTE.accentDeep,
                   shadowOffset: { width: 0, height: 4 },
                   shadowOpacity: 0.35,
                   shadowRadius: 8,
                   elevation: 4,
                 }}
               >
-                <Ionicons name="checkmark" size={13} color={WARM.charcoal} />
+                <Ionicons name="checkmark" size={13} color={PALETTE.charcoal} />
               </Animated.View>
             </View>
 
@@ -232,7 +273,7 @@ const BookRide = () => {
                 marginTop: 16,
                 fontSize: 19,
                 fontFamily: "Jakarta-ExtraBold",
-                color: WARM.charcoal,
+                color: PALETTE.charcoal,
                 letterSpacing: -0.3,
               }}
             >
@@ -254,13 +295,19 @@ const BookRide = () => {
                   alignItems: "center",
                   gap: 4,
                   borderRadius: 999,
-                  backgroundColor: WARM.goldSoft,
+                  backgroundColor: PALETTE.accentSoft,
                   paddingHorizontal: 12,
                   paddingVertical: 6,
                 }}
               >
-                <Ionicons name="star" size={12} color={WARM.goldDeep} />
-                <Text style={{ fontSize: 12, fontFamily: "Jakarta-Bold", color: WARM.charcoal }}>
+                <Ionicons name="star" size={12} color={PALETTE.accentDeep} />
+                <Text
+                  style={{
+                    fontSize: 12,
+                    fontFamily: "Jakarta-Bold",
+                    color: PALETTE.charcoal,
+                  }}
+                >
                   {driverDetails?.rating ?? "4.9"}
                 </Text>
               </View>
@@ -271,21 +318,31 @@ const BookRide = () => {
                   alignItems: "center",
                   gap: 4,
                   borderRadius: 999,
-                  backgroundColor: WARM.cream,
+                  backgroundColor: PALETTE.cream,
                   borderWidth: 1,
-                  borderColor: WARM.line,
+                  borderColor: PALETTE.line,
                   paddingHorizontal: 12,
                   paddingVertical: 6,
                 }}
               >
-                <Ionicons name="people-outline" size={12} color={WARM.graphite} />
-                <Text style={{ fontSize: 12, fontFamily: "Jakarta-Bold", color: WARM.graphite }}>
+                <Ionicons
+                  name="people-outline"
+                  size={12}
+                  color={PALETTE.graphite}
+                />
+                <Text
+                  style={{
+                    fontSize: 12,
+                    fontFamily: "Jakarta-Bold",
+                    color: PALETTE.graphite,
+                  }}
+                >
                   {driverDetails?.car_seats ?? 0} seats
                 </Text>
               </View>
             </View>
 
-            {/* Car details */}
+            {/* ── CAR DETAILS ── */}
             <View
               style={{
                 marginTop: 16,
@@ -294,18 +351,19 @@ const BookRide = () => {
                 alignItems: "center",
                 gap: 14,
                 borderRadius: 20,
-                backgroundColor: WARM.cream,
+                backgroundColor: PALETTE.cream,
                 borderWidth: 1,
-                borderColor: WARM.line,
+                borderColor: PALETTE.line,
                 padding: 14,
               }}
             >
+              {/* Car image */}
               <View
                 style={{
                   height: 56,
                   width: 56,
                   borderRadius: 16,
-                  backgroundColor: WARM.sand,
+                  backgroundColor: PALETTE.sand,
                   alignItems: "center",
                   justifyContent: "center",
                   overflow: "hidden",
@@ -318,16 +376,21 @@ const BookRide = () => {
                     resizeMode="cover"
                   />
                 ) : (
-                  <Ionicons name="car-sport" size={26} color={WARM.goldDeep} />
+                  <Ionicons
+                    name="car-sport"
+                    size={26}
+                    color={PALETTE.accentDeep}
+                  />
                 )}
               </View>
 
+              {/* Model + plate */}
               <View style={{ flex: 1 }}>
                 <Text
                   style={{
                     fontSize: 14,
                     fontFamily: "Jakarta-Bold",
-                    color: WARM.charcoal,
+                    color: PALETTE.charcoal,
                   }}
                   numberOfLines={1}
                 >
@@ -345,14 +408,14 @@ const BookRide = () => {
                     borderRadius: 8,
                     backgroundColor: "#FFFFFF",
                     borderWidth: 1,
-                    borderColor: WARM.line,
+                    borderColor: PALETTE.line,
                   }}
                 >
                   <Text
                     style={{
                       fontSize: 12.5,
                       fontFamily: "Jakarta-ExtraBold",
-                      color: WARM.charcoal,
+                      color: PALETTE.charcoal,
                       letterSpacing: 1.5,
                     }}
                   >
@@ -370,9 +433,9 @@ const BookRide = () => {
                 marginTop: 20,
                 width: "100%",
                 borderRadius: 20,
-                backgroundColor: WARM.cream,
+                backgroundColor: PALETTE.cream,
                 borderWidth: 1,
-                borderColor: WARM.line,
+                borderColor: PALETTE.line,
                 padding: 16,
               }}
             >
@@ -384,15 +447,33 @@ const BookRide = () => {
                   justifyContent: "space-between",
                 }}
               >
-                <Text style={{ fontSize: 13, fontFamily: "Jakarta-Medium", color: WARM.graphite }}>
+                <Text
+                  style={{
+                    fontSize: 13,
+                    fontFamily: "Jakarta-Medium",
+                    color: PALETTE.graphite,
+                  }}
+                >
                   Pickup in
                 </Text>
-                <Text style={{ fontSize: 13, fontFamily: "Jakarta-Bold", color: WARM.charcoal }}>
+                <Text
+                  style={{
+                    fontSize: 13,
+                    fontFamily: "Jakarta-Bold",
+                    color: PALETTE.charcoal,
+                  }}
+                >
                   {formatTime(driverDetails?.time ?? 0)}
                 </Text>
               </View>
 
-              <View style={{ height: 1, backgroundColor: WARM.line, marginBottom: 12 }} />
+              <View
+                style={{
+                  height: 1,
+                  backgroundColor: PALETTE.line,
+                  marginBottom: 12,
+                }}
+              />
 
               <Animated.View
                 style={{
@@ -402,14 +483,20 @@ const BookRide = () => {
                   transform: [{ scale: fareGlow }],
                 }}
               >
-                <Text style={{ fontSize: 14, fontFamily: "Jakarta-Bold", color: WARM.graphite }}>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontFamily: "Jakarta-Bold",
+                    color: PALETTE.graphite,
+                  }}
+                >
                   Total fare
                 </Text>
                 <Text
                   style={{
                     fontSize: 22,
                     fontFamily: "Jakarta-ExtraBold",
-                    color: WARM.goldDeep,
+                    color: PALETTE.accentDeep,
                     letterSpacing: -0.5,
                   }}
                 >
@@ -419,87 +506,47 @@ const BookRide = () => {
             </View>
           </Animated.View>
 
-          {/* ═══ Trip card — date, time, pickup, drop-off ═══ */}
+          {/* Route card */}
           <Animated.View
             style={{
-              opacity: tripCardFade,
-              transform: [{ translateY: tripCardSlide }],
+              opacity: routeCardFade,
+              transform: [{ translateY: routeCardSlide }],
               marginTop: 16,
               borderRadius: 24,
               borderWidth: 1,
-              borderColor: WARM.line,
+              borderColor: PALETTE.line,
               backgroundColor: "#FFFFFF",
               padding: 20,
-              shadowColor: WARM.charcoal,
+              shadowColor: PALETTE.charcoal,
               shadowOffset: { width: 0, height: 10 },
               shadowOpacity: 0.06,
               shadowRadius: 22,
               elevation: 5,
             }}
           >
-            {/* Title — "Trip · Mon, 22 Sep" */}
-            <View
+            <Text
               style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
                 marginBottom: 16,
+                fontSize: 11,
+                fontFamily: "Jakarta-Bold",
+                color: PALETTE.muted,
+                letterSpacing: 1.4,
+                textTransform: "uppercase",
               }}
             >
-              <Text
-                style={{
-                  fontSize: 11,
-                  fontFamily: "Jakarta-Bold",
-                  color: WARM.muted,
-                  letterSpacing: 1.4,
-                  textTransform: "uppercase",
-                }}
-              >
-                Trip · {formatDate(rideDate)}
-              </Text>
+              Your route
+            </Text>
 
-              {/* Time chip */}
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 6,
-                  paddingHorizontal: 10,
-                  paddingVertical: 5,
-                  borderRadius: 999,
-                  backgroundColor: WARM.goldSoft,
-                  borderWidth: 1,
-                  borderColor: WARM.gold,
-                }}
-              >
-                <Ionicons name="time-outline" size={12} color={WARM.goldDeep} />
-                <Text
-                  style={{
-                    fontSize: 12,
-                    fontFamily: "Jakarta-Bold",
-                    color: WARM.goldDeep,
-                  }}
-                >
-                  {formatTime(rideTimeValue)}
-                </Text>
-              </View>
-            </View>
-
-            {/* Route rail with pickup + drop-off */}
             <View style={{ flexDirection: "row" }}>
               <View
-                style={{
-                  marginRight: 12,
-                  alignItems: "center",
-                  paddingTop: 6,
-                }}
+                style={{ marginRight: 12, alignItems: "center", paddingTop: 6 }}
               >
                 <View
                   style={{
                     height: 10,
                     width: 10,
                     borderRadius: 5,
-                    backgroundColor: WARM.gold,
+                    backgroundColor: PALETTE.accent,
                   }}
                 />
                 <View
@@ -507,7 +554,7 @@ const BookRide = () => {
                     width: 1.5,
                     flex: 1,
                     marginVertical: 6,
-                    backgroundColor: WARM.line,
+                    backgroundColor: PALETTE.line,
                   }}
                 />
                 <View
@@ -515,7 +562,7 @@ const BookRide = () => {
                     height: 10,
                     width: 10,
                     borderRadius: 3,
-                    backgroundColor: WARM.charcoal,
+                    backgroundColor: PALETTE.charcoal,
                   }}
                 />
               </View>
@@ -525,7 +572,7 @@ const BookRide = () => {
                   style={{
                     fontSize: 11,
                     fontFamily: "Jakarta-Bold",
-                    color: WARM.muted,
+                    color: PALETTE.muted,
                     letterSpacing: 1.2,
                     textTransform: "uppercase",
                   }}
@@ -538,7 +585,7 @@ const BookRide = () => {
                     marginBottom: 20,
                     fontSize: 14,
                     fontFamily: "Jakarta-SemiBold",
-                    color: WARM.charcoal,
+                    color: PALETTE.charcoal,
                   }}
                 >
                   {userAddress ?? "—"}
@@ -548,7 +595,7 @@ const BookRide = () => {
                   style={{
                     fontSize: 11,
                     fontFamily: "Jakarta-Bold",
-                    color: WARM.muted,
+                    color: PALETTE.muted,
                     letterSpacing: 1.2,
                     textTransform: "uppercase",
                   }}
@@ -560,7 +607,7 @@ const BookRide = () => {
                     marginTop: 2,
                     fontSize: 14,
                     fontFamily: "Jakarta-SemiBold",
-                    color: WARM.charcoal,
+                    color: PALETTE.charcoal,
                   }}
                 >
                   {destinationAddress ?? "—"}
@@ -569,7 +616,7 @@ const BookRide = () => {
             </View>
           </Animated.View>
 
-          {/* ═══ Stripe Payment ═══ */}
+          {/* Stripe Payment — this is what shows the "Confirm Ride" button */}
           <Payment
             fullName={user?.fullName!}
             email={user?.emailAddresses[0].emailAddress!}

@@ -4,25 +4,27 @@ import { Image, Pressable, Text, View } from "react-native";
 import { formatDate, formatTime } from "@/lib/utils";
 import { Ride } from "@/types/type";
 
-// ─── Palette ─────────────────────────────────────────────────────────────────
-const WARM = {
-  cream: "#FBF7F0",
-  sand: "#F4EDE1",
-  gold: "#F5B93C",
-  goldDeep: "#E0A11E",
-  goldSoft: "#FCEBC4",
-  charcoal: "#2B2722",
-  graphite: "#4A443D",
-  muted: "#9A928A",
-  line: "#E7DECF",
+// ─── Palette (dark green / black / white) ────────────────────────────────────
+const THEME = {
+  primary: "#0A3B2E", // main fill: buttons, badges, pickup dot
+  primaryDeep: "#14523F", // borders on primary
+  accent: "#1FA574", // icon tint
+  mint: "#5FD3A6", // dot on dark surfaces
+  tint: "#E4EFEA", // pale green surfaces
+  surface: "#F4F6F5", // facts strip, secondary buttons
+  ink: "#101814", // primary text
+  graphite: "#7A8580", // secondary button text
+  muted: "#7A8580", // captions
+  line: "#E3E7E5", // borders and dividers
+  onPrimary: "#FFFFFF", // text/icons on primary fill
 };
 
-// Status → warm tint mapping
+// Status → pill colours
 const STATUS: Record<string, { bg: string; text: string }> = {
-  paid: { bg: "#FCEBC4", text: "#E0A11E" }, // gold soft / gold deep
-  pending: { bg: "#FDF4E3", text: "#8A6100" }, // unchanged amber
-  failed: { bg: "#FEF3F3", text: "#B02A2A" }, // unchanged red
-  refunded: { bg: "#F4EDE1", text: "#9A928A" }, // warm sand / muted
+  paid: { bg: "#E4EFEA", text: "#0A3B2E" },
+  pending: { bg: "#E4EFEA", text: "#0A3B2E" },
+  failed: { bg: "#FEF3F3", text: "#B02A2A" },
+  refunded: { bg: "#E3E7E5", text: "#7A8580" },
 };
 
 type Props = {
@@ -59,30 +61,29 @@ const Action = ({
   onPress?: () => void;
   tone?: "default" | "primary" | "danger";
 }) => {
-  // Warm tones:
-  // primary → gold fill, charcoal text
+  // primary → dark green fill, white text
   // danger  → soft red fill, red text
-  // default → cream fill, graphite text
+  // default → light grey fill, graphite text
   const styles =
     tone === "primary"
       ? {
-          bg: WARM.gold,
-          border: WARM.goldDeep,
-          text: WARM.charcoal,
-          icon: WARM.charcoal,
+          bg: THEME.primary,
+          border: THEME.primaryDeep,
+          text: THEME.onPrimary,
+          icon: THEME.onPrimary,
         }
       : tone === "danger"
         ? {
             bg: "#FEF3F3",
-            border: "#F5D5D5",
+            border: "#FEF3F3",
             text: "#B02A2A",
             icon: "#B02A2A",
           }
         : {
-            bg: WARM.cream,
-            border: WARM.line,
-            text: WARM.graphite,
-            icon: WARM.graphite,
+            bg: THEME.surface,
+            border: THEME.line,
+            text: THEME.graphite,
+            icon: THEME.graphite,
           };
 
   return (
@@ -154,11 +155,11 @@ const RideCard = ({
         overflow: "hidden",
         borderRadius: 24,
         borderWidth: 1,
-        borderColor: WARM.line,
+        borderColor: THEME.line,
         backgroundColor: "#FFFFFF",
-        shadowColor: WARM.charcoal,
+        shadowColor: THEME.ink,
         shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.05,
+        shadowOpacity: 0.06,
         shadowRadius: 18,
         elevation: 3,
       }}
@@ -172,7 +173,7 @@ const RideCard = ({
           style={{
             height: 128,
             width: "100%",
-            backgroundColor: WARM.sand,
+            backgroundColor: THEME.tint,
           }}
         />
 
@@ -186,12 +187,12 @@ const RideCard = ({
               alignItems: "center",
               gap: 6,
               borderRadius: 999,
-              backgroundColor: WARM.gold,
+              backgroundColor: THEME.primary,
               paddingHorizontal: 12,
               paddingVertical: 6,
               borderWidth: 1,
-              borderColor: WARM.goldDeep,
-              shadowColor: WARM.goldDeep,
+              borderColor: THEME.primaryDeep,
+              shadowColor: THEME.primary,
               shadowOffset: { width: 0, height: 4 },
               shadowOpacity: 0.3,
               shadowRadius: 8,
@@ -203,14 +204,14 @@ const RideCard = ({
                 height: 6,
                 width: 6,
                 borderRadius: 3,
-                backgroundColor: WARM.charcoal,
+                backgroundColor: THEME.mint,
               }}
             />
             <Text
               style={{
                 fontSize: 11,
                 fontFamily: "Jakarta-Bold",
-                color: WARM.charcoal,
+                color: THEME.onPrimary,
               }}
             >
               Upcoming
@@ -257,7 +258,7 @@ const RideCard = ({
                 height: 10,
                 width: 10,
                 borderRadius: 5,
-                backgroundColor: WARM.gold,
+                backgroundColor: THEME.primary,
               }}
             />
             <View
@@ -265,7 +266,7 @@ const RideCard = ({
                 width: 1.5,
                 flex: 1,
                 marginVertical: 4,
-                backgroundColor: WARM.line,
+                backgroundColor: THEME.line,
               }}
             />
             <View
@@ -273,7 +274,7 @@ const RideCard = ({
                 height: 10,
                 width: 10,
                 borderRadius: 3,
-                backgroundColor: WARM.charcoal,
+                backgroundColor: THEME.ink,
               }}
             />
           </View>
@@ -283,7 +284,7 @@ const RideCard = ({
               style={{
                 fontSize: 13.5,
                 fontFamily: "Jakarta-SemiBold",
-                color: WARM.charcoal,
+                color: THEME.ink,
               }}
               numberOfLines={1}
             >
@@ -295,7 +296,7 @@ const RideCard = ({
                 marginBottom: 12,
                 fontSize: 11,
                 fontFamily: "Jakarta",
-                color: WARM.muted,
+                color: THEME.muted,
               }}
             >
               Pickup
@@ -305,7 +306,7 @@ const RideCard = ({
               style={{
                 fontSize: 13.5,
                 fontFamily: "Jakarta-SemiBold",
-                color: WARM.charcoal,
+                color: THEME.ink,
               }}
               numberOfLines={1}
             >
@@ -316,7 +317,7 @@ const RideCard = ({
                 marginTop: 2,
                 fontSize: 11,
                 fontFamily: "Jakarta",
-                color: WARM.muted,
+                color: THEME.muted,
               }}
             >
               Drop-off
@@ -332,20 +333,20 @@ const RideCard = ({
             alignItems: "center",
             justifyContent: "space-around",
             borderRadius: 18,
-            backgroundColor: WARM.cream,
+            backgroundColor: THEME.surface,
             borderWidth: 1,
-            borderColor: WARM.line,
+            borderColor: THEME.line,
             paddingVertical: 12,
           }}
         >
           <View style={{ alignItems: "center" }}>
-            <Ionicons name="time-outline" size={15} color={WARM.goldDeep} />
+            <Ionicons name="time-outline" size={15} color={THEME.accent} />
             <Text
               style={{
                 marginTop: 4,
                 fontSize: 12.5,
                 fontFamily: "Jakarta-Bold",
-                color: WARM.charcoal,
+                color: THEME.ink,
               }}
             >
               {duration != null ? formatTime(duration) : "—"}
@@ -354,7 +355,7 @@ const RideCard = ({
               style={{
                 fontSize: 10,
                 fontFamily: "Jakarta",
-                color: WARM.muted,
+                color: THEME.muted,
               }}
             >
               Duration
@@ -365,18 +366,18 @@ const RideCard = ({
             style={{
               height: 32,
               width: 1,
-              backgroundColor: WARM.line,
+              backgroundColor: THEME.line,
             }}
           />
 
           <View style={{ alignItems: "center" }}>
-            <Ionicons name="calendar-outline" size={15} color={WARM.goldDeep} />
+            <Ionicons name="calendar-outline" size={15} color={THEME.accent} />
             <Text
               style={{
                 marginTop: 4,
                 fontSize: 12.5,
                 fontFamily: "Jakarta-Bold",
-                color: WARM.charcoal,
+                color: THEME.ink,
               }}
             >
               {formatDate(whenDate)}
@@ -385,7 +386,7 @@ const RideCard = ({
               style={{
                 fontSize: 10,
                 fontFamily: "Jakarta",
-                color: WARM.muted,
+                color: THEME.muted,
               }}
             >
               {upcoming ? "Departs" : "Travelled"}
@@ -396,18 +397,18 @@ const RideCard = ({
             style={{
               height: 32,
               width: 1,
-              backgroundColor: WARM.line,
+              backgroundColor: THEME.line,
             }}
           />
 
           <View style={{ alignItems: "center" }}>
-            <Ionicons name="wallet-outline" size={15} color={WARM.goldDeep} />
+            <Ionicons name="wallet-outline" size={15} color={THEME.accent} />
             <Text
               style={{
                 marginTop: 4,
                 fontSize: 12.5,
                 fontFamily: "Jakarta-Bold",
-                color: WARM.charcoal,
+                color: THEME.ink,
               }}
             >
               R{((ride.fare_price ?? 0) / 100).toFixed(2)}
@@ -416,7 +417,7 @@ const RideCard = ({
               style={{
                 fontSize: 10,
                 fontFamily: "Jakarta",
-                color: WARM.muted,
+                color: THEME.muted,
               }}
             >
               Fare
@@ -448,17 +449,17 @@ const RideCard = ({
                 borderRadius: 18,
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: WARM.goldSoft,
+                backgroundColor: THEME.tint,
               }}
             >
-              <Ionicons name="person" size={16} color={WARM.goldDeep} />
+              <Ionicons name="person" size={16} color={THEME.primary} />
             </View>
             <View style={{ flex: 1 }}>
               <Text
                 style={{
                   fontSize: 13,
                   fontFamily: "Jakarta-Bold",
-                  color: WARM.charcoal,
+                  color: THEME.ink,
                 }}
               >
                 {driverName}
@@ -467,7 +468,7 @@ const RideCard = ({
                 style={{
                   fontSize: 11,
                   fontFamily: "Jakarta",
-                  color: WARM.muted,
+                  color: THEME.muted,
                 }}
               >
                 {carSeats ?? "—"} seats
@@ -486,12 +487,12 @@ const RideCard = ({
                 alignItems: "center",
                 justifyContent: "center",
                 borderRadius: 18,
-                backgroundColor: WARM.cream,
+                backgroundColor: THEME.surface,
                 borderWidth: 1,
-                borderColor: WARM.line,
+                borderColor: THEME.line,
               }}
             >
-              <Ionicons name="flag-outline" size={15} color={WARM.graphite} />
+              <Ionicons name="flag-outline" size={15} color={THEME.graphite} />
             </Pressable>
           )}
         </View>

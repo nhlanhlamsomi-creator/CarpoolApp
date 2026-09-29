@@ -7,21 +7,17 @@ import { Alert, Image, Text, TouchableOpacity, View } from "react-native";
 import { icons } from "@/constants";
 import { googleOAuth } from "@/lib/auth";
 
-// Warm palette — matches the welcome + sign-up screens
-const WARM = {
-  cream:    "#FBF7F0",
-  sand:     "#F4EDE1",
-  line:     "#E7DECF",
-  gold:     "#F5B93C",
-  goldDeep: "#E0A11E",
-  charcoal: "#2B2722",
-  graphite: "#4A443D",
-  muted:    "#9A928A",
+// Palette — dark green / black / white
+const THEME = {
+  ink: "#101814",
+  line: "#E3E7E5",
+  muted: "#7A8580",
+  onDark: "#FFFFFF",
 };
 
 const OAuth = ({ showDivider = false }: { showDivider?: boolean }) => {
   const { startOAuthFlow: startGoogle } = useOAuth({ strategy: "oauth_google" });
-  const { startOAuthFlow: startApple }  = useOAuth({ strategy: "oauth_apple"  });
+  const { startOAuthFlow: startApple } = useOAuth({ strategy: "oauth_apple" });
 
   const [loading, setLoading] = useState<null | "google" | "apple">(null);
 
@@ -69,44 +65,44 @@ const OAuth = ({ showDivider = false }: { showDivider?: boolean }) => {
       {/* The auth screens already draw their own divider, so this is opt-in */}
       {showDivider && (
         <View className="my-4 flex-row items-center gap-2.5">
-          <View className="h-[1px] flex-1 bg-[#E7DECF]" />
-          <Text className="text-[11.5px] font-JakartaMedium text-[#9A928A]">
+          <View className="h-[1px] flex-1 bg-[#E3E7E5]" />
+          <Text className="text-[11.5px] font-JakartaMedium text-[#7A8580]">
             or continue with
           </Text>
-          <View className="h-[1px] flex-1 bg-[#E7DECF]" />
+          <View className="h-[1px] flex-1 bg-[#E3E7E5]" />
         </View>
       )}
 
       <View className="gap-3">
-        {/* Google */}
+        {/* Google — white */}
         <TouchableOpacity
           onPress={handleGoogleSignIn}
           disabled={!!loading}
-          activeOpacity={0.82}
+          activeOpacity={0.85}
           accessibilityRole="button"
-          className={`h-[52px] w-full flex-row items-center justify-center gap-2.5 rounded-2xl border-[1.5px] border-[#E7DECF] bg-[#FBF7F0] ${
+          className={`h-[52px] w-full flex-row items-center justify-center gap-2.5 rounded-full border-[1.5px] border-[#E3E7E5] bg-white ${
             loading && loading !== "google" ? "opacity-60" : ""
           }`}
         >
           <Image source={icons.google} resizeMode="contain" className="h-5 w-5" />
-          <Text className="text-[15px] font-JakartaSemiBold text-[#2B2722]">
-            {loading === "google" ? "Connecting…" : "Continue with Google"}
+          <Text className="text-[15px] font-JakartaSemiBold text-[#101814]">
+            {loading === "google" ? "Connecting…" : "Login with Google"}
           </Text>
         </TouchableOpacity>
 
-        {/* Apple */}
+        {/* Apple — black */}
         <TouchableOpacity
           onPress={handleAppleSignIn}
           disabled={!!loading}
-          activeOpacity={0.82}
+          activeOpacity={0.85}
           accessibilityRole="button"
-          className={`h-[52px] w-full flex-row items-center justify-center gap-2.5 rounded-2xl border-[1.5px] border-[#E7DECF] bg-[#FBF7F0] ${
+          className={`h-[52px] w-full flex-row items-center justify-center gap-2.5 rounded-full border-[1.5px] border-[#101814] bg-[#101814] ${
             loading && loading !== "apple" ? "opacity-60" : ""
           }`}
         >
-          <Ionicons name="logo-apple" size={20} color={WARM.charcoal} />
-          <Text className="text-[15px] font-JakartaSemiBold text-[#2B2722]">
-            {loading === "apple" ? "Connecting…" : "Continue with Apple"}
+          <Ionicons name="logo-apple" size={20} color={THEME.onDark} />
+          <Text className="text-[15px] font-JakartaSemiBold text-white">
+            {loading === "apple" ? "Connecting…" : "Login with Apple"}
           </Text>
         </TouchableOpacity>
       </View>

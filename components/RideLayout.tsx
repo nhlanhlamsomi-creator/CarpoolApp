@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import BottomSheet, {
-  BottomSheetScrollView,
-  BottomSheetView,
+    BottomSheetScrollView,
+    BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import { router } from "expo-router";
 import React, { useRef } from "react";
@@ -20,7 +20,7 @@ type Props = {
    *  - "scroll" (default) — wraps children in BottomSheetScrollView
    *  - "view"             — fixed height, no scrolling
    *  - "list"             — renders children raw, so the screen can supply its
-   *                         own BottomSheetFlatList. Use this whenever the
+   *                     +   own BottomSheetFlatList. Use this whenever the
    *                         content is a list, or React Native warns about
    *                         VirtualizedLists nested in a ScrollView.
    */
@@ -54,7 +54,7 @@ const RideLayout = ({
   };
 
   return (
-    <GestureHandlerRootView className="flex-1 bg-[#06231A]">
+    <GestureHandlerRootView className="flex-1 bg-[#04231C]">
       <View className="flex-1">
         {/* Full-screen map */}
         <Map />
@@ -83,7 +83,7 @@ const RideLayout = ({
               {title}
             </Text>
             {!!subtitle && (
-              <Text className="mt-0.5 text-[11.5px] font-Jakarta text-[#68756F]">
+              <Text className="mt-0.5 text-[11.5px] font-Jakarta text-[#7A8580]">
                 {subtitle}
               </Text>
             )}
@@ -102,7 +102,7 @@ const RideLayout = ({
             borderTopRightRadius: 30,
           }}
           handleIndicatorStyle={{
-            backgroundColor: "#DFE6E2",
+            backgroundColor: "#E3E7E5",
             width: 44,
             height: 4,
           }}

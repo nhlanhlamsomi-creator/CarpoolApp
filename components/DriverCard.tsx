@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
 import { formatTime } from "@/lib/utils";
@@ -17,17 +16,17 @@ const DriverCard = ({ item, selected, setSelected }: DriverCardProps) => {
       accessibilityState={{ selected: isSelected }}
       className={`mb-3 flex-row items-center rounded-3xl border-[1.5px] p-3.5 ${
         isSelected
-          ? "border-[#0E5C3F] bg-[#E6F2EC]"
-          : "border-[#E2E9E5] bg-white"
+          ? "border-[#0A3B2E] bg-[#E4EFEA]"
+          : "border-[#E3E7E5] bg-white"
       }`}
     >
       {/* Avatar + verified tick */}
       <View className="relative">
         <Image
           source={{ uri: item.profile_image_url }}
-          className="h-14 w-14 rounded-2xl bg-[#EEF1F0]"
+          className="h-14 w-14 rounded-2xl bg-[#E4EFEA]"
         />
-        <View className="absolute -bottom-1 -right-1 h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-[#1FB574]">
+        <View className="absolute -bottom-1 -right-1 h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-[#1FA574]">
           <Ionicons name="checkmark" size={11} color="#fff" />
         </View>
       </View>
@@ -42,9 +41,9 @@ const DriverCard = ({ item, selected, setSelected }: DriverCardProps) => {
             {item.title}
           </Text>
 
-          <View className="flex-row items-center gap-0.5 rounded-full bg-[#F5F8F6] px-2 py-0.5">
-            <Ionicons name="star" size={11} color="#E3A008" />
-            <Text className="text-[11px] font-JakartaBold text-[#4A5450]">
+          <View className="flex-row items-center gap-0.5 rounded-full bg-[#F4F6F5] px-2 py-0.5">
+            <Ionicons name="star" size={11} color="#1FA574" />
+            <Text className="text-[11px] font-JakartaBold text-[#101814]">
               {rating > 0 ? rating.toFixed(1) : "New"}
             </Text>
           </View>
@@ -53,17 +52,17 @@ const DriverCard = ({ item, selected, setSelected }: DriverCardProps) => {
         {/* Meta chips — spaced, not pipe-separated */}
         <View className="mt-2 flex-row items-center gap-3">
           <View className="flex-row items-center gap-1">
-            <Ionicons name="time-outline" size={13} color="#68756F" />
-            <Text className="text-xs font-JakartaMedium text-[#68756F]">
+            <Ionicons name="time-outline" size={13} color="#7A8580" />
+            <Text className="text-xs font-JakartaMedium text-[#7A8580]">
               {formatTime(item.time!)}
             </Text>
           </View>
 
-          <View className="h-3 w-[1px] bg-[#E2E9E5]" />
+          <View className="h-3 w-[1px] bg-[#E3E7E5]" />
 
           <View className="flex-row items-center gap-1">
-            <Ionicons name="people-outline" size={13} color="#68756F" />
-            <Text className="text-xs font-JakartaMedium text-[#68756F]">
+            <Ionicons name="people-outline" size={13} color="#7A8580" />
+            <Text className="text-xs font-JakartaMedium text-[#7A8580]">
               {item.car_seats} seats
             </Text>
           </View>
@@ -72,7 +71,7 @@ const DriverCard = ({ item, selected, setSelected }: DriverCardProps) => {
 
       {/* Price + car */}
       <View className="items-end">
-        <Text className="text-[17px] font-JakartaExtraBold text-[#0E5C3F]">
+        <Text className="text-[17px] font-JakartaExtraBold text-[#0A3B2E]">
           R{item.price}
         </Text>
         <Image

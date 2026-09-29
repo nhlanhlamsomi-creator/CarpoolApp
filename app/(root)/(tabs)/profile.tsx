@@ -22,6 +22,7 @@ import OptionSheet, {
     SA_LANGUAGES,
     VEHICLE_OPTIONS,
 } from "@/components/OptionSheet";
+import { brand, ui } from "@/constants/theme";
 import { fetchAPI } from "@/lib/fetch";
 import {
     PickedImage,
@@ -31,16 +32,16 @@ import {
 } from "@/lib/verification";
 
 // ─── Palette ─────────────────────────────────────────────────────────────────
-const WARM = {
-  cream:    "#FBF7F0",
-  sand:     "#F4EDE1",
-  gold:     "#F5B93C",
-  goldDeep: "#E0A11E",
-  goldSoft: "#FCEBC4",
-  charcoal: "#2B2722",
-  graphite: "#4A443D",
-  muted:    "#9A928A",
-  line:     "#E7DECF",
+const PALETTE = {
+  cream: ui.bg,
+  sand: ui.surface,
+  accent: brand.accent,
+  accentDeep: brand.dark,
+  accentSoft: brand.tint,
+  charcoal: ui.ink,
+  graphite: ui.muted,
+  muted: ui.muted,
+  line: ui.border,
 };
 
 // ─── Support contacts ───────────────────────────────────────────────────────
@@ -53,7 +54,10 @@ const openLink = async (url: string) => {
   if (supported) {
     Linking.openURL(url);
   } else {
-    Alert.alert("Can't open that", "No app on this phone can handle that link.");
+    Alert.alert(
+      "Can't open that",
+      "No app on this phone can handle that link.",
+    );
   }
 };
 
@@ -168,7 +172,10 @@ const Profile = () => {
         setProfile(result.data);
       }
     } catch (error) {
-      Alert.alert("Update failed", "Your profile could not be saved right now.");
+      Alert.alert(
+        "Update failed",
+        "Your profile could not be saved right now.",
+      );
       console.warn(error);
     } finally {
       setSaving(false);
@@ -260,7 +267,9 @@ const Profile = () => {
     `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim() ||
     "Your Name";
   const emailAddress =
-    profile?.email || user?.primaryEmailAddress?.emailAddress || "Add your email";
+    profile?.email ||
+    user?.primaryEmailAddress?.emailAddress ||
+    "Add your email";
   const phoneNumber =
     profile?.phone_number ||
     profileData.phone_number ||
@@ -274,10 +283,14 @@ const Profile = () => {
       : 0;
 
   const hasPhoto = Boolean(
-    profile?.profile_image_url || profileData.profile_image_url || user?.imageUrl,
+    profile?.profile_image_url ||
+    profileData.profile_image_url ||
+    user?.imageUrl,
   );
   const hasPhone = Boolean(phoneNumber && phoneNumber !== "Add a phone number");
-  const hasId = Boolean(profile?.government_id_url || profileData.government_id_url);
+  const hasId = Boolean(
+    profile?.government_id_url || profileData.government_id_url,
+  );
   const hasSelfie = Boolean(
     profile?.selfie_image_url || profileData.selfie_image_url,
   );
@@ -315,7 +328,7 @@ const Profile = () => {
           height: 112,
           width: "100%",
           borderRadius: 24,
-          backgroundColor: WARM.sand,
+          backgroundColor: PALETTE.sand,
         }}
       />
       <View
@@ -323,7 +336,7 @@ const Profile = () => {
           marginBottom: 16,
           height: 96,
           borderRadius: 24,
-          backgroundColor: WARM.sand,
+          backgroundColor: PALETTE.sand,
         }}
       />
       <View
@@ -331,7 +344,7 @@ const Profile = () => {
           marginBottom: 16,
           height: 128,
           borderRadius: 24,
-          backgroundColor: WARM.sand,
+          backgroundColor: PALETTE.sand,
         }}
       />
       <View
@@ -339,19 +352,19 @@ const Profile = () => {
           marginBottom: 16,
           height: 96,
           borderRadius: 24,
-          backgroundColor: WARM.sand,
+          backgroundColor: PALETTE.sand,
         }}
       />
     </View>
   );
 
-  // Section header — warm palette
+  // Section header — shared green palette
   const renderSectionHeader = (
     title: string,
     section: keyof typeof expandedSections,
     iconName: string,
-    iconBgColor: string = WARM.goldSoft,
-    iconColor: string = WARM.goldDeep,
+    iconBgColor: string = PALETTE.accentSoft,
+    iconColor: string = PALETTE.accentDeep,
   ) => (
     <Pressable
       onPress={() => toggleSection(section)}
@@ -362,7 +375,7 @@ const Profile = () => {
         justifyContent: "space-between",
         borderRadius: 20,
         borderWidth: 1,
-        borderColor: WARM.line,
+        borderColor: PALETTE.line,
         backgroundColor: "#FFFFFF",
         paddingHorizontal: 16,
         paddingVertical: 12,
@@ -385,7 +398,7 @@ const Profile = () => {
           style={{
             fontSize: 15,
             fontFamily: "Jakarta-ExtraBold",
-            color: WARM.charcoal,
+            color: PALETTE.charcoal,
           }}
         >
           {title}
@@ -394,13 +407,13 @@ const Profile = () => {
       <Ionicons
         name={expandedSections[section] ? "chevron-up" : "chevron-down"}
         size={22}
-        color={WARM.muted}
+        color={PALETTE.muted}
       />
     </Pressable>
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: WARM.cream }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: PALETTE.cream }}>
       <ScrollView
         className="px-5"
         contentContainerStyle={{ paddingBottom: 140 }}
@@ -410,7 +423,7 @@ const Profile = () => {
             marginVertical: 20,
             fontSize: 24,
             fontFamily: "Jakarta-ExtraBold",
-            color: WARM.charcoal,
+            color: PALETTE.charcoal,
           }}
         >
           My profile
@@ -427,12 +440,12 @@ const Profile = () => {
                 alignItems: "center",
                 borderRadius: 24,
                 borderWidth: 1,
-                borderColor: WARM.line,
+                borderColor: PALETTE.line,
                 backgroundColor: "#FFFFFF",
                 paddingHorizontal: 20,
                 paddingBottom: 20,
                 paddingTop: 24,
-                shadowColor: WARM.charcoal,
+                shadowColor: PALETTE.charcoal,
                 shadowOffset: { width: 0, height: 10 },
                 shadowOpacity: 0.06,
                 shadowRadius: 22,
@@ -453,8 +466,8 @@ const Profile = () => {
                     width: 104,
                     borderRadius: 52,
                     borderWidth: 3,
-                    borderColor: WARM.goldSoft,
-                    backgroundColor: WARM.sand,
+                    borderColor: PALETTE.accentSoft,
+                    backgroundColor: PALETTE.sand,
                   }}
                 />
                 <Pressable
@@ -471,15 +484,15 @@ const Profile = () => {
                     borderRadius: 20,
                     borderWidth: 3,
                     borderColor: "#FFFFFF",
-                    backgroundColor: WARM.gold,
-                    shadowColor: WARM.goldDeep,
+                    backgroundColor: PALETTE.accent,
+                    shadowColor: PALETTE.accentDeep,
                     shadowOffset: { width: 0, height: 4 },
                     shadowOpacity: 0.3,
                     shadowRadius: 8,
                     elevation: 3,
                   }}
                 >
-                  <Ionicons name="camera" size={17} color={WARM.charcoal} />
+                  <Ionicons name="camera" size={17} color={PALETTE.charcoal} />
                 </Pressable>
               </View>
 
@@ -488,7 +501,7 @@ const Profile = () => {
                   marginTop: 16,
                   fontSize: 20,
                   fontFamily: "Jakarta-ExtraBold",
-                  color: WARM.charcoal,
+                  color: PALETTE.charcoal,
                   letterSpacing: -0.3,
                 }}
               >
@@ -499,7 +512,7 @@ const Profile = () => {
                   marginTop: 4,
                   fontSize: 13,
                   fontFamily: "Jakarta",
-                  color: WARM.muted,
+                  color: PALETTE.muted,
                 }}
               >
                 {emailAddress}
@@ -509,7 +522,11 @@ const Profile = () => {
             {/* ── Stats ── */}
             <View style={{ marginBottom: 20, flexDirection: "row", gap: 12 }}>
               <StatCard icon="star" label="Rating" value={rating.toFixed(1)} />
-              <StatCard icon="car-sport" label="Trips" value={String(totalTrips)} />
+              <StatCard
+                icon="car-sport"
+                label="Trips"
+                value={String(totalTrips)}
+              />
               <StatCard
                 icon="shield-checkmark"
                 label="Verified"
@@ -524,10 +541,10 @@ const Profile = () => {
                 marginBottom: 20,
                 borderRadius: 24,
                 borderWidth: 1,
-                borderColor: WARM.line,
+                borderColor: PALETTE.line,
                 backgroundColor: "#FFFFFF",
                 padding: 20,
-                shadowColor: WARM.charcoal,
+                shadowColor: PALETTE.charcoal,
                 shadowOffset: { width: 0, height: 8 },
                 shadowOpacity: 0.05,
                 shadowRadius: 18,
@@ -546,7 +563,7 @@ const Profile = () => {
                     style={{
                       fontSize: 16,
                       fontFamily: "Jakarta-ExtraBold",
-                      color: WARM.charcoal,
+                      color: PALETTE.charcoal,
                     }}
                   >
                     {progressValue === 100
@@ -559,7 +576,7 @@ const Profile = () => {
                       fontSize: 13,
                       fontFamily: "Jakarta",
                       lineHeight: 20,
-                      color: WARM.graphite,
+                      color: PALETTE.graphite,
                     }}
                   >
                     {progressValue === 100
@@ -571,7 +588,7 @@ const Profile = () => {
                   style={{
                     fontSize: 20,
                     fontFamily: "Jakarta-ExtraBold",
-                    color: WARM.goldDeep,
+                    color: PALETTE.accentDeep,
                   }}
                 >
                   {progressValue}%
@@ -584,14 +601,14 @@ const Profile = () => {
                   height: 8,
                   overflow: "hidden",
                   borderRadius: 4,
-                  backgroundColor: WARM.cream,
+                  backgroundColor: PALETTE.cream,
                 }}
               >
                 <View
                   style={{
                     height: 8,
                     borderRadius: 4,
-                    backgroundColor: WARM.gold,
+                    backgroundColor: PALETTE.accent,
                     width: `${progressValue}%`,
                   }}
                 />
@@ -614,14 +631,16 @@ const Profile = () => {
                         alignItems: "center",
                         justifyContent: "center",
                         borderRadius: 9,
-                        backgroundColor: step.done ? WARM.gold : WARM.sand,
+                        backgroundColor: step.done
+                          ? PALETTE.accent
+                          : PALETTE.sand,
                       }}
                     >
                       {step.done ? (
                         <Ionicons
                           name="checkmark"
                           size={11}
-                          color={WARM.charcoal}
+                          color={PALETTE.charcoal}
                         />
                       ) : null}
                     </View>
@@ -629,7 +648,7 @@ const Profile = () => {
                       style={{
                         fontSize: 13,
                         fontFamily: step.done ? "Jakarta-Medium" : "Jakarta",
-                        color: step.done ? WARM.charcoal : WARM.muted,
+                        color: step.done ? PALETTE.charcoal : PALETTE.muted,
                       }}
                     >
                       {step.label}
@@ -651,7 +670,7 @@ const Profile = () => {
                     style={{
                       fontSize: 13,
                       fontFamily: "Jakarta-Bold",
-                      color: WARM.goldDeep,
+                      color: PALETTE.accentDeep,
                     }}
                   >
                     Continue verification
@@ -659,7 +678,7 @@ const Profile = () => {
                   <Ionicons
                     name="arrow-forward"
                     size={14}
-                    color={WARM.goldDeep}
+                    color={PALETTE.accentDeep}
                   />
                 </View>
               )}
@@ -670,8 +689,8 @@ const Profile = () => {
               "Identity & security",
               "identitySecurity",
               "shield-checkmark",
-              WARM.goldSoft,
-              WARM.goldDeep,
+              PALETTE.accentSoft,
+              PALETTE.accentDeep,
             )}
             {expandedSections.identitySecurity && (
               <View style={{ marginBottom: 20 }}>
@@ -759,7 +778,7 @@ const Profile = () => {
                     marginBottom: 10,
                     borderRadius: 20,
                     borderWidth: 1,
-                    borderColor: WARM.line,
+                    borderColor: PALETTE.line,
                     backgroundColor: "#FFFFFF",
                     overflow: "hidden",
                   }}
@@ -771,7 +790,7 @@ const Profile = () => {
                           marginBottom: 12,
                           fontSize: 14,
                           fontFamily: "Jakarta-SemiBold",
-                          color: WARM.charcoal,
+                          color: PALETTE.charcoal,
                         }}
                       >
                         Add Emergency Contact
@@ -782,7 +801,7 @@ const Profile = () => {
                           marginBottom: 4,
                           fontSize: 12,
                           fontFamily: "Jakarta",
-                          color: WARM.muted,
+                          color: PALETTE.muted,
                         }}
                       >
                         Contact Name
@@ -792,16 +811,16 @@ const Profile = () => {
                           marginBottom: 12,
                           borderRadius: 14,
                           borderWidth: 1,
-                          borderColor: WARM.line,
-                          backgroundColor: WARM.cream,
+                          borderColor: PALETTE.line,
+                          backgroundColor: PALETTE.cream,
                           paddingHorizontal: 12,
                           paddingVertical: 10,
                           fontSize: 14,
                           fontFamily: "Jakarta",
-                          color: WARM.charcoal,
+                          color: PALETTE.charcoal,
                         }}
                         placeholder="e.g., John Doe"
-                        placeholderTextColor={WARM.muted}
+                        placeholderTextColor={PALETTE.muted}
                         value={emergencyName}
                         onChangeText={setEmergencyName}
                       />
@@ -811,7 +830,7 @@ const Profile = () => {
                           marginBottom: 4,
                           fontSize: 12,
                           fontFamily: "Jakarta",
-                          color: WARM.muted,
+                          color: PALETTE.muted,
                         }}
                       >
                         Phone Number (10+ digits)
@@ -821,16 +840,16 @@ const Profile = () => {
                           marginBottom: 12,
                           borderRadius: 14,
                           borderWidth: 1,
-                          borderColor: WARM.line,
-                          backgroundColor: WARM.cream,
+                          borderColor: PALETTE.line,
+                          backgroundColor: PALETTE.cream,
                           paddingHorizontal: 12,
                           paddingVertical: 10,
                           fontSize: 14,
                           fontFamily: "Jakarta",
-                          color: WARM.charcoal,
+                          color: PALETTE.charcoal,
                         }}
                         placeholder="e.g., 0712345678"
-                        placeholderTextColor={WARM.muted}
+                        placeholderTextColor={PALETTE.muted}
                         value={emergencyPhone}
                         onChangeText={setEmergencyPhone}
                         keyboardType="phone-pad"
@@ -843,9 +862,9 @@ const Profile = () => {
                           style={{
                             flex: 1,
                             borderRadius: 14,
-                            backgroundColor: WARM.gold,
+                            backgroundColor: PALETTE.accent,
                             borderWidth: 1.5,
-                            borderColor: WARM.goldDeep,
+                            borderColor: PALETTE.accentDeep,
                             paddingVertical: 12,
                             alignItems: "center",
                             justifyContent: "center",
@@ -855,7 +874,7 @@ const Profile = () => {
                             style={{
                               fontSize: 14,
                               fontFamily: "Jakarta-Bold",
-                              color: WARM.charcoal,
+                              color: PALETTE.charcoal,
                             }}
                           >
                             Save
@@ -871,7 +890,7 @@ const Profile = () => {
                             flex: 1,
                             borderRadius: 14,
                             borderWidth: 1,
-                            borderColor: WARM.line,
+                            borderColor: PALETTE.line,
                             backgroundColor: "#FFFFFF",
                             paddingVertical: 12,
                             alignItems: "center",
@@ -882,7 +901,7 @@ const Profile = () => {
                             style={{
                               fontSize: 14,
                               fontFamily: "Jakarta-Bold",
-                              color: WARM.graphite,
+                              color: PALETTE.graphite,
                             }}
                           >
                             Cancel
@@ -916,13 +935,13 @@ const Profile = () => {
                             alignItems: "center",
                             justifyContent: "center",
                             borderRadius: 14,
-                            backgroundColor: "#FCEBC4",
+                            backgroundColor: "#E4EFEA",
                           }}
                         >
                           <Ionicons
                             name="alert-circle-outline"
                             size={18}
-                            color="#E0A11E"
+                            color="#0A3B2E"
                           />
                         </View>
                         <View style={{ flex: 1 }}>
@@ -930,7 +949,7 @@ const Profile = () => {
                             style={{
                               fontSize: 14,
                               fontFamily: "Jakarta-SemiBold",
-                              color: WARM.charcoal,
+                              color: PALETTE.charcoal,
                             }}
                           >
                             Emergency contact
@@ -942,7 +961,7 @@ const Profile = () => {
                                   marginTop: 2,
                                   fontSize: 13,
                                   fontFamily: "Jakarta-Medium",
-                                  color: WARM.charcoal,
+                                  color: PALETTE.charcoal,
                                 }}
                               >
                                 {emergencyContact.name}
@@ -952,7 +971,7 @@ const Profile = () => {
                                   style={{
                                     fontSize: 12,
                                     fontFamily: "Jakarta",
-                                    color: WARM.muted,
+                                    color: PALETTE.muted,
                                   }}
                                 >
                                   {emergencyContact.phone}
@@ -965,7 +984,7 @@ const Profile = () => {
                                 marginTop: 2,
                                 fontSize: 13,
                                 fontFamily: "Jakarta",
-                                color: WARM.muted,
+                                color: PALETTE.muted,
                               }}
                             >
                               Add emergency contact
@@ -976,7 +995,7 @@ const Profile = () => {
                       <Ionicons
                         name="chevron-forward"
                         size={20}
-                        color={WARM.muted}
+                        color={PALETTE.muted}
                       />
                     </Pressable>
                   )}
@@ -1008,7 +1027,9 @@ const Profile = () => {
                 />
                 <SectionCard
                   title="Favourite locations"
-                  value={profileData.favorite_locations || "Add a favourite place"}
+                  value={
+                    profileData.favorite_locations || "Add a favourite place"
+                  }
                   icon="location-outline"
                   onPress={() =>
                     router.push({
@@ -1029,7 +1050,7 @@ const Profile = () => {
                     justifyContent: "space-between",
                     borderRadius: 20,
                     borderWidth: 1,
-                    borderColor: WARM.line,
+                    borderColor: PALETTE.line,
                     backgroundColor: "#FFFFFF",
                     paddingHorizontal: 16,
                     paddingVertical: 14,
@@ -1050,13 +1071,13 @@ const Profile = () => {
                         alignItems: "center",
                         justifyContent: "center",
                         borderRadius: 14,
-                        backgroundColor: WARM.goldSoft,
+                        backgroundColor: PALETTE.accentSoft,
                       }}
                     >
                       <Ionicons
                         name="notifications-outline"
                         size={18}
-                        color={WARM.goldDeep}
+                        color={PALETTE.accentDeep}
                       />
                     </View>
                     <View style={{ flex: 1 }}>
@@ -1064,7 +1085,7 @@ const Profile = () => {
                         style={{
                           fontSize: 14,
                           fontFamily: "Jakarta-SemiBold",
-                          color: WARM.charcoal,
+                          color: PALETTE.charcoal,
                         }}
                       >
                         Trip notifications
@@ -1074,7 +1095,7 @@ const Profile = () => {
                           marginTop: 2,
                           fontSize: 12,
                           fontFamily: "Jakarta",
-                          color: WARM.muted,
+                          color: PALETTE.muted,
                         }}
                       >
                         Driver updates and booking confirmations
@@ -1087,7 +1108,7 @@ const Profile = () => {
                     onValueChange={(value) =>
                       handleTogglePreference("notifications_enabled", value)
                     }
-                    trackColor={{ false: WARM.line, true: WARM.gold }}
+                    trackColor={{ false: PALETTE.line, true: PALETTE.accent }}
                     thumbColor="#FFFFFF"
                   />
                 </View>
@@ -1213,17 +1234,17 @@ const Profile = () => {
             alignItems: "center",
             gap: 8,
             borderRadius: 999,
-            backgroundColor: WARM.charcoal,
+            backgroundColor: PALETTE.charcoal,
             paddingHorizontal: 16,
             paddingVertical: 10,
-            shadowColor: WARM.charcoal,
+            shadowColor: PALETTE.charcoal,
             shadowOffset: { width: 0, height: 8 },
             shadowOpacity: 0.25,
             shadowRadius: 14,
             elevation: 6,
           }}
         >
-          <ActivityIndicator size="small" color={WARM.gold} />
+          <ActivityIndicator size="small" color={PALETTE.accent} />
           <Text
             style={{
               fontSize: 12,

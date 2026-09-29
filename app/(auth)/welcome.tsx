@@ -2,36 +2,37 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
-  Animated,
-  Dimensions,
-  Easing,
-  FlatList,
-  Image,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Animated,
+    Dimensions,
+    Easing,
+    FlatList,
+    Image,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import LogoLoader from "@/components/Logoloader";
 import { onboarding } from "@/constants";
+import { brand, ui } from "@/constants/theme";
 
 const { width, height } = Dimensions.get("window");
 
 // ─── Palette ─────────────────────────────────────────────────────────────────
-const WARM = {
-  cream:      "#FBF7F0",
-  sand:       "#F4EDE1",
-  beige:      "#EDE3D2",
-  gold:       "#F5B93C",
-  goldDeep:   "#E0A11E",
-  goldSoft:   "#FCEBC4",
-  charcoal:   "#2B2722",
-  graphite:   "#4A443D",
-  muted:      "#9A928A",
-  line:       "#E7DECF",
+const PALETTE = {
+  cream: ui.bg,
+  sand: ui.surface,
+  beige: ui.border,
+  accent: brand.accent,
+  accentDeep: brand.dark,
+  accentSoft: brand.tint,
+  charcoal: ui.ink,
+  graphite: ui.muted,
+  muted: ui.muted,
+  line: ui.border,
 };
 
 // ─── Animated Slide ──────────────────────────────────────────────────────────
@@ -64,11 +65,11 @@ function Slide({ item, index, scrollX }: any) {
   });
 
   // ── Always-on loops ────────────────────────────────────────────────────────
-  const bob       = useRef(new Animated.Value(0)).current; // vertical float
-  const spinRing  = useRef(new Animated.Value(0)).current; // outer dashed ring
+  const bob = useRef(new Animated.Value(0)).current; // vertical float
+  const spinRing = useRef(new Animated.Value(0)).current; // outer dashed ring
   const spinInner = useRef(new Animated.Value(0)).current; // inner thin ring
-  const halo      = useRef(new Animated.Value(1)).current; // breathing halo
-  const pop       = useRef(new Animated.Value(0.9)).current; // entrance pop
+  const halo = useRef(new Animated.Value(1)).current; // breathing halo
+  const pop = useRef(new Animated.Value(0.9)).current; // entrance pop
 
   // Floating accent orbs — three independent phases
   const orb1 = useRef(new Animated.Value(0)).current;
@@ -95,7 +96,7 @@ function Slide({ item, index, scrollX }: any) {
           easing: Easing.inOut(Easing.sin),
           useNativeDriver: true,
         }),
-      ])
+      ]),
     ).start();
 
     // Outer dashed ring spins one way
@@ -105,7 +106,7 @@ function Slide({ item, index, scrollX }: any) {
         duration: 28000,
         easing: Easing.linear,
         useNativeDriver: true,
-      })
+      }),
     ).start();
 
     // Inner thin ring spins the other way — depth illusion
@@ -115,7 +116,7 @@ function Slide({ item, index, scrollX }: any) {
         duration: 18000,
         easing: Easing.linear,
         useNativeDriver: true,
-      })
+      }),
     ).start();
 
     // Breathing halo
@@ -133,7 +134,7 @@ function Slide({ item, index, scrollX }: any) {
           easing: Easing.inOut(Easing.sin),
           useNativeDriver: true,
         }),
-      ])
+      ]),
     ).start();
 
     // Orbs drift on their own timelines
@@ -152,7 +153,7 @@ function Slide({ item, index, scrollX }: any) {
             easing: Easing.inOut(Easing.quad),
             useNativeDriver: true,
           }),
-        ])
+        ]),
       ).start();
 
     drift(orb1, 3200);
@@ -175,7 +176,7 @@ function Slide({ item, index, scrollX }: any) {
             easing: Easing.in(Easing.quad),
             useNativeDriver: true,
           }),
-        ])
+        ]),
       ).start();
 
     twinkle(twinkle1, 1800);
@@ -256,9 +257,11 @@ function Slide({ item, index, scrollX }: any) {
           />
 
           {/* Breathing halo behind the image */}
-          <Animated.View style={[styles.halo, { transform: [{ scale: halo }] }]} />
+          <Animated.View
+            style={[styles.halo, { transform: [{ scale: halo }] }]}
+          />
 
-          {/* Floating golden orbs */}
+          {/* Floating green accent shapes */}
           <Animated.View
             style={[
               styles.orb,
@@ -283,18 +286,30 @@ function Slide({ item, index, scrollX }: any) {
 
           {/* Twinkling sparkles */}
           <Animated.View
-            style={[styles.sparkle, styles.sparkle1, { opacity: twinkle1Opacity }]}
+            style={[
+              styles.sparkle,
+              styles.sparkle1,
+              { opacity: twinkle1Opacity },
+            ]}
           >
             <View style={styles.sparkleDot} />
           </Animated.View>
           <Animated.View
-            style={[styles.sparkle, styles.sparkle2, { opacity: twinkle2Opacity }]}
+            style={[
+              styles.sparkle,
+              styles.sparkle2,
+              { opacity: twinkle2Opacity },
+            ]}
           >
             <View style={styles.sparkleDot} />
           </Animated.View>
 
           {/* The actual illustration */}
-          <Image source={item.image} style={styles.slideImage} resizeMode="contain" />
+          <Image
+            source={item.image}
+            style={styles.slideImage}
+            resizeMode="contain"
+          />
         </Animated.View>
       </Animated.View>
     </View>
@@ -316,10 +331,10 @@ const Welcome = () => {
 
   // Sheet intro
   const sheetSlide = useRef(new Animated.Value(48)).current;
-  const sheetFade  = useRef(new Animated.Value(0)).current;
+  const sheetFade = useRef(new Animated.Value(0)).current;
 
   // Copy re-animates on every slide change
-  const copyFade  = useRef(new Animated.Value(0)).current;
+  const copyFade = useRef(new Animated.Value(0)).current;
   const copySlide = useRef(new Animated.Value(18)).current;
 
   useEffect(() => {
@@ -337,11 +352,15 @@ const Welcome = () => {
           easing: Easing.inOut(Easing.sin),
           useNativeDriver: true,
         }),
-      ])
+      ]),
     ).start();
 
     Animated.parallel([
-      Animated.timing(sheetFade, { toValue: 1, duration: 520, useNativeDriver: true }),
+      Animated.timing(sheetFade, {
+        toValue: 1,
+        duration: 520,
+        useNativeDriver: true,
+      }),
       Animated.spring(sheetSlide, {
         toValue: 0,
         tension: 62,
@@ -355,7 +374,11 @@ const Welcome = () => {
     copyFade.setValue(0);
     copySlide.setValue(18);
     Animated.parallel([
-      Animated.timing(copyFade, { toValue: 1, duration: 380, useNativeDriver: true }),
+      Animated.timing(copyFade, {
+        toValue: 1,
+        duration: 380,
+        useNativeDriver: true,
+      }),
       Animated.timing(copySlide, {
         toValue: 0,
         duration: 380,
@@ -369,7 +392,10 @@ const Welcome = () => {
     if (isLastSlide) {
       router.replace("/(auth)/sign-up");
     } else {
-      listRef.current?.scrollToIndex({ index: activeIndex + 1, animated: true });
+      listRef.current?.scrollToIndex({
+        index: activeIndex + 1,
+        animated: true,
+      });
     }
   };
 
@@ -377,15 +403,17 @@ const Welcome = () => {
 
   return (
     <View style={styles.root}>
-      <StatusBar barStyle="dark-content" backgroundColor={WARM.cream} />
+      <StatusBar barStyle="dark-content" backgroundColor={PALETTE.cream} />
 
       {/* ── Cream stage ── */}
       <View style={styles.stage}>
         <View style={styles.blobTop} />
         <View style={styles.blobRight} />
 
-        {/* Breathing golden glow — sits behind the slides */}
-        <Animated.View style={[styles.glow, { transform: [{ scale: glowPulse }] }]} />
+        {/* Breathing green glow behind the slides */}
+        <Animated.View
+          style={[styles.glow, { transform: [{ scale: glowPulse }] }]}
+        />
 
         <SafeAreaView edges={["top"]} style={styles.stageSafe}>
           <View style={styles.topBar}>
@@ -406,7 +434,11 @@ const Welcome = () => {
               activeOpacity={0.75}
             >
               <Text style={styles.skipText}>Skip</Text>
-              <Ionicons name="chevron-forward" size={13} color={WARM.graphite} />
+              <Ionicons
+                name="chevron-forward"
+                size={13}
+                color={PALETTE.graphite}
+              />
             </TouchableOpacity>
           </View>
 
@@ -424,7 +456,7 @@ const Welcome = () => {
             scrollEventThrottle={16}
             onScroll={Animated.event(
               [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-              { useNativeDriver: false }
+              { useNativeDriver: false },
             )}
             onMomentumScrollEnd={(e) => {
               const i = Math.round(e.nativeEvent.contentOffset.x / width);
@@ -479,7 +511,11 @@ const Welcome = () => {
           })}
         </View>
 
-        <TouchableOpacity style={styles.cta} onPress={goNext} activeOpacity={0.88}>
+        <TouchableOpacity
+          style={styles.cta}
+          onPress={goNext}
+          activeOpacity={0.88}
+        >
           <Text style={styles.ctaText}>
             {isLastSlide ? "Get started" : "Continue"}
           </Text>
@@ -487,7 +523,7 @@ const Welcome = () => {
             <Ionicons
               name={isLastSlide ? "checkmark" : "arrow-forward"}
               size={16}
-              color={WARM.charcoal}
+              color={PALETTE.charcoal}
             />
           </View>
         </TouchableOpacity>
@@ -502,7 +538,9 @@ const Welcome = () => {
         </TouchableOpacity>
       </Animated.View>
 
-      {booting && <LogoLoader onFinish={() => setBooting(false)} duration={2500} />}
+      {booting && (
+        <LogoLoader onFinish={() => setBooting(false)} duration={2500} />
+      )}
     </View>
   );
 };
@@ -515,12 +553,12 @@ const STAGE_HEIGHT = height * 0.52;
 const ART_SIZE = width * 0.76;
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: WARM.cream },
+  root: { flex: 1, backgroundColor: PALETTE.cream },
 
   // Stage
   stage: {
     height: STAGE_HEIGHT,
-    backgroundColor: WARM.cream,
+    backgroundColor: PALETTE.cream,
     overflow: "hidden",
   },
   stageSafe: { flex: 1 },
@@ -529,7 +567,7 @@ const styles = StyleSheet.create({
     width: width * 1.4,
     height: width * 1.4,
     borderRadius: width * 0.7,
-    backgroundColor: WARM.goldSoft,
+    backgroundColor: PALETTE.accentSoft,
     opacity: 0.55,
     top: -width * 0.85,
     left: -width * 0.2,
@@ -539,7 +577,7 @@ const styles = StyleSheet.create({
     width: width * 0.9,
     height: width * 0.9,
     borderRadius: width * 0.45,
-    backgroundColor: WARM.sand,
+    backgroundColor: PALETTE.sand,
     opacity: 0.8,
     bottom: -width * 0.4,
     right: -width * 0.35,
@@ -549,7 +587,7 @@ const styles = StyleSheet.create({
     width: width * 0.78,
     height: width * 0.78,
     borderRadius: width * 0.39,
-    backgroundColor: WARM.gold,
+    backgroundColor: PALETTE.accent,
     opacity: 0.14,
     alignSelf: "center",
     top: STAGE_HEIGHT * 0.2,
@@ -568,10 +606,10 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 12,
-    backgroundColor: WARM.gold,
+    backgroundColor: PALETTE.accent,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: WARM.goldDeep,
+    shadowColor: PALETTE.accentDeep,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
@@ -579,7 +617,7 @@ const styles = StyleSheet.create({
   },
   brandMarkImage: { width: 20, height: 20 },
   brandText: {
-    color: WARM.charcoal,
+    color: PALETTE.charcoal,
     fontSize: 17,
     fontFamily: "Jakarta-ExtraBold",
     letterSpacing: -0.3,
@@ -592,12 +630,12 @@ const styles = StyleSheet.create({
     paddingLeft: 16,
     paddingRight: 12,
     borderRadius: 999,
-    backgroundColor: WARM.sand,
+    backgroundColor: PALETTE.sand,
     borderWidth: 1,
-    borderColor: WARM.line,
+    borderColor: PALETTE.line,
   },
   skipText: {
-    color: WARM.graphite,
+    color: PALETTE.graphite,
     fontSize: 13,
     fontFamily: "Jakarta-SemiBold",
   },
@@ -650,15 +688,15 @@ const styles = StyleSheet.create({
     width: ART_SIZE * 0.86,
     height: ART_SIZE * 0.86,
     borderRadius: (ART_SIZE * 0.86) / 2,
-    backgroundColor: WARM.goldSoft,
+    backgroundColor: PALETTE.accentSoft,
     opacity: 0.55,
   },
 
-  // Floating golden orbs
+  // Floating green accent shapes
   orb: {
     position: "absolute",
     borderRadius: 999,
-    backgroundColor: WARM.gold,
+    backgroundColor: PALETTE.accent,
   },
   orb1: {
     width: 14,
@@ -673,7 +711,7 @@ const styles = StyleSheet.create({
     bottom: "22%",
     left: "8%",
     opacity: 0.7,
-    backgroundColor: WARM.goldDeep,
+    backgroundColor: PALETTE.accentDeep,
   },
   orb3: {
     width: 8,
@@ -695,20 +733,20 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: WARM.goldDeep,
+    backgroundColor: PALETTE.accentDeep,
   },
 
   // Sheet
   sheet: {
     flex: 1,
-    backgroundColor: WARM.sand,
+    backgroundColor: PALETTE.sand,
     borderTopLeftRadius: 40,
     borderTopRightRadius: 40,
     marginTop: -32,
     paddingHorizontal: 26,
     paddingTop: 16,
     paddingBottom: 30,
-    shadowColor: WARM.charcoal,
+    shadowColor: PALETTE.charcoal,
     shadowOffset: { width: 0, height: -6 },
     shadowOpacity: 0.06,
     shadowRadius: 20,
@@ -718,7 +756,7 @@ const styles = StyleSheet.create({
     width: 42,
     height: 4,
     borderRadius: 2,
-    backgroundColor: WARM.beige,
+    backgroundColor: PALETTE.beige,
     alignSelf: "center",
     marginBottom: 22,
   },
@@ -732,19 +770,19 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 999,
-    backgroundColor: WARM.goldSoft,
+    backgroundColor: PALETTE.accentSoft,
     marginBottom: 14,
   },
   stepDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: WARM.goldDeep,
+    backgroundColor: PALETTE.accentDeep,
   },
   stepLabel: {
     fontSize: 11,
     fontFamily: "Jakarta-Bold",
-    color: WARM.goldDeep,
+    color: PALETTE.accentDeep,
     letterSpacing: 1.4,
     textTransform: "uppercase",
   },
@@ -753,7 +791,7 @@ const styles = StyleSheet.create({
     fontSize: 29,
     lineHeight: 35,
     fontFamily: "Jakarta-ExtraBold",
-    color: WARM.charcoal,
+    color: PALETTE.charcoal,
     letterSpacing: -0.8,
     marginBottom: 10,
   },
@@ -761,7 +799,7 @@ const styles = StyleSheet.create({
     fontSize: 14.5,
     lineHeight: 22,
     fontFamily: "Jakarta",
-    color: WARM.graphite,
+    color: PALETTE.graphite,
   },
 
   // Dots
@@ -775,26 +813,26 @@ const styles = StyleSheet.create({
   dot: {
     height: 8,
     borderRadius: 4,
-    backgroundColor: WARM.gold,
+    backgroundColor: PALETTE.accent,
   },
 
   // CTA
   cta: {
     height: 58,
     borderRadius: 22,
-    backgroundColor: WARM.gold,
+    backgroundColor: PALETTE.accent,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 10,
-    shadowColor: WARM.goldDeep,
+    shadowColor: PALETTE.accentDeep,
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.3,
     shadowRadius: 18,
     elevation: 8,
   },
   ctaText: {
-    color: WARM.charcoal,
+    color: PALETTE.charcoal,
     fontSize: 16,
     fontFamily: "Jakarta-Bold",
     letterSpacing: 0.2,
@@ -818,11 +856,11 @@ const styles = StyleSheet.create({
   loginLabel: {
     fontSize: 14,
     fontFamily: "Jakarta",
-    color: WARM.muted,
+    color: PALETTE.muted,
   },
   loginAction: {
     fontSize: 14,
     fontFamily: "Jakarta-Bold",
-    color: WARM.charcoal,
+    color: PALETTE.charcoal,
   },
 });

@@ -1,38 +1,44 @@
+import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useMemo } from "react";
 import {
-    ActivityIndicator,
-    FlatList,
-    Image,
-    Pressable,
-    Text,
-    View,
+  ActivityIndicator,
+  FlatList,
+  Image,
+  Pressable,
+  Text,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { EmptyState } from "@/components/Cards";
-import { useApiFetch } from "@/lib/api";
+import { brand, ui } from "@/constants/theme";
+import { useFetch } from "@/lib/fetch";
 import { Ride } from "@/types/type";
 
 // ─── Palette ─────────────────────────────────────────────────────────────────
 const WARM = {
-  cream:    "#FBF7F0",
-  sand:     "#F4EDE1",
-  gold:     "#F5B93C",
-  goldDeep: "#E0A11E",
-  goldSoft: "#FCEBC4",
-  charcoal: "#2B2722",
-  graphite: "#4A443D",
-  muted:    "#9A928A",
-  line:     "#E7DECF",
+  cream: ui.bg,
+  sand: ui.surface,
+  accent: brand.accent,
+  accentDeep: brand.dark,
+  accentSoft: brand.tint,
+  charcoal: ui.ink,
+  graphite: ui.muted,
+  muted: ui.muted,
+  line: ui.border,
 };
 
 // PASSENGER APP — the Chat tab: one conversation per trip that has a driver
 // attached. Reuses the rides endpoint, so no new API is needed for the list.
 
 const Chat = () => {
-  const { data, loading, refetch } = useApiFetch<Ride[]>("/api/rides");
+  const { user } = useUser();
+
+  const state = useFetch<Ride[]>(`/(api)/ride/${user?.id}`);
+  const { data, loading } = state;
+  const refetch = (state as any).refetch as (() => void) | undefined;
 
   useFocusEffect(
     useCallback(() => {
@@ -107,10 +113,10 @@ const Chat = () => {
                     alignItems: "center",
                     justifyContent: "center",
                     borderRadius: 24,
-                    backgroundColor: WARM.goldSoft,
+                    backgroundColor: WARM.accentSoft,
                   }}
                 >
-                  <Ionicons name="person" size={20} color={WARM.goldDeep} />
+                  <Ionicons name="person" size={20} color={WARM.accentDeep} />
                 </View>
               )}
 
@@ -138,7 +144,7 @@ const Chat = () => {
                         height: 8,
                         width: 8,
                         borderRadius: 4,
-                        backgroundColor: WARM.gold,
+                        backgroundColor: WARM.accent,
                       }}
                     />
                   )}
@@ -156,11 +162,7 @@ const Chat = () => {
                 </Text>
               </View>
 
-              <Ionicons
-                name="chevron-forward"
-                size={18}
-                color={WARM.muted}
-              />
+              <Ionicons name="chevron-forward" size={18} color={WARM.muted} />
             </Pressable>
           );
         }}
@@ -179,7 +181,7 @@ const Chat = () => {
         ListEmptyComponent={
           loading ? (
             <View style={{ alignItems: "center", paddingVertical: 48 }}>
-              <ActivityIndicator size="large" color={WARM.gold} />
+              <ActivityIndicator size="large" color={WARM.accent} />
             </View>
           ) : (
             <EmptyState

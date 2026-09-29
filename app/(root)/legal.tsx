@@ -178,13 +178,13 @@ const Legal = () => {
   const sections = active === "privacy" ? PRIVACY : TERMS;
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F5F8F6]">
+    <SafeAreaView className="flex-1 bg-[#F4F6F5]">
       {/* Header */}
       <View className="flex-row items-center gap-3 px-5 pb-3 pt-2">
         <Pressable
           onPress={() => router.back()}
           hitSlop={8}
-          className="h-10 w-10 items-center justify-center rounded-xl border border-[#E2E9E5] bg-white active:opacity-70"
+          className="h-10 w-10 items-center justify-center rounded-xl border border-[#E3E7E5] bg-white active:opacity-70"
         >
           <Ionicons name="chevron-back" size={20} color="#101814" />
         </Pressable>
@@ -194,7 +194,7 @@ const Legal = () => {
       </View>
 
       {/* Tabs */}
-      <View className="mx-5 mb-4 flex-row rounded-2xl bg-[#EEF1F0] p-1">
+      <View className="mx-5 mb-4 flex-row rounded-2xl bg-[#E4EFEA] p-1">
         {(["privacy", "terms"] as const).map((key) => {
           const selected = active === key;
           return (
@@ -208,8 +208,8 @@ const Legal = () => {
               <Text
                 className={`text-[13px] ${
                   selected
-                    ? "font-JakartaBold text-[#0E5C3F]"
-                    : "font-JakartaMedium text-[#68756F]"
+                    ? "font-JakartaBold text-[#0A3B2E]"
+                    : "font-JakartaMedium text-[#7A8580]"
                 }`}
               >
                 {key === "privacy" ? "Privacy policy" : "Terms of use"}
@@ -224,18 +224,18 @@ const Legal = () => {
         contentContainerStyle={{ paddingBottom: 48 }}
         showsVerticalScrollIndicator={false}
       >
-        <Text className="mb-4 text-[11.5px] font-JakartaMedium uppercase tracking-wider text-[#9BA6A1]">
+        <Text className="mb-4 text-[11.5px] font-JakartaMedium uppercase tracking-wider text-[#A9B1AD]">
           Last updated {LAST_UPDATED}
         </Text>
 
         {sections.map((section, index) => (
           <View
             key={section.heading}
-            className="mb-3 rounded-2xl border border-[#E2E9E5] bg-white p-5"
+            className="mb-3 rounded-2xl border border-[#E3E7E5] bg-white p-5"
           >
             <View className="mb-3 flex-row items-center gap-2.5">
-              <View className="h-6 w-6 items-center justify-center rounded-lg bg-[#E6F2EC]">
-                <Text className="text-[11px] font-JakartaBold text-[#0E5C3F]">
+              <View className="h-6 w-6 items-center justify-center rounded-lg bg-[#E4EFEA]">
+                <Text className="text-[11px] font-JakartaBold text-[#0A3B2E]">
                   {index + 1}
                 </Text>
               </View>
@@ -246,8 +246,8 @@ const Legal = () => {
 
             {section.body.map((paragraph, i) => (
               <View key={i} className="mb-2.5 flex-row">
-                <View className="mr-2.5 mt-[7px] h-1.5 w-1.5 rounded-full bg-[#1FB574]" />
-                <Text className="flex-1 text-[13px] font-Jakarta leading-5 text-[#4A5450]">
+                <View className="mr-2.5 mt-[7px] h-1.5 w-1.5 rounded-full bg-[#1FA574]" />
+                <Text className="flex-1 text-[13px] font-Jakarta leading-5 text-[#7A8580]">
                   {paragraph}
                 </Text>
               </View>
@@ -255,9 +255,9 @@ const Legal = () => {
           </View>
         ))}
 
-        <View className="mt-2 flex-row gap-2.5 rounded-2xl bg-[#E6F2EC] p-4">
-          <Ionicons name="mail-outline" size={16} color="#0E5C3F" />
-          <Text className="flex-1 text-[12px] font-Jakarta leading-4 text-[#0E5C3F]">
+        <View className="mt-2 flex-row gap-2.5 rounded-2xl bg-[#E4EFEA] p-4">
+          <Ionicons name="mail-outline" size={16} color="#0A3B2E" />
+          <Text className="flex-1 text-[12px] font-Jakarta leading-4 text-[#0A3B2E]">
             Questions about any of this? Email {CONTACT_EMAIL} and we&apos;ll
             answer within five working days.
           </Text>

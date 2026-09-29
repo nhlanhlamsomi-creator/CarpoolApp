@@ -6,36 +6,37 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const brand = {
-  deep:   "#06231A", // near-black green — headers, splash        bg-[#06231A]
-  dark:   "#0E5C3F", // primary — buttons, active states          bg-[#0E5C3F]
-  mid:    "#12724F", // pressed / secondary surfaces              bg-[#12724F]
-  accent: "#1FB574", // emerald — highlights, success             bg-[#1FB574]
-  mint:   "#6FEFB4", // brightest highlight, on dark only         bg-[#6FEFB4]
-  tint:   "#E6F2EC", // pale green chips and info rows            bg-[#E6F2EC]
+  deep: "#04231C", // darkest green, splash background      bg-[#04231C]
+  dark: "#0A3B2E", // primary: buttons, active tab, hexagon  bg-[#0A3B2E]
+  mid: "#14523F", // pressed state / secondary surfaces     bg-[#14523F]
+  accent: "#1FA574", // car illustration, route pin, pulse ring bg-[#1FA574]
+  mint: "#5FD3A6", // highlight on dark surfaces only        bg-[#5FD3A6]
+  tint: "#E4EFEA", // pale green chips, pulse-ring fill      bg-[#E4EFEA]
 } as const;
 
 export const ui = {
-  bg:      "#F5F8F6", // app background
-  surface: "#FFFFFF",
-  border:  "#E2E9E5",
-  ink:     "#101814", // primary text
-  muted:   "#68756F", // secondary text
-  faint:   "#9BA6A1", // captions, placeholders
-  danger:  "#E04545",
-  dangerBg:"#FEF3F3",
-  warning: "#E3A008",
+  bg: "#F4F6F5", // app background
+  surface: "#FFFFFF", // sheets, cards, modals
+  border: "#E3E7E5", // input borders, dividers
+  ink: "#101814", // primary text
+  muted: "#7A8580", // secondary text (subtitles, descriptions)
+  faint: "#A9B1AD", // placeholders, "Lain Kali" link, inactive tabs
+  danger: "#E0575B", // route line, origin pin
+  dangerBg: "#FEF3F3",
+  warning: brand.accent, // star rating and positive highlights
+  mapBase: "#E6E6E6", // greyed map behind the sheets
+  overlay: "rgba(0,0,0,0.35)", // dim layer behind modals
 } as const;
 
-/** Status pill colours, keyed by the payment_status / trip status string. */
 export const statusStyles: Record<
   string,
   { bg: string; text: string; label: string }
 > = {
-  paid:      { bg: "#E6F2EC", text: "#0E5C3F", label: "Paid" },
-  pending:   { bg: "#FDF4E3", text: "#8A6100", label: "Pending" },
-  failed:    { bg: "#FEF3F3", text: "#B02A2A", label: "Failed" },
-  refunded:  { bg: "#EEF1F0", text: "#68756F", label: "Refunded" },
-  completed: { bg: "#E6F2EC", text: "#0E5C3F", label: "Completed" },
+  paid: { bg: "#E4EFEA", text: "#0A3B2E", label: "Paid" },
+  pending: { bg: brand.tint, text: brand.dark, label: "Pending" },
+  failed: { bg: "#FEF3F3", text: "#B02A2A", label: "Failed" },
+  refunded: { bg: "#E3E7E5", text: "#7A8580", label: "Refunded" },
+  completed: { bg: "#E4EFEA", text: "#0A3B2E", label: "Completed" },
   cancelled: { bg: "#FEF3F3", text: "#B02A2A", label: "Cancelled" },
 };
 

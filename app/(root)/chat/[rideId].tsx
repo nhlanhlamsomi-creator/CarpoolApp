@@ -1,11 +1,9 @@
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
-import * as Linking from "expo-linking";
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
     ActivityIndicator,
-    Alert,
     FlatList,
     Image,
     KeyboardAvoidingView,
@@ -17,19 +15,20 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { brand, ui } from "@/constants/theme";
 import { fetchAPI } from "@/lib/fetch";
 
 // ─── Palette ─────────────────────────────────────────────────────────────────
-const WARM = {
-  cream:    "#FBF7F0",
-  sand:     "#F4EDE1",
-  gold:     "#F5B93C",
-  goldDeep: "#E0A11E",
-  goldSoft: "#FCEBC4",
-  charcoal: "#2B2722",
-  graphite: "#4A443D",
-  muted:    "#9A928A",
-  line:     "#E7DECF",
+const PALETTE = {
+  cream: ui.bg,
+  sand: ui.surface,
+  accent: brand.accent,
+  accentDeep: brand.dark,
+  accentSoft: brand.tint,
+  charcoal: ui.ink,
+  graphite: ui.muted,
+  muted: ui.muted,
+  line: ui.border,
 };
 
 // One conversation, tied to one trip. Identical file in both apps — the API
@@ -45,14 +44,7 @@ type Message = {
 type Thread = {
   ride_id: number;
   status: string;
-  other: {
-    name: string;
-    image: string | null;
-    role: "driver" | "passenger";
-    // Optional — add these on your API if you want the call button to work
-    phone?: string | null;
-    phone_number?: string | null;
-  };
+  other: { name: string; image: string | null; role: "driver" | "passenger" };
   messages: Message[];
 };
 
@@ -66,7 +58,6 @@ const ChatThread = () => {
   const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
-  const [calling, setCalling] = useState(false);
 
   const listRef = useRef<FlatList>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -135,52 +126,12 @@ const ChatThread = () => {
     }
   };
 
-  // ── Call handler ───────────────────────────────────────────────────────────
-  // Uses the native dialer via tel: — no extra packages required.
-  const handleCall = async () => {
-    const phone = thread?.other?.phone ?? thread?.other?.phone_number ?? null;
-
-    if (!phone) {
-      Alert.alert(
-        "Phone number unavailable",
-        "We don't have a contact number for this person yet. Try messaging instead.",
-      );
-      return;
-    }
-
-    // Strip spaces, dashes, parens — keep leading + for country code
-    const cleaned = phone.replace(/[^\d+]/g, "");
-    const url = `tel:${cleaned}`;
-
-    try {
-      setCalling(true);
-      const supported = await Linking.canOpenURL(url);
-
-      if (!supported) {
-        Alert.alert(
-          "Can't place the call",
-          "This device doesn't support phone calls.",
-        );
-        return;
-      }
-
-      await Linking.openURL(url);
-    } catch (error) {
-      Alert.alert("Call failed", "Something went wrong. Please try again.");
-    } finally {
-      setCalling(false);
-    }
-  };
-
   const closed = thread?.status === "cancelled";
   const done = thread?.status === "completed";
-  const hasPhone = Boolean(
-    thread?.other?.phone ?? thread?.other?.phone_number,
-  );
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: WARM.cream }}
+      style={{ flex: 1, backgroundColor: PALETTE.cream }}
       edges={["top"]}
     >
       {/* ── Header ── */}
@@ -190,7 +141,7 @@ const ChatThread = () => {
           alignItems: "center",
           gap: 12,
           borderBottomWidth: 1,
-          borderBottomColor: WARM.line,
+          borderBottomColor: PALETTE.line,
           backgroundColor: "#FFFFFF",
           paddingHorizontal: 16,
           paddingBottom: 12,
@@ -206,12 +157,12 @@ const ChatThread = () => {
             alignItems: "center",
             justifyContent: "center",
             borderRadius: 14,
-            backgroundColor: WARM.sand,
+            backgroundColor: PALETTE.sand,
             borderWidth: 1,
-            borderColor: WARM.line,
+            borderColor: PALETTE.line,
           }}
         >
-          <Ionicons name="chevron-back" size={20} color={WARM.charcoal} />
+          <Ionicons name="chevron-back" size={20} color={PALETTE.charcoal} />
         </Pressable>
 
         {thread?.other.image ? (
@@ -221,7 +172,7 @@ const ChatThread = () => {
               height: 40,
               width: 40,
               borderRadius: 20,
-              backgroundColor: WARM.sand,
+              backgroundColor: PALETTE.sand,
             }}
           />
         ) : (
@@ -232,10 +183,10 @@ const ChatThread = () => {
               alignItems: "center",
               justifyContent: "center",
               borderRadius: 20,
-              backgroundColor: WARM.goldSoft,
+              backgroundColor: PALETTE.accentSoft,
             }}
           >
-            <Ionicons name="person" size={17} color={WARM.goldDeep} />
+            <Ionicons name="person" size={17} color={PALETTE.accentDeep} />
           </View>
         )}
 
@@ -244,7 +195,7 @@ const ChatThread = () => {
             style={{
               fontSize: 15,
               fontFamily: "Jakarta-Bold",
-              color: WARM.charcoal,
+              color: PALETTE.charcoal,
             }}
             numberOfLines={1}
           >
@@ -254,44 +205,15 @@ const ChatThread = () => {
             style={{
               fontSize: 11,
               fontFamily: "Jakarta",
-              color: WARM.muted,
+              color: PALETTE.muted,
               textTransform: "capitalize",
             }}
           >
-            {thread ? `Your ${thread.other.role} · trip #${thread.ride_id}` : ""}
+            {thread
+              ? `Your ${thread.other.role} · trip #${thread.ride_id}`
+              : ""}
           </Text>
         </View>
-
-        {/* ── Call button ── */}
-        <Pressable
-          onPress={handleCall}
-          disabled={calling}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel={`Call ${thread?.other.name ?? "contact"}`}
-          style={{
-            height: 40,
-            width: 40,
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: 14,
-            backgroundColor: calling ? WARM.goldSoft : WARM.gold,
-            borderWidth: 1.5,
-            borderColor: calling ? WARM.gold : WARM.goldDeep,
-            shadowColor: WARM.goldDeep,
-            shadowOffset: { width: 0, height: 6 },
-            shadowOpacity: calling ? 0.1 : 0.3,
-            shadowRadius: 12,
-            elevation: calling ? 2 : 5,
-            opacity: calling ? 0.65 : 1,
-          }}
-        >
-          {calling ? (
-            <ActivityIndicator size="small" color={WARM.charcoal} />
-          ) : (
-            <Ionicons name="call" size={18} color={WARM.charcoal} />
-          )}
-        </Pressable>
       </View>
 
       <KeyboardAvoidingView
@@ -303,7 +225,7 @@ const ChatThread = () => {
           <View
             style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
           >
-            <ActivityIndicator size="large" color={WARM.gold} />
+            <ActivityIndicator size="large" color={PALETTE.accent} />
           </View>
         ) : (
           <FlatList
@@ -326,10 +248,12 @@ const ChatThread = () => {
                   alignSelf: item.mine ? "flex-end" : "flex-start",
                   borderBottomRightRadius: item.mine ? 8 : 18,
                   borderBottomLeftRadius: item.mine ? 18 : 8,
-                  backgroundColor: item.mine ? WARM.gold : "#FFFFFF",
+                  backgroundColor: item.mine ? PALETTE.accent : "#FFFFFF",
                   borderWidth: item.mine ? 0 : 1,
-                  borderColor: WARM.line,
-                  shadowColor: item.mine ? WARM.goldDeep : WARM.charcoal,
+                  borderColor: PALETTE.line,
+                  shadowColor: item.mine
+                    ? PALETTE.accentDeep
+                    : PALETTE.charcoal,
                   shadowOffset: { width: 0, height: 4 },
                   shadowOpacity: item.mine ? 0.2 : 0.04,
                   shadowRadius: 10,
@@ -341,7 +265,7 @@ const ChatThread = () => {
                     fontSize: 14,
                     fontFamily: "Jakarta",
                     lineHeight: 20,
-                    color: WARM.charcoal,
+                    color: item.mine ? PALETTE.charcoal : PALETTE.charcoal,
                   }}
                 >
                   {item.body}
@@ -351,9 +275,7 @@ const ChatThread = () => {
                     marginTop: 4,
                     fontSize: 9.5,
                     fontFamily: "Jakarta",
-                    color: item.mine
-                      ? "rgba(43,39,34,0.55)"
-                      : WARM.muted,
+                    color: item.mine ? "rgba(43,39,34,0.55)" : PALETTE.muted,
                   }}
                 >
                   {new Date(item.created_at).toLocaleTimeString("en-ZA", {
@@ -378,13 +300,13 @@ const ChatThread = () => {
                     alignItems: "center",
                     justifyContent: "center",
                     borderRadius: 28,
-                    backgroundColor: WARM.goldSoft,
+                    backgroundColor: PALETTE.accentSoft,
                   }}
                 >
                   <Ionicons
                     name="chatbubble-ellipses-outline"
                     size={24}
-                    color={WARM.goldDeep}
+                    color={PALETTE.accentDeep}
                   />
                 </View>
                 <Text
@@ -394,46 +316,12 @@ const ChatThread = () => {
                     fontSize: 13,
                     fontFamily: "Jakarta",
                     lineHeight: 20,
-                    color: WARM.graphite,
+                    color: PALETTE.graphite,
                   }}
                 >
                   Say hello and confirm the pickup point. Messages stay in the
                   app for everyone&apos;s safety.
                 </Text>
-
-                {/* Quick-call prompt in empty state, if we have a number */}
-                {hasPhone ? (
-                  <Pressable
-                    onPress={handleCall}
-                    style={{
-                      marginTop: 16,
-                      flexDirection: "row",
-                      alignItems: "center",
-                      gap: 8,
-                      paddingHorizontal: 16,
-                      paddingVertical: 10,
-                      borderRadius: 14,
-                      backgroundColor: WARM.cream,
-                      borderWidth: 1.5,
-                      borderColor: WARM.line,
-                    }}
-                  >
-                    <Ionicons
-                      name="call-outline"
-                      size={15}
-                      color={WARM.goldDeep}
-                    />
-                    <Text
-                      style={{
-                        fontSize: 13,
-                        fontFamily: "Jakarta-SemiBold",
-                        color: WARM.charcoal,
-                      }}
-                    >
-                      Or call instead
-                    </Text>
-                  </Pressable>
-                ) : null}
               </View>
             }
           />
@@ -444,7 +332,7 @@ const ChatThread = () => {
           <View
             style={{
               borderTopWidth: 1,
-              borderTopColor: WARM.line,
+              borderTopColor: PALETTE.line,
               backgroundColor: "#FFFFFF",
               paddingHorizontal: 20,
               paddingVertical: 16,
@@ -455,7 +343,7 @@ const ChatThread = () => {
                 textAlign: "center",
                 fontSize: 12.5,
                 fontFamily: "Jakarta",
-                color: WARM.muted,
+                color: PALETTE.muted,
               }}
             >
               This trip was cancelled, so its chat is closed.
@@ -465,7 +353,7 @@ const ChatThread = () => {
           <View
             style={{
               borderTopWidth: 1,
-              borderTopColor: WARM.line,
+              borderTopColor: PALETTE.line,
               backgroundColor: "#FFFFFF",
               paddingHorizontal: 12,
               paddingVertical: 10,
@@ -478,7 +366,7 @@ const ChatThread = () => {
                   textAlign: "center",
                   fontSize: 11,
                   fontFamily: "Jakarta",
-                  color: WARM.muted,
+                  color: PALETTE.muted,
                 }}
               >
                 Trip completed — you can still message about lost items.
@@ -495,7 +383,7 @@ const ChatThread = () => {
                 value={draft}
                 onChangeText={setDraft}
                 placeholder="Type a message"
-                placeholderTextColor={WARM.muted}
+                placeholderTextColor={PALETTE.muted}
                 multiline
                 maxLength={2000}
                 style={{
@@ -503,13 +391,13 @@ const ChatThread = () => {
                   flex: 1,
                   borderRadius: 18,
                   borderWidth: 1.5,
-                  borderColor: WARM.line,
-                  backgroundColor: WARM.cream,
+                  borderColor: PALETTE.line,
+                  backgroundColor: PALETTE.cream,
                   paddingHorizontal: 16,
                   paddingVertical: 12,
                   fontSize: 14.5,
                   fontFamily: "Jakarta",
-                  color: WARM.charcoal,
+                  color: PALETTE.charcoal,
                 }}
               />
               <Pressable
@@ -522,11 +410,13 @@ const ChatThread = () => {
                   justifyContent: "center",
                   borderRadius: 18,
                   backgroundColor:
-                    draft.trim() && !sending ? WARM.gold : WARM.sand,
+                    draft.trim() && !sending ? PALETTE.accent : PALETTE.sand,
                   borderWidth: 1.5,
                   borderColor:
-                    draft.trim() && !sending ? WARM.goldDeep : WARM.line,
-                  shadowColor: WARM.goldDeep,
+                    draft.trim() && !sending
+                      ? PALETTE.accentDeep
+                      : PALETTE.line,
+                  shadowColor: PALETTE.accentDeep,
                   shadowOffset: { width: 0, height: 6 },
                   shadowOpacity: draft.trim() && !sending ? 0.3 : 0,
                   shadowRadius: 12,
@@ -534,12 +424,12 @@ const ChatThread = () => {
                 }}
               >
                 {sending ? (
-                  <ActivityIndicator size="small" color={WARM.charcoal} />
+                  <ActivityIndicator size="small" color={PALETTE.charcoal} />
                 ) : (
                   <Ionicons
                     name="arrow-up"
                     size={20}
-                    color={WARM.charcoal}
+                    color={PALETTE.charcoal}
                   />
                 )}
               </Pressable>

@@ -3,17 +3,18 @@ import { Pressable, Text, View } from "react-native";
 
 import { OfferTrip } from "@/types/type";
 
-// ─── Palette ─────────────────────────────────────────────────────────────────
-const WARM = {
-  cream:    "#FBF7F0",
-  sand:     "#F4EDE1",
-  gold:     "#F5B93C",
-  goldDeep: "#E0A11E",
-  goldSoft: "#FCEBC4",
-  charcoal: "#2B2722",
-  graphite: "#4A443D",
-  muted:    "#9A928A",
-  line:     "#E7DECF",
+// ─── Palette (dark green / black / white) ────────────────────────────────────
+const THEME = {
+  primary: "#0A3B2E", // book button, price text
+  primaryDeep: "#14523F", // button border
+  accent: "#1FA574", // icon tint, price chip border
+  tint: "#E4EFEA", // pale green surfaces
+  surface: "#F4F6F5", // secondary icon box
+  ink: "#101814", // primary text
+  graphite: "#7A8580", // secondary text
+  muted: "#7A8580", // captions and meta icons
+  line: "#E3E7E5", // borders and dividers
+  onPrimary: "#FFFFFF", // text/icons on primary fill
 };
 
 const formatDeparture = (date: string, time: string) => {
@@ -52,39 +53,56 @@ const OfferTripCard = ({
         marginBottom: 12,
         borderRadius: 22,
         borderWidth: 1,
-        borderColor: WARM.line,
+        borderColor: THEME.line,
         backgroundColor: "#FFFFFF",
         padding: 16,
-        shadowColor: WARM.charcoal,
+        shadowColor: THEME.ink,
         shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.05,
+        shadowOpacity: 0.06,
         shadowRadius: 14,
         elevation: 2,
       }}
     >
       {/* ── Header: from/to + price ── */}
-      <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between" }}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+        }}
+      >
         <View style={{ flex: 1, paddingRight: 12 }}>
           {/* From */}
-          <View style={{ marginBottom: 8, flexDirection: "row", alignItems: "center", gap: 8 }}>
+          <View
+            style={{
+              marginBottom: 8,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
             <View
               style={{
                 height: 26,
                 width: 26,
                 borderRadius: 9,
-                backgroundColor: WARM.goldSoft,
+                backgroundColor: THEME.tint,
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <Ionicons name="navigate-outline" size={14} color={WARM.goldDeep} />
+              <Ionicons
+                name="navigate-outline"
+                size={14}
+                color={THEME.primary}
+              />
             </View>
             <Text
               style={{
                 flex: 1,
                 fontSize: 15,
                 fontFamily: "Jakarta-Bold",
-                color: WARM.charcoal,
+                color: THEME.ink,
               }}
               numberOfLines={1}
             >
@@ -99,21 +117,25 @@ const OfferTripCard = ({
                 height: 26,
                 width: 26,
                 borderRadius: 9,
-                backgroundColor: WARM.cream,
+                backgroundColor: THEME.surface,
                 borderWidth: 1,
-                borderColor: WARM.line,
+                borderColor: THEME.line,
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <Ionicons name="location-outline" size={14} color={WARM.graphite} />
+              <Ionicons
+                name="location-outline"
+                size={14}
+                color={THEME.graphite}
+              />
             </View>
             <Text
               style={{
                 flex: 1,
                 fontSize: 15,
                 fontFamily: "Jakarta-Bold",
-                color: WARM.charcoal,
+                color: THEME.ink,
               }}
               numberOfLines={1}
             >
@@ -128,16 +150,16 @@ const OfferTripCard = ({
             paddingHorizontal: 10,
             paddingVertical: 6,
             borderRadius: 12,
-            backgroundColor: WARM.goldSoft,
+            backgroundColor: THEME.tint,
             borderWidth: 1,
-            borderColor: WARM.gold,
+            borderColor: THEME.accent,
           }}
         >
           <Text
             style={{
               fontSize: 14,
               fontFamily: "Jakarta-ExtraBold",
-              color: WARM.goldDeep,
+              color: THEME.primary,
               letterSpacing: -0.2,
             }}
           >
@@ -152,7 +174,7 @@ const OfferTripCard = ({
           marginTop: 12,
           paddingTop: 12,
           borderTopWidth: 1,
-          borderTopColor: WARM.line,
+          borderTopColor: THEME.line,
           flexDirection: "row",
           flexWrap: "wrap",
           columnGap: 16,
@@ -160,30 +182,48 @@ const OfferTripCard = ({
         }}
       >
         <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-          <Ionicons name="calendar-outline" size={14} color={WARM.muted} />
-          <Text style={{ fontSize: 11.5, fontFamily: "Jakarta", color: WARM.graphite }}>
+          <Ionicons name="calendar-outline" size={14} color={THEME.muted} />
+          <Text
+            style={{
+              fontSize: 11.5,
+              fontFamily: "Jakarta",
+              color: THEME.graphite,
+            }}
+          >
             {formatDeparture(trip.departure_date, trip.departure_time)}
           </Text>
         </View>
 
         <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-          <Ionicons name="people-outline" size={14} color={WARM.muted} />
-          <Text style={{ fontSize: 11.5, fontFamily: "Jakarta", color: WARM.graphite }}>
+          <Ionicons name="people-outline" size={14} color={THEME.muted} />
+          <Text
+            style={{
+              fontSize: 11.5,
+              fontFamily: "Jakarta",
+              color: THEME.graphite,
+            }}
+          >
             {seatsLeft} {seatsLeft === 1 ? "seat" : "seats"} left
           </Text>
         </View>
 
         {driverName && (
           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-            <Ionicons name="person-outline" size={14} color={WARM.muted} />
-            <Text style={{ fontSize: 11.5, fontFamily: "Jakarta", color: WARM.graphite }}>
+            <Ionicons name="person-outline" size={14} color={THEME.muted} />
+            <Text
+              style={{
+                fontSize: 11.5,
+                fontFamily: "Jakarta",
+                color: THEME.graphite,
+              }}
+            >
               {driverName}
             </Text>
           </View>
         )}
       </View>
 
-      {/* ── Book ride button — GOLD ── */}
+      {/* ── Book ride button ── */}
       <Pressable
         onPress={onBook}
         disabled={booking}
@@ -193,14 +233,14 @@ const OfferTripCard = ({
           marginTop: 16,
           height: 48,
           borderRadius: 16,
-          backgroundColor: booking ? WARM.goldSoft : WARM.gold,
+          backgroundColor: booking ? THEME.tint : THEME.primary,
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "center",
           gap: 8,
           borderWidth: 1.5,
-          borderColor: booking ? WARM.gold : WARM.goldDeep,
-          shadowColor: WARM.goldDeep,
+          borderColor: booking ? THEME.accent : THEME.primaryDeep,
+          shadowColor: THEME.primary,
           shadowOffset: { width: 0, height: 8 },
           shadowOpacity: booking ? 0.1 : 0.3,
           shadowRadius: 14,
@@ -212,9 +252,8 @@ const OfferTripCard = ({
           style={{
             fontSize: 14,
             fontFamily: "Jakarta-Bold",
-            color: WARM.charcoal,
+            color: booking ? THEME.primary : THEME.onPrimary,
             letterSpacing: 0.2,
-            opacity: booking ? 0.65 : 1,
           }}
         >
           {booking ? "Booking…" : "Book ride"}
@@ -226,12 +265,12 @@ const OfferTripCard = ({
               height: 22,
               width: 22,
               borderRadius: 11,
-              backgroundColor: "rgba(255,255,255,0.55)",
+              backgroundColor: "rgba(255,255,255,0.18)",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <Ionicons name="arrow-forward" size={13} color={WARM.charcoal} />
+            <Ionicons name="arrow-forward" size={13} color={THEME.onPrimary} />
           </View>
         )}
       </Pressable>

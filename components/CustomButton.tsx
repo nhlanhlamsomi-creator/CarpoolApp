@@ -9,48 +9,37 @@ type Props = ButtonProps & {
   fullWidth?: boolean;
 };
 
-// ─── Palette ─────────────────────────────────────────────────────────────────
-const WARM = {
-  cream:    "#FBF7F0",
-  sand:     "#F4EDE1",
-  gold:     "#F5B93C",
-  goldDeep: "#E0A11E",
-  goldSoft: "#FCEBC4",
-  charcoal: "#2B2722",
-  graphite: "#4A443D",
-  muted:    "#9A928A",
-  line:     "#E7DECF",
-};
-
-// ─── Background variant ──────────────────────────────────────────────────────
 const getBgVariantStyle = (variant: ButtonProps["bgVariant"]) => {
   switch (variant) {
     case "secondary":
-      return "bg-[#F4EDE1] border-[1.5px] border-[#E7DECF]";
+      return "bg-[#14523F]";
     case "danger":
-      return "bg-[#E04545]";
+      return "bg-[#E0575B]";
     case "success":
-      return "bg-[#F5B93C] border-[1.5px] border-[#E0A11E]";
+      return "bg-[#1FA574]";
     case "outline":
-      return "bg-white border-[1.5px] border-[#E7DECF]";
+      return "bg-white border-[1.5px] border-[#E3E7E5]";
+    case "ghost":
+      return "bg-[#E4EFEA]";
     default:
-      return "bg-[#F5B93C] border-[1.5px] border-[#E0A11E]";
+      return "bg-[#0A3B2E]";
   }
 };
 
-// ─── Text variant ────────────────────────────────────────────────────────────
 const getTextVariantStyle = (variant: ButtonProps["textVariant"]) => {
   switch (variant) {
     case "primary":
-      return "text-[#2B2722]";
+      return "text-[#101814]";
     case "secondary":
-      return "text-[#4A443D]";
+      return "text-[#7A8580]";
     case "danger":
       return "text-white";
     case "success":
-      return "text-[#2B2722]";
+      return "text-white";
+    case "brand":
+      return "text-[#0A3B2E]";
     default:
-      return "text-[#2B2722]";
+      return "text-white";
   }
 };
 
@@ -92,9 +81,12 @@ const CustomButton = ({
 }: Props) => {
   const inactive = loading || disabled;
 
-  // Only filled variants carry a shadow — outline stays flat.
+  // Only the filled primary button carries a shadow — an outline button with a
+  // drop shadow reads as a mistake.
   const elevation =
-    bgVariant === "outline" ? "" : "shadow-lg shadow-[#E0A11E]/30";
+    bgVariant === "outline" || bgVariant === "ghost"
+      ? ""
+      : "shadow-lg shadow-[#0A3B2E]/25";
 
   return (
     <TouchableOpacity
@@ -104,7 +96,7 @@ const CustomButton = ({
       accessibilityRole="button"
       accessibilityState={{ disabled: inactive, busy: loading }}
       className={`${fullWidth ? "w-full" : "self-start"} rounded-2xl flex-row items-center justify-center gap-2 ${getSizeStyle(
-        size
+        size,
       )} ${getBgVariantStyle(bgVariant)} ${elevation} ${
         inactive ? "opacity-60" : ""
       } ${className}`}
@@ -113,7 +105,11 @@ const CustomButton = ({
       {loading ? (
         <ActivityIndicator
           size="small"
-          color={bgVariant === "outline" ? "#E0A11E" : "#2B2722"}
+          color={
+            bgVariant === "outline" || bgVariant === "ghost"
+              ? "#0A3B2E"
+              : "#FFFFFF"
+          }
         />
       ) : (
         IconLeft && <IconLeft />
@@ -121,7 +117,7 @@ const CustomButton = ({
 
       <Text
         className={`font-JakartaBold ${getTextSize(size)} ${getTextVariantStyle(
-          textVariant
+          textVariant,
         )}`}
       >
         {title}
