@@ -42,3 +42,12 @@ app-example
 /ios
 /android
 .env
+
+# Coverage reports
+coverage/
+*.lcov
+lcov.info
+
+# IDE
+.idea/
+.vscode/

@@ -1,5 +1,5 @@
 {
-  "name": "lyft-driver",
+  "name": "lyft-passenger",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
@@ -12,6 +12,28 @@
     "test": "jest --runInBand --watch=false",
     "coverage": "jest --runInBand --coverage --watch=false"
   },
+  "jest": {
+  "preset": "react-native",
+  "testPathIgnorePatterns": [
+    "/node_modules/",
+    "tests/checkIdService.test.ts",
+    "tests/kmeans.test.ts",
+    "tests/passwordHash.test.ts",
+    "tests/safety.test.ts"
+  ],
+  "moduleNameMapper": {
+    "^@/(.*)$": "<rootDir>/$1"
+  },
+  "transformIgnorePatterns": [
+    "node_modules/(?!(@react-native|react-native|expo|@expo|@clerk|@stripe|@supabase|nativewind|react-native-css-interop)/)"
+  ],
+  "collectCoverageFrom": [
+    "lib/**/*.{js,jsx,ts,tsx}",
+    "app/**/*.{js,jsx,ts,tsx}",
+    "!**/*.test.{js,jsx,ts,tsx}",
+    "!**/node_modules/**"
+  ]
+},
   "dependencies": {
     "@babel/core": "^7.29.7",
     "@clerk/backend": "^3.16.13",
