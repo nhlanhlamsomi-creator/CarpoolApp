@@ -1,4 +1,4 @@
-import { useUser } from "@clerk/clerk-expo";
+import { useAuth, useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
@@ -75,6 +75,7 @@ const STATUS_BANNER: Record<
 };
 
 const Verification = () => {
+  const { getToken } = useAuth();
   const { user } = useUser();
 
   const [status, setStatus] = useState<VerificationStatus>("not_submitted");
@@ -197,7 +198,7 @@ const Verification = () => {
 
     setVerifyingId(true);
     try {
-      const result = await verifySouthAfricanID(normalisedId);
+      const result = await verifySouthAfricanID(normalisedId, await getToken());
 
       if (!result.isValid) {
         setIdVerification(null);

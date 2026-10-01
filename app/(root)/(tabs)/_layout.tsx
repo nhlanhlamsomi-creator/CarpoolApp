@@ -103,14 +103,6 @@ export default function Layout() {
         }}
       />
       <Tabs.Screen
-        name="earnings"
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <TabIcon source={icons.dollar} label="Earnings" focused={focused} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="chat"
         options={{
           tabBarIcon: ({ focused }) => (

@@ -12,7 +12,9 @@ export const requireAuth: RequestHandler = async (request, response, next) => {
 
   const secretKey = process.env.CLERK_SECRET_KEY;
   if (!secretKey) {
-    response.status(500).json({ error: "Authentication is not configured" });
+    response.status(500).json({
+      error: "Authentication is not configured. Set CLERK_SECRET_KEY in Render.",
+    });
     return;
   }
 

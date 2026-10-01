@@ -1,3 +1,5 @@
+import { fetchAPI } from "./fetch";
+
 export interface CheckIdResponse {
   idNumber: string;
   isValid: boolean;
@@ -17,10 +19,9 @@ export class CheckIdServiceError extends Error {
   }
 }
 
-const CHECK_ID_URL = "https://api.checkid.co.za/api/v1/validate";
-
 export async function verifySouthAfricanID(
   idNumber: string,
+  token?: string | null,
 ): Promise<CheckIdResponse> {
   const normalisedId = idNumber.replace(/\s/g, "");
 
@@ -28,40 +29,40 @@ export async function verifySouthAfricanID(
     throw new CheckIdServiceError("Invalid South African ID number", 400);
   }
 
-  const apiKey = process.env.EXPO_PUBLIC_CHECK_ID_API_KEY;
-  if (!apiKey) {
-    throw new CheckIdServiceError("ID verification is not configured");
-  }
-
-  let response: Response;
   try {
-    response = await fetch(`${CHECK_ID_URL}/${normalisedId}`, {
+    const response = await fetchAPI("/api/check-id/validate", {
+      method: "POST",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
         Accept: "application/json",
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
+      body: JSON.stringify({ idNumber: normalisedId }),
     });
-  } catch {
+
+    return {
+      idNumber: String(response.idNumber ?? normalisedId),
+      isValid: response.isValid === true,
+      dob: response.dob,
+      age: response.age,
+      gender: response.gender,
+      citizenship: response.citizenship,
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    const status = Number(/status:\s*(\d+)/i.exec(message)?.[1]);
+
+    if (Number.isInteger(status) && status > 0) {
+      throw new CheckIdServiceError(
+        status === 400
+          ? "Invalid South African ID number"
+          : status === 401
+            ? "Authentication is required to verify an ID"
+            : "ID verification service request failed",
+        status,
+      );
+    }
+
     throw new CheckIdServiceError("Unable to reach ID verification service");
   }
-
-  let result: Partial<CheckIdResponse> = {};
-  try {
-    result = await response.json();
-  } catch {
-    // The status code below still gives the UI a safe, generic outcome.
-  }
-
-  if (!response.ok) {
-    throw new CheckIdServiceError("ID verification service request failed", response.status);
-  }
-
-  return {
-    idNumber: String(result.idNumber ?? normalisedId),
-    isValid: result.isValid === true,
-    dob: result.dob,
-    age: result.age,
-    gender: result.gender,
-    citizenship: result.citizenship,
-  };
 }

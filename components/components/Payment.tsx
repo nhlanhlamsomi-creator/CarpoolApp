@@ -2,12 +2,12 @@ import { useAuth } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useStripe } from "@stripe/stripe-react-native";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Alert, Image, Pressable, Text, View } from "react-native";
 import { ReactNativeModal } from "react-native-modal";
 
 import { images } from "@/constants";
-import { fetchAPI } from "@/lib/fetch";
+import { apiRequest } from "@/lib/api";
 import { useLocationStore } from "@/store";
 import { PaymentProps } from "@/types/type";
 
@@ -41,9 +41,10 @@ const Payment = ({
     destinationLongitude,
   } = useLocationStore();
 
-  const { userId } = useAuth();
+  const { getToken } = useAuth();
   const [success, setSuccess] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const paymentIntentId = useRef<string | null>(null);
 
   const openPaymentSheet = async () => {
     try {
@@ -55,6 +56,30 @@ const Payment = ({
       if (error) {
         Alert.alert(`Error code: ${error.code}`, error.message);
       } else {
+        const token = await getToken();
+        if (!token || !paymentIntentId.current) {
+          throw new Error("Payment confirmation could not be verified.");
+        }
+
+        await apiRequest(
+          "/api/rides",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              origin_address: userAddress,
+              destination_address: destinationAddress,
+              origin_latitude: userLatitude,
+              origin_longitude: userLongitude,
+              destination_latitude: destinationLatitude,
+              destination_longitude: destinationLongitude,
+              ride_time: rideTime.toFixed(0),
+              fare_price: Math.round(Number(amount) * 100),
+              driver_id: driverId,
+              payment_intent_id: paymentIntentId.current,
+            }),
+          },
+          token,
+        );
         setSuccess(true);
       }
     } catch (err: any) {
@@ -65,73 +90,52 @@ const Payment = ({
   };
 
   const initializePaymentSheet = async () => {
+    paymentIntentId.current = null;
     const { error } = await initPaymentSheet({
       merchantDisplayName: "LYFT",
       intentConfiguration: {
         mode: {
           amount: Math.round(Number(amount) * 100),
-          currencyCode: "usd",
+          currencyCode: "ZAR",
         },
         confirmHandler: async (
-          paymentMethod,
-          shouldSavePaymentMethod,
+          _paymentMethod,
+          _shouldSavePaymentMethod,
           intentCreationCallback,
         ) => {
-          const { paymentIntent, customer } = await fetchAPI(
-            "/(api)/(stripe)/create",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                name: fullName || email.split("@")[0],
-                email: email,
-                amount: Number(amount),
-                paymentMethodId: paymentMethod.id,
-              }),
-            },
-          );
+          try {
+            const token = await getToken();
+            if (!token) throw new Error("Sign in to complete payment.");
 
-          if (paymentIntent.client_secret) {
-            const { result } = await fetchAPI("/(api)/(stripe)/pay", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                payment_method_id: paymentMethod.id,
-                payment_intent_id: paymentIntent.id,
-                customer_id: customer,
-                client_secret: paymentIntent.client_secret,
-              }),
-            });
-
-            if (result.client_secret) {
-              await fetchAPI("/(api)/ride/create", {
+            const { paymentIntent } = await apiRequest<{
+              paymentIntent: { id: string; client_secret: string | null };
+            }>(
+              "/api/payments/intents",
+              {
                 method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
                 body: JSON.stringify({
-                  origin_address: userAddress,
-                  destination_address: destinationAddress,
-                  origin_latitude: userLatitude,
-                  origin_longitude: userLongitude,
-                  destination_latitude: destinationLatitude,
-                  destination_longitude: destinationLongitude,
-                  ride_time: rideTime.toFixed(0),
-                  fare_price: Math.round(Number(amount) * 100),
-                  payment_status: "paid",
-                  driver_id: driverId,
-                  user_id: userId,
+                  name: fullName || email.split("@")[0],
+                  email,
+                  amount: Number(amount),
                 }),
-              });
+              },
+              token,
+            );
 
-              intentCreationCallback({
-                clientSecret: result.client_secret,
-              });
+            if (!paymentIntent.client_secret) {
+              throw new Error("Payment provider did not return a client secret.");
             }
+
+            paymentIntentId.current = paymentIntent.id;
+            intentCreationCallback({ clientSecret: paymentIntent.client_secret });
+          } catch (requestError) {
+            const message =
+              requestError instanceof Error
+                ? requestError.message
+                : "Unable to create a payment intent.";
+            intentCreationCallback({
+              error: { code: "Failed", message, localizedMessage: message },
+            });
           }
         },
       },

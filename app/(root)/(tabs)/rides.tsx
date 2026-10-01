@@ -416,7 +416,9 @@ const Rides = () => {
             <EmptyState
               icon="cloud-offline-outline"
               title="Couldn't load your trips"
-              message="Check your connection and pull down to try again."
+              message={error}
+              actionLabel="Retry"
+              onAction={refetch}
             />
           ) : tab === "upcoming" ? (
             <EmptyState

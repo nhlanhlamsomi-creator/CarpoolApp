@@ -8,33 +8,20 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const rideId = number(body.ride_id);
-      const { data: existingAlert, error: alertLookupError } = await supabase
-        .from("safety_alerts")
-        .select("id")
-        .eq("ride_id", rideId)
-        .eq("trigger_source", "AUTOMATED")
-        .in("status", ["open", "acknowledged"])
-        .maybeSingle();
-      if (alertLookupError) throw alertLookupError;
-
-      if (!existingAlert) {
-        const { error: alertInsertError } = await supabase.from("safety_alerts").insert({
-          ride_id: rideId,
-          passenger_id: ride.user_id,
-          driver_id: ride.driver_id,
-          trigger_source: "AUTOMATED",
-          severity: "high",
-          latitude,
-          longitude,
-          reason: anomaly.reason,
-          route_deviation_meters: anomaly.deviationMeters,
-          status: "open",
-        });
-        if (alertInsertError) throw alertInsertError;
-      }
+    const driverId = number(body.driver_id);
+    const latitude = number(body.latitude);
+    const longitude = number(body.longitude);
+    const recordedAt = body.recorded_at
       ? new Date(body.recorded_at)
       : new Date();
+
     if (
+      !Number.isSafeInteger(rideId) ||
+      rideId <= 0 ||
+      !Number.isSafeInteger(driverId) ||
+      driverId <= 0 ||
+      !Number.isFinite(latitude) ||
+      !Number.isFinite(longitude) ||
       Number.isNaN(recordedAt.getTime()) ||
       latitude < -90 ||
       latitude > 90 ||

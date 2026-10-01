@@ -53,6 +53,7 @@
     "react-dom": "19.2.3",
     "react-native": "0.86.3",
     "react-native-gesture-handler": "~2.32.0",
+    "react-native-google-places-autocomplete": "^2.6.5",
     "react-native-maps": "1.27.2",
     "react-native-maps-directions": "^1.9.0",
     "react-native-modal": "^14.0.0-rc.1",

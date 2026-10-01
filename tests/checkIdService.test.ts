@@ -1,24 +1,27 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
     CheckIdServiceError,
     verifySouthAfricanID,
 } from "../lib/checkIdService";
 
-const originalApiKey = process.env.EXPO_PUBLIC_CHECK_ID_API_KEY;
+const originalApiUrl = process.env.EXPO_PUBLIC_API_URL;
+
+beforeEach(() => {
+  process.env.EXPO_PUBLIC_API_URL = "https://api.example.test";
+});
 
 afterEach(() => {
   vi.restoreAllMocks();
-  if (originalApiKey === undefined) {
-    delete process.env.EXPO_PUBLIC_CHECK_ID_API_KEY;
+  if (originalApiUrl === undefined) {
+    delete process.env.EXPO_PUBLIC_API_URL;
   } else {
-    process.env.EXPO_PUBLIC_CHECK_ID_API_KEY = originalApiKey;
+    process.env.EXPO_PUBLIC_API_URL = originalApiUrl;
   }
 });
 
 describe("Check ID service", () => {
-  it("normalises the ID and returns a valid API response", async () => {
-    process.env.EXPO_PUBLIC_CHECK_ID_API_KEY = "test-key";
+  it("normalises the ID and sends it with the session to Render", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(
         JSON.stringify({
@@ -33,17 +36,19 @@ describe("Check ID service", () => {
       ),
     );
 
-    await expect(verifySouthAfricanID("890307 5555 083")).resolves.toMatchObject({
-      isValid: true,
-      age: 35,
-    });
+    await expect(
+      verifySouthAfricanID("890307 5555 083", "test-session-token"),
+    ).resolves.toMatchObject({ isValid: true, age: 35 });
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://api.checkid.co.za/api/v1/validate/8903075555083",
+      "https://api.example.test/api/check-id/validate",
       expect.objectContaining({
+        method: "POST",
         headers: {
-          Authorization: "Bearer test-key",
           Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: "Bearer test-session-token",
         },
+        body: JSON.stringify({ idNumber: "8903075555083" }),
       }),
     );
   });
@@ -58,7 +63,6 @@ describe("Check ID service", () => {
   });
 
   it("returns an invalid result when Check ID rejects the number", async () => {
-    process.env.EXPO_PUBLIC_CHECK_ID_API_KEY = "test-key";
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(
         JSON.stringify({ idNumber: "8903075555083", isValid: false }),
@@ -73,7 +77,6 @@ describe("Check ID service", () => {
   });
 
   it("preserves a 401 status without exposing response secrets", async () => {
-    process.env.EXPO_PUBLIC_CHECK_ID_API_KEY = "test-key";
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(null, { status: 401 }),
     );
@@ -81,13 +84,12 @@ describe("Check ID service", () => {
     await expect(verifySouthAfricanID("8903075555083")).rejects.toEqual(
       expect.objectContaining({
         status: 401,
-        message: "ID verification service request failed",
+        message: "Authentication is required to verify an ID",
       } satisfies Partial<CheckIdServiceError>),
     );
   });
 
   it("converts network failures into a service error", async () => {
-    process.env.EXPO_PUBLIC_CHECK_ID_API_KEY = "test-key";
     vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("offline"));
 
     await expect(verifySouthAfricanID("8903075555083")).rejects.toMatchObject({

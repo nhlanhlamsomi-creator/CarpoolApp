@@ -22,7 +22,8 @@ import Map from "@/components/Map";
 import OfferTripCard from "@/components/OfferTripCard";
 import RideCard from "@/components/RideCard";
 import { useApiFetch } from "@/lib/api";
-import { fetchAPI, useFetch } from "@/lib/fetch";
+import { useFetch } from "@/lib/fetch";
+import { apiRequest } from "@/lib/api";
 import {
     HUB_PROMOTION_END_HOUR,
     HUB_PROMOTION_START_HOUR,
@@ -90,7 +91,7 @@ const normalizeRecentRide = (ride: Ride) => {
 
 const Home = () => {
   const { user } = useUser();
-  const { signOut, userId } = useAuth();
+  const { getToken, signOut, userId } = useAuth();
 
   const {
     setUserLocation,
@@ -103,11 +104,13 @@ const Home = () => {
 
   const {
     data: recentRides,
+    error: recentRidesError,
     loading,
     refetch: refetchRecentRides,
   } = useApiFetch<Ride[]>("/api/rides");
   const {
     data: availableTrips,
+    error: availableTripsError,
     loading: availableTripsLoading,
     refetch: refetchAvailableTrips,
   } = useFetch<OfferTrip[]>("/(api)/offer-trip");
@@ -216,11 +219,16 @@ const Home = () => {
     setBookingTripId(trip.id);
 
     try {
-      const response = await fetchAPI("/(api)/offer-trip", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tripId: trip.id, userId }),
-      });
+      const token = await getToken();
+      if (!token) throw new Error("Sign in again to book this ride.");
+      const response = await apiRequest(
+        "/api/offer-trip",
+        {
+          method: "POST",
+          body: JSON.stringify({ tripId: trip.id }),
+        },
+        token,
+      );
 
       await Promise.all([refetchAvailableTrips(), refetchRecentRides()]);
       Alert.alert(
@@ -368,6 +376,15 @@ const Home = () => {
             {availableTripsLoading ? (
               <View className="mb-2 items-center rounded-3xl border border-[#E7DECF] bg-white py-5">
                 <ActivityIndicator size="small" color="#F5B93C" />
+              </View>
+            ) : availableTripsError ? (
+              <View className="mb-2 rounded-3xl border border-[#F1C8C5] bg-white px-4 py-5">
+                <Text className="text-center text-[12.5px] font-JakartaSemiBold text-[#A63B36]">
+                  Couldn&apos;t load available rides
+                </Text>
+                <Text className="mt-1 text-center text-[11px] font-Jakarta text-[#68756F]">
+                  {availableTripsError}
+                </Text>
               </View>
             ) : offerTrips.length > 0 ? (
               offerTrips.slice(0, 5).map((trip) => (
@@ -623,6 +640,12 @@ const Home = () => {
                 Loading your rides
               </Text>
             </View>
+          ) : recentRidesError ? (
+            <EmptyState
+              icon="cloud-offline-outline"
+              title="Couldn't load recent rides"
+              message={recentRidesError}
+            />
           ) : (
             <EmptyState
               icon="car-outline"

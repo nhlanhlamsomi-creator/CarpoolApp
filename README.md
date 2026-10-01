@@ -114,11 +114,11 @@ cd CarpoolApp
 npm install
 ```
 
-### 2. Configure Clerk
+### 2. Configure Expo and Clerk
 
 1. Create a Clerk application.
 2. Enable email/password, email verification and Google OAuth.
-3. Copy the publishable key into your `.env` file (next step).
+3. Add the Clerk publishable key to local `.env.local` and to EAS `preview` and `production` environments.
 
 ### 3. Configure Supabase
 
@@ -126,37 +126,24 @@ npm install
 2. Apply the database migrations to create the trip-related tables, views and Row Level Security policies.
 3. Keep the service-role key **server-only**. Never prefix it with `EXPO_PUBLIC_`.
 
-### 4. Create a `.env` file
+### 4. Configure local and cloud environment variables
 
-Create a `.env` file in the project root. It is git-ignored; never commit it.
+Copy `.env.example` to `.env.local` for local Expo development. The Expo app only needs public client values there. The project ignores local env files; never commit them.
 
 ```env
-# Clerk
+EXPO_PUBLIC_API_URL=https://your-render-service.onrender.com
 EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_your_key
-
-# Supabase (server-side)
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your_server_only_service_role_key
-
-# Optional public fallback for development only; do not use it for protected writes
-SUPABASE_PUBLISHABLE_KEY=your_publishable_key
-
-# Google Maps  (confirm variable name against the code)
-EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_key
-
-# Stripe test mode  (confirm variable names against the code)
+EXPO_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
+EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=your_restricted_google_maps_key
+EXPO_PUBLIC_DIRECTIONS_API_KEY=your_restricted_google_maps_key
+EXPO_PUBLIC_GEOAPIFY_API_KEY=your_restricted_geoapify_key
 EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_key
-STRIPE_SECRET_KEY=sk_test_your_server_only_key
-
-# Optional server-only Argon2id tuning values
-ARGON2_MEMORY_COST=65536
-ARGON2_TIME_COST=3
-ARGON2_PARALLELISM=4
 ```
 
-The server client also accepts these alternative Supabase names where applicable: `NEXT_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` and `SUPABASE_ANON_KEY`.
+Set the same Expo public variables in Expo dashboard environment groups `preview` (APK) and `production` (AAB). EAS builds do not receive ignored local env files. Configure backend secrets separately in Render; see [`server/.env.example`](server/.env.example) for the exact names.
 
-> **Never** expose `SUPABASE_SERVICE_ROLE_KEY`, `STRIPE_SECRET_KEY` or any other secret through an `EXPO_PUBLIC_` variable. Those values are bundled into the mobile app.
+> **Never** put `SUPABASE_SERVICE_ROLE_KEY`, `STRIPE_SECRET_KEY`, `CLERK_SECRET_KEY`, or the Check ID key in an `EXPO_PUBLIC_` variable. Expo public variables are embedded in the mobile app.
 
 ### 5. Run the app
 
@@ -335,17 +322,12 @@ The password tests cover Argon2id output, correct and incorrect verification, un
 
 ### Check ID verification
 
-The existing identity-verification screen uses [`lib/checkIdService.ts`](lib/checkIdService.ts)
-to call Check ID's `GET /api/v1/validate/{idNumber}` endpoint after normalizing a 13-digit
-South African ID number.
+The identity-verification screen sends a normalized 13-digit South African ID number
+to the authenticated Render endpoint `POST /api/check-id/validate`. Render calls Check ID.
 
-Add this development/test variable to `.env`:
+Add the provider key to Render as `CHECK_ID_API_KEY` (and to `server/.env` for local
+backend development). Do not add it to Expo or an `EXPO_PUBLIC_*` variable.
 
-```env
-EXPO_PUBLIC_CHECK_ID_API_KEY=YOUR_CHECK_ID_TEST_KEY
-```
-
-Do not include `Bearer` in the value. The `.env` file is already git-ignored. Run
 [`migrations/profile-migration.sql`](migrations/profile-migration.sql) in Supabase; it adds
 `users.id_verified`, which is set to `true` after a successful Check ID response. No
 `drivers` table change is needed because the current identity-verification flow stores
@@ -360,15 +342,12 @@ npx expo start -c
 
 Enter a valid 13-digit ID and press **Verify ID** to see `ID Verified` and the returned
 date of birth, age, gender, and citizenship. Use a rejected 13-digit value to test the
-invalid-ID message; a malformed value tests the 400-style validation path. An invalid
-key tests the 401 message, and disabling the network tests the generic network message.
+invalid-ID message; a malformed value tests the 400 validation path.
 
 This service validates the ID number and returns demographic information. It does not
 prove that the ID belongs to the person presenting it and does not perform physical or
 biometric identity verification. Because `EXPO_PUBLIC_*` variables are bundled into the
-mobile app, this development/test API key is not secret. For production, move the Check
-ID request to a Supabase Edge Function or another server-side API and keep the live key
-there.
+mobile app, provider credentials must stay on the server.
 
 ### System test cases
 
