@@ -21,9 +21,8 @@ import GoogleTextInput from "@/components/GoogleTextInput";
 import Map from "@/components/Map";
 import OfferTripCard from "@/components/OfferTripCard";
 import RideCard from "@/components/RideCard";
-import { useApiFetch } from "@/lib/api";
+import { apiRequest, useApiFetch } from "@/lib/api";
 import { useFetch } from "@/lib/fetch";
-import { apiRequest } from "@/lib/api";
 import {
     HUB_PROMOTION_END_HOUR,
     HUB_PROMOTION_START_HOUR,
