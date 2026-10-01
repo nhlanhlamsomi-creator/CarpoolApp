@@ -13,7 +13,9 @@ module.exports = ({ config }) => {
     (name) => !process.env[name]?.trim(),
   );
 
-  if (missingVariables.length > 0) {
+  const isEasBuild = process.env.EAS_BUILD === "true" || process.env.EAS_BUILD === "1";
+
+  if (isEasBuild && missingVariables.length > 0) {
     throw new Error(
       `Missing app build environment variables: ${missingVariables.join(", ")}`,
     );
