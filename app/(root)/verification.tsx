@@ -45,22 +45,22 @@ const STATUS_BANNER: Record<
   { bg: string; icon: any; title: string; body: string; tint: string }
 > = {
   not_submitted: {
-    bg: "bg-[#E6F2EC]",
-    tint: "#0E5C3F",
+    bg: "bg-[#E4EFEA]",
+    tint: "#0A3B2E",
     icon: "shield-outline",
     title: "Verify your identity",
     body: "This takes about two minutes and only has to be done once.",
   },
   pending: {
-    bg: "bg-[#FDF4E3]",
-    tint: "#8A6100",
+    bg: "bg-[#E4EFEA]",
+    tint: "#0A3B2E",
     icon: "time-outline",
     title: "We're reviewing your documents",
     body: "Most checks finish within 24 hours. We'll notify you either way.",
   },
   approved: {
-    bg: "bg-[#E6F2EC]",
-    tint: "#0E5C3F",
+    bg: "bg-[#E4EFEA]",
+    tint: "#0A3B2E",
     icon: "shield-checkmark",
     title: "You're verified",
     body: "Your identity is confirmed. Nothing further is needed.",
@@ -101,10 +101,7 @@ const Verification = () => {
   // Runs on every keystroke, but only surfaces an error once 13 digits are in
   // — telling someone their number is "too short" while they're still typing
   // it is just noise.
-  const idResult = useMemo(
-    () => validateSaIdNumber(idInput),
-    [idInput],
-  );
+  const idResult = useMemo(() => validateSaIdNumber(idInput), [idInput]);
   const idDigits = normaliseIdNumber(idInput).length;
   const showIdError = idTouched && idDigits >= 13 && !idResult.valid;
 
@@ -283,7 +280,13 @@ const Verification = () => {
   const locked = status === "pending" || status === "approved";
 
   // ── Document row ───────────────────────────────────────────────────────────
-  const DocRow = ({ kind, optional }: { kind: DocKind; optional?: boolean }) => {
+  const DocRow = ({
+    kind,
+    optional,
+  }: {
+    kind: DocKind;
+    optional?: boolean;
+  }) => {
     const image = picked[kind];
     const busy = busyKind === kind;
     const label = DOC_LABELS[kind];
@@ -293,20 +296,20 @@ const Verification = () => {
         onPress={() => !locked && !busy && choose(kind)}
         disabled={locked || busy}
         className={`mb-3 flex-row items-center rounded-2xl border-[1.5px] p-3.5 ${
-          image ? "border-[#0E5C3F] bg-[#F2F8F5]" : "border-[#E2E9E5] bg-white"
+          image ? "border-[#0A3B2E] bg-[#E4EFEA]" : "border-[#E3E7E5] bg-white"
         } ${locked ? "opacity-60" : "active:opacity-80"}`}
       >
         {image ? (
           <Image
             source={{ uri: image.uri }}
-            className="h-14 w-14 rounded-xl bg-[#EEF1F0]"
+            className="h-14 w-14 rounded-xl bg-[#E4EFEA]"
           />
         ) : (
-          <View className="h-14 w-14 items-center justify-center rounded-xl bg-[#E6F2EC]">
+          <View className="h-14 w-14 items-center justify-center rounded-xl bg-[#E4EFEA]">
             <Ionicons
               name={kind === "selfie" ? "person-outline" : "card-outline"}
               size={22}
-              color="#0E5C3F"
+              color="#0A3B2E"
             />
           </View>
         )}
@@ -317,14 +320,14 @@ const Verification = () => {
               {label.title}
             </Text>
             {optional && (
-              <Text className="text-[10.5px] font-JakartaMedium text-[#9BA6A1]">
+              <Text className="text-[10.5px] font-JakartaMedium text-[#A9B1AD]">
                 Optional
               </Text>
             )}
           </View>
 
           <Text
-            className="mt-1 text-[11.5px] font-Jakarta leading-4 text-[#68756F]"
+            className="mt-1 text-[11.5px] font-Jakarta leading-4 text-[#7A8580]"
             numberOfLines={2}
           >
             {image ? "Ready to submit. Tap to replace." : label.help}
@@ -333,13 +336,13 @@ const Verification = () => {
 
         <View className="ml-2">
           {busy ? (
-            <ActivityIndicator size="small" color="#0E5C3F" />
+            <ActivityIndicator size="small" color="#0A3B2E" />
           ) : image ? (
-            <View className="h-6 w-6 items-center justify-center rounded-full bg-[#1FB574]">
+            <View className="h-6 w-6 items-center justify-center rounded-full bg-[#1FA574]">
               <Ionicons name="checkmark" size={14} color="#fff" />
             </View>
           ) : (
-            <Ionicons name="add-circle-outline" size={22} color="#9BA6A1" />
+            <Ionicons name="add-circle-outline" size={22} color="#A9B1AD" />
           )}
         </View>
       </Pressable>
@@ -347,13 +350,13 @@ const Verification = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F5F8F6]">
+    <SafeAreaView className="flex-1 bg-[#F4F6F5]">
       {/* Header */}
       <View className="flex-row items-center gap-3 px-5 pb-2 pt-2">
         <Pressable
           onPress={() => router.back()}
           hitSlop={8}
-          className="h-10 w-10 items-center justify-center rounded-xl border border-[#E2E9E5] bg-white active:opacity-70"
+          className="h-10 w-10 items-center justify-center rounded-xl border border-[#E3E7E5] bg-white active:opacity-70"
         >
           <Ionicons name="chevron-back" size={20} color="#101814" />
         </Pressable>
@@ -364,7 +367,7 @@ const Verification = () => {
 
       {loading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#0E5C3F" />
+          <ActivityIndicator size="large" color="#0A3B2E" />
         </View>
       ) : (
         <ScrollView
@@ -382,7 +385,7 @@ const Verification = () => {
             >
               {banner.title}
             </Text>
-            <Text className="mt-1.5 text-[13px] font-Jakarta leading-5 text-[#4A5450]">
+            <Text className="mt-1.5 text-[13px] font-Jakarta leading-5 text-[#7A8580]">
               {banner.body}
             </Text>
 
@@ -405,7 +408,7 @@ const Verification = () => {
                 Your ID number
               </Text>
 
-              <View className="mb-3 rounded-2xl border border-[#E2E9E5] bg-white p-4">
+              <View className="mb-3 rounded-2xl border border-[#E3E7E5] bg-white p-4">
                 <TextInput
                   value={formatIdNumber(idInput)}
                   onChangeText={(text) => {
@@ -421,10 +424,10 @@ const Verification = () => {
                   maxLength={15} // 13 digits plus the two display spaces
                   className={`rounded-xl border-[1.5px] px-4 py-3.5 text-[18px] font-JakartaBold tracking-[2px] text-[#101814] ${
                     showIdError
-                      ? "border-[#E04545] bg-[#FEF3F3]"
+                      ? "border-[#E0575B] bg-[#FEF3F3]"
                       : idResult.valid
-                        ? "border-[#0E5C3F] bg-[#F2F8F5]"
-                        : "border-[#E2E9E5] bg-[#F8FAF9]"
+                        ? "border-[#0A3B2E] bg-[#E4EFEA]"
+                        : "border-[#E3E7E5] bg-[#F4F6F5]"
                   }`}
                 />
 
@@ -501,8 +504,8 @@ const Verification = () => {
 
                 {showIdError && !idResult.valid && (
                   <View className="mt-2.5 flex-row items-center gap-1.5">
-                    <Ionicons name="close-circle" size={14} color="#E04545" />
-                    <Text className="flex-1 text-[12px] font-JakartaMedium text-[#E04545]">
+                    <Ionicons name="close-circle" size={14} color="#E0575B" />
+                    <Text className="flex-1 text-[12px] font-JakartaMedium text-[#E0575B]">
                       {idResult.error}
                     </Text>
                   </View>
@@ -511,10 +514,14 @@ const Verification = () => {
                 {/* Showing what we read back proves the check ran, and lets
                     people catch a typo that still happens to be valid */}
                 {idResult.valid && (
-                  <View className="mt-3 rounded-xl bg-[#E6F2EC] p-3.5">
+                  <View className="mt-3 rounded-xl bg-[#E4EFEA] p-3.5">
                     <View className="mb-2 flex-row items-center gap-1.5">
-                      <Ionicons name="checkmark-circle" size={15} color="#0E5C3F" />
-                      <Text className="text-[12px] font-JakartaBold text-[#0E5C3F]">
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={15}
+                        color="#0A3B2E"
+                      />
+                      <Text className="text-[12px] font-JakartaBold text-[#0A3B2E]">
                         Valid ID number
                       </Text>
                     </View>
@@ -524,8 +531,7 @@ const Verification = () => {
                       { label: "Age", value: `${idResult.age}` },
                       {
                         label: "Gender",
-                        value:
-                          idResult.gender === "male" ? "Male" : "Female",
+                        value: idResult.gender === "male" ? "Male" : "Female",
                       },
                       {
                         label: "Status",
@@ -539,7 +545,7 @@ const Verification = () => {
                         key={row.label}
                         className="flex-row items-center justify-between py-0.5"
                       >
-                        <Text className="text-[12px] font-Jakarta text-[#4A5450]">
+                        <Text className="text-[12px] font-Jakarta text-[#7A8580]">
                           {row.label}
                         </Text>
                         <Text className="text-[12px] font-JakartaBold text-[#101814]">
@@ -556,10 +562,14 @@ const Verification = () => {
                 {warnings.map((warning) => (
                   <View
                     key={warning}
-                    className="mt-2.5 flex-row items-start gap-2 rounded-xl bg-[#FDF4E3] p-3"
+                    className="mt-2.5 flex-row items-start gap-2 rounded-xl bg-[#E4EFEA] p-3"
                   >
-                    <Ionicons name="warning-outline" size={14} color="#8A6100" />
-                    <Text className="flex-1 text-[11.5px] font-Jakarta leading-4 text-[#8A6100]">
+                    <Ionicons
+                      name="warning-outline"
+                      size={14}
+                      color="#0A3B2E"
+                    />
+                    <Text className="flex-1 text-[11.5px] font-Jakarta leading-4 text-[#0A3B2E]">
                       {warning}
                     </Text>
                   </View>
@@ -575,9 +585,13 @@ const Verification = () => {
               <DocRow kind="id_back" optional />
               <DocRow kind="selfie" />
 
-              <View className="mt-2 flex-row gap-2.5 rounded-2xl border border-[#E2E9E5] bg-white p-4">
-                <Ionicons name="lock-closed-outline" size={16} color="#0E5C3F" />
-                <Text className="flex-1 text-[11.5px] font-Jakarta leading-4 text-[#68756F]">
+              <View className="mt-2 flex-row gap-2.5 rounded-2xl border border-[#E3E7E5] bg-white p-4">
+                <Ionicons
+                  name="lock-closed-outline"
+                  size={16}
+                  color="#0A3B2E"
+                />
+                <Text className="flex-1 text-[11.5px] font-Jakarta leading-4 text-[#7A8580]">
                   Your documents are encrypted and stored privately. Only our
                   verification team can open them, and they&apos;re deleted once
                   your account is closed.
@@ -593,7 +607,7 @@ const Verification = () => {
                     onPress={submit}
                   />
                   {!canSubmit && !submitting && (
-                    <Text className="mt-2.5 text-center text-[11.5px] font-Jakarta text-[#9BA6A1]">
+                    <Text className="mt-2.5 text-center text-[11.5px] font-Jakarta text-[#A9B1AD]">
                       {!idResult.valid
                         ? "Enter a valid ID number to continue"
                         : idVerification?.isValid !== true

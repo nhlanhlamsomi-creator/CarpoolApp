@@ -1,7 +1,7 @@
 import { Stack } from "expo-router";
 
 // Matches the splash and the screen headers, so transitions never flash white
-const GREEN_DEEP = "#06231A";
+const GREEN_DEEP = "#04231C";
 
 const Layout = () => {
   return (

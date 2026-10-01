@@ -2,27 +2,28 @@ import { useMemo, useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { brand, ui } from "@/constants/theme";
 import { findCarpoolGroups, type PassengerLocation } from "@/services/kMeans";
 
 const PASSENGERS: PassengerLocation[] = [
   { id: "p1", latitude: -25.7479, longitude: 28.2293 },
-  { id: "p2", latitude: -25.75,   longitude: 28.23   },
-  { id: "p3", latitude: -25.76,   longitude: 28.24   },
-  { id: "p4", latitude: -25.77,   longitude: 28.25   },
-  { id: "p5", latitude: -25.771,  longitude: 28.251  },
-  { id: "p6", latitude: -25.742,  longitude: 28.2205 },
+  { id: "p2", latitude: -25.75, longitude: 28.23 },
+  { id: "p3", latitude: -25.76, longitude: 28.24 },
+  { id: "p4", latitude: -25.77, longitude: 28.25 },
+  { id: "p5", latitude: -25.771, longitude: 28.251 },
+  { id: "p6", latitude: -25.742, longitude: 28.2205 },
 ];
 
-const WARM = {
-  cream:    "#FBF7F0",
-  sand:     "#F4EDE1",
-  gold:     "#F5B93C",
-  goldDeep: "#E0A11E",
-  goldSoft: "#FCEBC4",
-  charcoal: "#2B2722",
-  graphite: "#4A443D",
-  muted:    "#9A928A",
-  line:     "#E7DECF",
+const PALETTE = {
+  cream: ui.bg,
+  sand: ui.surface,
+  accent: brand.accent,
+  accentDeep: brand.dark,
+  accentSoft: brand.tint,
+  charcoal: ui.ink,
+  graphite: ui.muted,
+  muted: ui.muted,
+  line: ui.border,
 };
 
 export default function CarpoolGroupsScreen() {
@@ -39,7 +40,7 @@ export default function CarpoolGroupsScreen() {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: WARM.cream }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: PALETTE.cream }}>
       <ScrollView
         className="flex-1 px-5"
         contentContainerStyle={{ paddingBottom: 40 }}
@@ -55,9 +56,9 @@ export default function CarpoolGroupsScreen() {
         </View>
 
         {/* Summary pill */}
-        <View className="mt-4 flex-row items-center gap-3 rounded-3xl border border-[#E7DECF] bg-[#F4EDE1] p-4">
-          <View className="h-10 w-10 items-center justify-center rounded-full bg-[#FCEBC4]">
-            <Text className="text-[15px] font-JakartaExtraBold text-[#E0A11E]">
+        <View className="mt-4 flex-row items-center gap-3 rounded-3xl border border-[#E3E7E5] bg-white p-4">
+          <View className="h-10 w-10 items-center justify-center rounded-full bg-[#E4EFEA]">
+            <Text className="text-[15px] font-JakartaExtraBold text-[#0A3B2E]">
               {groups.length}
             </Text>
           </View>
@@ -81,10 +82,10 @@ export default function CarpoolGroupsScreen() {
               gap: 14,
               borderRadius: 24,
               borderWidth: 1,
-              borderColor: WARM.line,
+              borderColor: PALETTE.line,
               backgroundColor: "#FFFFFF",
               padding: 16,
-              shadowColor: WARM.charcoal,
+              shadowColor: PALETTE.charcoal,
               shadowOffset: { width: 0, height: 6 },
               shadowOpacity: 0.05,
               shadowRadius: 14,
@@ -97,9 +98,9 @@ export default function CarpoolGroupsScreen() {
                 width: 72,
                 height: 72,
                 borderRadius: 20,
-                backgroundColor: WARM.goldSoft,
+                backgroundColor: PALETTE.accentSoft,
                 borderWidth: 1.5,
-                borderColor: WARM.gold,
+                borderColor: PALETTE.accent,
                 alignItems: "center",
                 justifyContent: "center",
               }}
@@ -108,7 +109,7 @@ export default function CarpoolGroupsScreen() {
                 style={{
                   fontSize: 24,
                   fontFamily: "Jakarta-ExtraBold",
-                  color: WARM.goldDeep,
+                  color: PALETTE.accentDeep,
                   lineHeight: 26,
                 }}
               >
@@ -118,7 +119,7 @@ export default function CarpoolGroupsScreen() {
                 style={{
                   fontSize: 9,
                   fontFamily: "Jakarta-Bold",
-                  color: WARM.goldDeep,
+                  color: PALETTE.accentDeep,
                   letterSpacing: 1,
                   textTransform: "uppercase",
                   marginTop: 2,
@@ -135,17 +136,14 @@ export default function CarpoolGroupsScreen() {
                   style={{
                     fontSize: 15,
                     fontFamily: "Jakarta-ExtraBold",
-                    color: WARM.charcoal,
+                    color: PALETTE.charcoal,
                   }}
                 >
                   Cluster {index + 1}
                 </Text>
 
                 <View style={{ marginTop: 8, gap: 4 }}>
-                  <Row
-                    label="Passengers"
-                    value={`${group.passengerCount}`}
-                  />
+                  <Row label="Passengers" value={`${group.passengerCount}`} />
                   <Row
                     label="Pickup area"
                     value={`${group.pickupAreaRadiusKm.toFixed(1)} km radius`}
@@ -165,10 +163,10 @@ export default function CarpoolGroupsScreen() {
                   marginTop: 12,
                   height: 42,
                   borderRadius: 14,
-                  backgroundColor: WARM.gold,
+                  backgroundColor: PALETTE.accent,
                   alignItems: "center",
                   justifyContent: "center",
-                  shadowColor: WARM.goldDeep,
+                  shadowColor: PALETTE.accentDeep,
                   shadowOffset: { width: 0, height: 6 },
                   shadowOpacity: 0.28,
                   shadowRadius: 12,
@@ -177,7 +175,7 @@ export default function CarpoolGroupsScreen() {
               >
                 <Text
                   style={{
-                    color: WARM.charcoal,
+                    color: PALETTE.charcoal,
                     fontSize: 13.5,
                     fontFamily: "Jakarta-Bold",
                     letterSpacing: 0.2,
@@ -198,20 +196,21 @@ export default function CarpoolGroupsScreen() {
               borderRadius: 24,
               borderWidth: 1.5,
               borderStyle: "dashed",
-              borderColor: WARM.goldSoft,
-              backgroundColor: WARM.sand,
+              borderColor: PALETTE.accentSoft,
+              backgroundColor: PALETTE.sand,
               padding: 24,
               alignItems: "center",
             }}
           >
-            <View className="h-12 w-12 items-center justify-center rounded-full bg-[#FCEBC4]">
+            <View className="h-12 w-12 items-center justify-center rounded-full bg-[#E4EFEA]">
               <Text className="text-[20px]">🚗</Text>
             </View>
             <Text className="mt-3 text-[15px] font-JakartaBold text-[#2B2722]">
               No passengers available
             </Text>
             <Text className="mt-1 text-center text-[12.5px] font-Jakarta text-[#9A928A]">
-              Add valid latitude and longitude values to generate carpool groups.
+              Add valid latitude and longitude values to generate carpool
+              groups.
             </Text>
           </View>
         )}

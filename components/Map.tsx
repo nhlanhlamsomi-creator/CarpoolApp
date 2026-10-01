@@ -1,28 +1,65 @@
-import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Image, Platform, View } from "react-native";
 import MapView, {
-    Circle,
-    Marker,
-    Polyline,
-    PROVIDER_DEFAULT,
-    PROVIDER_GOOGLE,
+  Circle,
+  Marker,
+  Polyline,
+  PROVIDER_DEFAULT,
+  PROVIDER_GOOGLE,
 } from "react-native-maps";
 
 import { icons } from "@/constants";
 import {
-    calculateDriverTimes,
-    calculateRegion,
-    fetchRoutePolyline,
-    generateMarkersFromData,
+  calculateDriverTimes,
+  calculateRegion,
+  fetchRoutePolyline,
+  generateMarkersFromData,
 } from "@/lib/map";
 import { getSupabaseClient } from "@/lib/supabase";
 import { isDriverVisible } from "@/lib/utils";
 import { useDriverStore, useLocationStore } from "@/store";
 import { Driver, Hub, MarkerData } from "@/types/type";
 
-const GEOAPIFY_API_KEY =
-  process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY!;
+const GEOAPIFY_API_KEY = process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY!;
+
+// ─── Palette (dark green / black / white) ────────────────────────────────────
+const THEME = {
+  primary: "#0A3B2E", // loader, hub pins
+  accent: "#1FA574", // driver route, hub circles, pulse ring
+  route: "#E0575B", // user → destination line
+};
+
+// Soft grey map style (Google Maps only, so Android in this setup).
+// Apple Maps on iOS can't be restyled, but it stays light with
+// userInterfaceStyle="light".
+const SOFT_GREY_MAP_STYLE = [
+  { elementType: "geometry", stylers: [{ color: "#EBEBEB" }] },
+  { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+  { elementType: "labels.text.fill", stylers: [{ color: "#8A9490" }] },
+  { elementType: "labels.text.stroke", stylers: [{ color: "#F4F6F5" }] },
+  { featureType: "poi", stylers: [{ visibility: "off" }] },
+  { featureType: "transit", stylers: [{ visibility: "off" }] },
+  {
+    featureType: "road",
+    elementType: "geometry",
+    stylers: [{ color: "#FFFFFF" }],
+  },
+  {
+    featureType: "road",
+    elementType: "geometry.stroke",
+    stylers: [{ color: "#E3E7E5" }],
+  },
+  {
+    featureType: "water",
+    elementType: "geometry",
+    stylers: [{ color: "#D6E4DE" }],
+  },
+  {
+    featureType: "landscape",
+    elementType: "geometry",
+    stylers: [{ color: "#EFEFEF" }],
+  },
+];
 
 export default function Map() {
   const {
@@ -30,11 +67,13 @@ export default function Map() {
     userLongitude,
     destinationLatitude,
     destinationLongitude,
-    setHubPickup,
   } = useLocationStore();
 
-  const { selectedDriver, drivers: storeDrivers, setDrivers: setStoreDrivers } =
-    useDriverStore();
+  const {
+    selectedDriver,
+    drivers: storeDrivers,
+    setDrivers: setStoreDrivers,
+  } = useDriverStore();
 
   const [markers, setMarkers] = useState<MarkerData[]>([]);
   const [drivers, setLoadedDrivers] = useState<Driver[]>([]);
@@ -55,7 +94,7 @@ export default function Map() {
         const { data, error } = await supabase
           .from("drivers")
           .select(
-            "id, first_name, last_name, profile_image_url, car_image_url, car_seats, rating, status, verified, is_online, driver_verification_status, latitude, longitude"
+            "id, first_name, last_name, profile_image_url, car_image_url, car_seats, rating, status, verified, is_online, driver_verification_status, latitude, longitude",
           );
 
         if (!isMounted) return;
@@ -109,17 +148,12 @@ export default function Map() {
   }, []);
 
   useEffect(() => {
-    if (
-      userLatitude != null &&
-      userLongitude != null &&
-      drivers.length > 0
-    ) {
-      const driverMarkers =
-        generateMarkersFromData({
-          data: drivers,
-          userLatitude,
-          userLongitude,
-        });
+    if (userLatitude != null && userLongitude != null && drivers.length > 0) {
+      const driverMarkers = generateMarkersFromData({
+        data: drivers,
+        userLatitude,
+        userLongitude,
+      });
 
       setMarkers(driverMarkers);
     } else {
@@ -154,7 +188,7 @@ export default function Map() {
     setStoreDrivers,
   ]);
 
-  // Fetch route from user to destination (blue line)
+  // Fetch route from user to destination (red line)
   useEffect(() => {
     if (
       userLatitude != null &&
@@ -189,12 +223,7 @@ export default function Map() {
     } else {
       setRouteCoordinates(null);
     }
-  }, [
-    userLatitude,
-    userLongitude,
-    destinationLatitude,
-    destinationLongitude,
-  ]);
+  }, [userLatitude, userLongitude, destinationLatitude, destinationLongitude]);
 
   // Fetch route from selected driver to user (green line)
   useEffect(() => {
@@ -204,9 +233,7 @@ export default function Map() {
       userLongitude != null
     ) {
       // Find the selected driver's marker
-      const driverMarker = markers.find(
-        (m) => Number(m.id) === selectedDriver
-      );
+      const driverMarker = markers.find((m) => Number(m.id) === selectedDriver);
 
       if (driverMarker) {
         // 1. Immediate straight-line fallback
@@ -215,8 +242,12 @@ export default function Map() {
         for (let i = 0; i <= steps; i++) {
           const t = i / steps;
           fallback.push({
-            latitude: driverMarker.latitude + (userLatitude - driverMarker.latitude) * t,
-            longitude: driverMarker.longitude + (userLongitude - driverMarker.longitude) * t,
+            latitude:
+              driverMarker.latitude +
+              (userLatitude - driverMarker.latitude) * t,
+            longitude:
+              driverMarker.longitude +
+              (userLongitude - driverMarker.longitude) * t,
           });
         }
         setDriverRouteCoordinates(fallback);
@@ -248,16 +279,10 @@ export default function Map() {
     destinationLongitude,
   });
 
-  if (
-    userLatitude == null ||
-    userLongitude == null
-  ) {
+  if (userLatitude == null || userLongitude == null) {
     return (
-      <View className="flex-1 justify-center items-center">
-        <ActivityIndicator
-          size="large"
-          color="#0286FF"
-        />
+      <View className="flex-1 items-center justify-center">
+        <ActivityIndicator size="large" color={THEME.primary} />
       </View>
     );
   }
@@ -274,7 +299,17 @@ export default function Map() {
       followsUserLocation
       mapType="standard"
       userInterfaceStyle="light"
+      customMapStyle={SOFT_GREY_MAP_STYLE}
     >
+      {/* Soft ring around the user's location */}
+      <Circle
+        center={{ latitude: userLatitude, longitude: userLongitude }}
+        radius={180}
+        strokeColor="rgba(31,165,116,0.35)"
+        strokeWidth={1}
+        fillColor="rgba(31,165,116,0.18)"
+      />
+
       {hubs.map((hub) => (
         <React.Fragment key={hub.id}>
           <Circle
@@ -283,9 +318,9 @@ export default function Map() {
               longitude: hub.longitude,
             }}
             radius={hub.radius}
-            strokeColor="#0E5C3F"
-            strokeWidth={1.5}
-            fillColor="rgba(14, 92, 63, 0.10)"
+            strokeColor={THEME.accent}
+            strokeWidth={2}
+            fillColor="rgba(31,165,116,0.12)"
           />
           <Marker
             coordinate={{
@@ -294,58 +329,17 @@ export default function Map() {
             }}
             title={hub.name}
             description={hub.address}
-            onPress={() =>
-              setHubPickup({
-                id: hub.id,
-                name: hub.name,
-                latitude: hub.latitude,
-                longitude: hub.longitude,
-                address: hub.address,
-              })
-            }
-            anchor={{ x: 0.5, y: 0.5 }}
-            tracksViewChanges={false}
-          >
-            <View
-              style={{
-                height: 40,
-                width: 40,
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: 20,
-                backgroundColor: "#FFFFFF",
-                borderWidth: 2,
-                borderColor: "#F5B93C",
-                shadowColor: "#06231A",
-                shadowOffset: { width: 0, height: 3 },
-                shadowOpacity: 0.2,
-                shadowRadius: 5,
-                elevation: 5,
-              }}
-            >
-              <View
-                style={{
-                  height: 28,
-                  width: 28,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  borderRadius: 14,
-                  backgroundColor: "#0E5C3F",
-                }}
-              >
-                <Ionicons name="business-outline" size={16} color="#FFFFFF" />
-              </View>
-            </View>
-          </Marker>
+            pinColor={THEME.primary}
+          />
         </React.Fragment>
       ))}
 
-      {/* Route from user to destination (blue) */}
+      {/* Route from user to destination (red) */}
       {hasDestination && routeCoordinates && routeCoordinates.length > 0 && (
         <Polyline
           coordinates={routeCoordinates}
           strokeWidth={5}
-          strokeColor="#0286FF"
+          strokeColor={THEME.route}
         />
       )}
 
@@ -354,7 +348,7 @@ export default function Map() {
         <Polyline
           coordinates={driverRouteCoordinates}
           strokeWidth={4}
-          strokeColor="#1FB574"
+          strokeColor={THEME.accent}
         />
       )}
 

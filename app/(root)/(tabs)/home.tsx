@@ -2,7 +2,7 @@ import { useAuth, useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { router, useFocusEffect } from "expo-router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
     ActivityIndicator,
     Alert,
@@ -21,13 +21,9 @@ import GoogleTextInput from "@/components/GoogleTextInput";
 import Map from "@/components/Map";
 import OfferTripCard from "@/components/OfferTripCard";
 import RideCard from "@/components/RideCard";
+import { brand, ui } from "@/constants/theme";
 import { apiRequest, useApiFetch } from "@/lib/api";
 import { useFetch } from "@/lib/fetch";
-import {
-    HUB_PROMOTION_END_HOUR,
-    HUB_PROMOTION_START_HOUR,
-    isHubPromotionActive,
-} from "@/lib/promotions";
 import { findCarpoolGroups, type PassengerLocation } from "@/services/kMeans";
 import { useLocationStore } from "@/store";
 import { OfferTrip, Ride } from "@/types/type";
@@ -35,16 +31,16 @@ import { OfferTrip, Ride } from "@/types/type";
 const { width } = Dimensions.get("window");
 
 // ─── Palette ─────────────────────────────────────────────────────────────────
-const WARM = {
-  cream:    "#FBF7F0",
-  sand:     "#F4EDE1",
-  gold:     "#F5B93C",
-  goldDeep: "#E0A11E",
-  goldSoft: "#FCEBC4",
-  charcoal: "#2B2722",
-  graphite: "#4A443D",
-  muted:    "#9A928A",
-  line:     "#E7DECF",
+const PALETTE = {
+  cream: ui.bg,
+  sand: ui.surface,
+  accent: brand.accent,
+  accentDeep: brand.dark,
+  accentSoft: brand.tint,
+  charcoal: ui.ink,
+  graphite: ui.muted,
+  muted: ui.muted,
+  line: ui.border,
 };
 
 // 3-column square grid sizing inside px-5 (20 each side) + 10 gaps
@@ -57,36 +53,12 @@ const PREVIEW_LIMIT = 3;
 // Demo passenger seed — matches CarpoolGroupsScreen so both screens agree
 const PASSENGERS: PassengerLocation[] = [
   { id: "p1", latitude: -25.7479, longitude: 28.2293 },
-  { id: "p2", latitude: -25.75,   longitude: 28.23   },
-  { id: "p3", latitude: -25.76,   longitude: 28.24   },
-  { id: "p4", latitude: -25.77,   longitude: 28.25   },
-  { id: "p5", latitude: -25.771,  longitude: 28.251  },
-  { id: "p6", latitude: -25.742,  longitude: 28.2205 },
+  { id: "p2", latitude: -25.75, longitude: 28.23 },
+  { id: "p3", latitude: -25.76, longitude: 28.24 },
+  { id: "p4", latitude: -25.77, longitude: 28.25 },
+  { id: "p5", latitude: -25.771, longitude: 28.251 },
+  { id: "p6", latitude: -25.742, longitude: 28.2205 },
 ];
-
-const normalizeRecentRide = (ride: Ride) => {
-  const rawRide = ride as Ride & {
-    drivers?: Ride["driver"] | Ride["driver"][] | null;
-  };
-  const relatedDriver = Array.isArray(rawRide.drivers)
-    ? rawRide.drivers[0]
-    : rawRide.drivers;
-  const driver = ride.driver ?? relatedDriver ?? null;
-
-  return {
-    ...ride,
-    driver: driver
-      ? {
-          ...driver,
-          first_name: driver.first_name ?? "",
-          last_name: driver.last_name ?? "",
-          car_seats: Number.isFinite(Number(driver.car_seats))
-            ? Number(driver.car_seats)
-            : null,
-        }
-      : null,
-  } as Ride;
-};
 
 const Home = () => {
   const { user } = useUser();
@@ -98,7 +70,6 @@ const Home = () => {
     userAddress,
     userLatitude,
     userLongitude,
-    selectedHubName,
   } = useLocationStore();
 
   const {
@@ -114,26 +85,19 @@ const Home = () => {
     refetch: refetchAvailableTrips,
   } = useFetch<OfferTrip[]>("/(api)/offer-trip");
 
-  const rides = useMemo(
-    () =>
-      (Array.isArray(recentRides) ? recentRides : [])
-        .map(normalizeRecentRide)
-        .sort(
-          (left, right) =>
-            new Date(right.created_at).getTime() -
-            new Date(left.created_at).getTime(),
-        ),
-    [recentRides],
+  const rides = (Array.isArray(recentRides) ? [...recentRides] : []).sort(
+    (left, right) =>
+      new Date(right.created_at).getTime() -
+      new Date(left.created_at).getTime(),
   );
   const offerTrips = availableTrips || [];
   const [bookingTripId, setBookingTripId] = useState<number | null>(null);
-  const hubPromotionActive = isHubPromotionActive();
 
   useFocusEffect(
     useCallback(() => {
-      refetchRecentRides();
-      refetchAvailableTrips();
-    }, [refetchRecentRides, refetchAvailableTrips]),
+      void refetchRecentRides();
+      void refetchAvailableTrips();
+    }, [refetchAvailableTrips, refetchRecentRides]),
   );
 
   // ── Carpool clusters ──────────────────────────────────────────────────────
@@ -172,7 +136,7 @@ const Home = () => {
           easing: Easing.inOut(Easing.sin),
           useNativeDriver: true,
         }),
-      ])
+      ]),
     ).start();
   }, []);
 
@@ -248,9 +212,9 @@ const Home = () => {
   const initial = (user?.firstName ?? "T").charAt(0).toUpperCase();
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: WARM.cream }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: PALETTE.cream }}>
       <FlatList
-        data={rides.slice(0, 3)}
+        data={rides.slice(0, 5)}
         renderItem={({ item }) => <RideCard ride={item} />}
         keyExtractor={(item, index) =>
           `${item.user_id}-${item.created_at}-${index}`
@@ -266,7 +230,7 @@ const Home = () => {
               <View className="flex-1 pr-3 flex-row items-center gap-3">
                 <Animated.View
                   style={{ transform: [{ translateY: avatarY }] }}
-                  className="h-12 w-12 items-center justify-center rounded-2xl bg-[#F5B93C] border border-[#E0A11E]"
+                  className="h-12 w-12 items-center justify-center rounded-2xl bg-[#1FA574] border border-[#0A3B2E]"
                 >
                   <Text className="text-[18px] font-JakartaExtraBold text-[#2B2722]">
                     {initial}
@@ -294,7 +258,7 @@ const Home = () => {
                 accessibilityRole="button"
                 accessibilityLabel="Sign out"
                 activeOpacity={0.8}
-                className="h-11 w-11 items-center justify-center rounded-2xl border border-[#E7DECF] bg-[#F4EDE1]"
+                className="h-11 w-11 items-center justify-center rounded-2xl border border-[#E3E7E5] bg-white"
               >
                 <Ionicons name="log-out-outline" size={19} color="#4A443D" />
               </TouchableOpacity>
@@ -312,14 +276,14 @@ const Home = () => {
             />
 
             {/* ── Map ── */}
-            <View className="mt-6 overflow-hidden rounded-3xl border border-[#E7DECF] bg-white">
+            <View className="mt-6 overflow-hidden rounded-3xl border border-[#E3E7E5] bg-white">
               <View className="h-[260px]">
                 <Map />
               </View>
 
-              <View className="flex-row items-center gap-3 px-4 py-3.5 bg-[#FBF7F0]">
-                <View className="h-9 w-9 items-center justify-center rounded-full bg-[#FCEBC4]">
-                  <Ionicons name="navigate" size={16} color="#E0A11E" />
+              <View className="flex-row items-center gap-3 px-4 py-3.5 bg-[#F4F6F5]">
+                <View className="h-9 w-9 items-center justify-center rounded-full bg-[#E4EFEA]">
+                  <Ionicons name="navigate" size={16} color="#0A3B2E" />
                 </View>
                 <View className="flex-1">
                   <Text className="text-[10.5px] font-JakartaBold text-[#9A928A] tracking-widest uppercase">
@@ -332,49 +296,31 @@ const Home = () => {
                     {userAddress ?? "Finding you…"}
                   </Text>
                 </View>
-                <View className="h-2 w-2 rounded-full bg-[#F5B93C]" />
+                <View className="h-2 w-2 rounded-full bg-[#1FA574]" />
               </View>
             </View>
-
-            {selectedHubName ? (
-              <View className="mt-3 flex-row items-center gap-3 rounded-2xl border border-[#F5D88A] bg-[#FFF8E8] px-4 py-3">
-                <View className="h-9 w-9 items-center justify-center rounded-full bg-[#FCEBC4]">
-                  <Ionicons name="pricetag-outline" size={17} color="#E0A11E" />
-                </View>
-                <View className="flex-1">
-                  <Text className="text-[11px] font-JakartaBold uppercase tracking-widest text-[#9A6B00]">
-                    {selectedHubName} pickup selected
-                  </Text>
-                  <Text className="mt-0.5 text-[12px] font-JakartaSemiBold text-[#4A443D]">
-                    {hubPromotionActive
-                      ? "10% off your ride until 4:00 PM"
-                      : `10% off from ${HUB_PROMOTION_START_HOUR}:00 to ${HUB_PROMOTION_END_HOUR}:00`}
-                  </Text>
-                </View>
-                <Ionicons name="checkmark-circle" size={19} color="#0E5C3F" />
-              </View>
-            ) : null}
 
             {/* ── Available rides heading ── */}
             <View className="mt-7 mb-3 flex-row items-center justify-between">
               <View className="flex-row items-center gap-2">
-                <View className="h-2 w-2 rounded-full bg-[#F5B93C]" />
+                <View className="h-2 w-2 rounded-full bg-[#1FA574]" />
                 <Text className="text-[17px] font-JakartaExtraBold text-[#2B2722]">
                   Available rides
                 </Text>
               </View>
               {offerTrips.length > 0 && (
-                <View className="rounded-full bg-[#FCEBC4] px-2.5 py-1">
-                  <Text className="text-[11px] font-JakartaBold text-[#E0A11E]">
-                    {offerTrips.length} {offerTrips.length === 1 ? "ride" : "rides"}
+                <View className="rounded-full bg-[#E4EFEA] px-2.5 py-1">
+                  <Text className="text-[11px] font-JakartaBold text-[#0A3B2E]">
+                    {offerTrips.length}{" "}
+                    {offerTrips.length === 1 ? "ride" : "rides"}
                   </Text>
                 </View>
               )}
             </View>
 
             {availableTripsLoading ? (
-              <View className="mb-2 items-center rounded-3xl border border-[#E7DECF] bg-white py-5">
-                <ActivityIndicator size="small" color="#F5B93C" />
+              <View className="mb-2 items-center rounded-3xl border border-[#E3E7E5] bg-white py-5">
+                <ActivityIndicator size="small" color="#1FA574" />
               </View>
             ) : availableTripsError ? (
               <View className="mb-2 rounded-3xl border border-[#F1C8C5] bg-white px-4 py-5">
@@ -386,16 +332,18 @@ const Home = () => {
                 </Text>
               </View>
             ) : offerTrips.length > 0 ? (
-              offerTrips.slice(0, 5).map((trip) => (
-                <OfferTripCard
-                  key={trip.id}
-                  trip={trip}
-                  booking={bookingTripId === trip.id}
-                  onBook={() => handleBookOfferTrip(trip)}
-                />
-              ))
+              offerTrips
+                .slice(0, 5)
+                .map((trip) => (
+                  <OfferTripCard
+                    key={trip.id}
+                    trip={trip}
+                    booking={bookingTripId === trip.id}
+                    onBook={() => handleBookOfferTrip(trip)}
+                  />
+                ))
             ) : (
-              <View className="mb-2 rounded-3xl border border-dashed border-[#FCEBC4] bg-[#F4EDE1] px-4 py-5">
+              <View className="mb-2 rounded-3xl border border-dashed border-[#E4EFEA] bg-white px-4 py-5">
                 <Text className="text-center text-[12.5px] font-Jakarta text-[#9A928A]">
                   No rides are available right now.
                 </Text>
@@ -405,7 +353,7 @@ const Home = () => {
             {/* ── Carpool groups heading + always-visible View all ── */}
             <View className="mt-7 mb-3 flex-row items-center justify-between">
               <View className="flex-row items-center gap-2">
-                <View className="h-2 w-2 rounded-full bg-[#F5B93C]" />
+                <View className="h-2 w-2 rounded-full bg-[#1FA574]" />
                 <Text className="text-[17px] font-JakartaExtraBold text-[#2B2722]">
                   Carpool groups
                 </Text>
@@ -416,10 +364,10 @@ const Home = () => {
                 onPress={() => router.push("/(root)/carpool-groups")}
                 className="flex-row items-center gap-1"
               >
-                <Text className="text-[13px] font-JakartaBold text-[#E0A11E]">
+                <Text className="text-[13px] font-JakartaBold text-[#0A3B2E]">
                   View all
                 </Text>
-                <Ionicons name="chevron-forward" size={13} color="#E0A11E" />
+                <Ionicons name="chevron-forward" size={13} color="#0A3B2E" />
               </TouchableOpacity>
             </View>
 
@@ -448,13 +396,15 @@ const Home = () => {
                           borderRadius: 20,
                           backgroundColor: "#FFFFFF",
                           borderWidth: 2,
-                          borderColor: isSelected ? WARM.gold : WARM.line,
+                          borderColor: isSelected
+                            ? PALETTE.accent
+                            : PALETTE.line,
                           paddingHorizontal: 12,
                           paddingVertical: 12,
                           justifyContent: "space-between",
                           shadowColor: isSelected
-                            ? WARM.goldDeep
-                            : WARM.charcoal,
+                            ? PALETTE.accentDeep
+                            : PALETTE.charcoal,
                           shadowOffset: {
                             width: 0,
                             height: isSelected ? 8 : 4,
@@ -470,8 +420,8 @@ const Home = () => {
                             width: 26,
                             borderRadius: 9,
                             backgroundColor: isSelected
-                              ? WARM.gold
-                              : WARM.goldSoft,
+                              ? PALETTE.accent
+                              : PALETTE.accentSoft,
                             alignItems: "center",
                             justifyContent: "center",
                           }}
@@ -481,8 +431,8 @@ const Home = () => {
                               fontSize: 11,
                               fontFamily: "Jakarta-ExtraBold",
                               color: isSelected
-                                ? WARM.charcoal
-                                : WARM.goldDeep,
+                                ? PALETTE.charcoal
+                                : PALETTE.accentDeep,
                             }}
                           >
                             {index + 1}
@@ -494,7 +444,7 @@ const Home = () => {
                             style={{
                               fontSize: 22,
                               fontFamily: "Jakarta-ExtraBold",
-                              color: WARM.charcoal,
+                              color: PALETTE.charcoal,
                               lineHeight: 24,
                             }}
                           >
@@ -504,7 +454,7 @@ const Home = () => {
                             style={{
                               fontSize: 10,
                               fontFamily: "Jakarta-SemiBold",
-                              color: WARM.muted,
+                              color: PALETTE.muted,
                               marginTop: 2,
                               textTransform: "uppercase",
                               letterSpacing: 0.6,
@@ -527,15 +477,15 @@ const Home = () => {
                               width: 5,
                               borderRadius: 3,
                               backgroundColor: isSelected
-                                ? WARM.gold
-                                : WARM.muted,
+                                ? PALETTE.accent
+                                : PALETTE.muted,
                             }}
                           />
                           <Text
                             style={{
                               fontSize: 10,
                               fontFamily: "Jakarta-Medium",
-                              color: WARM.graphite,
+                              color: PALETTE.graphite,
                             }}
                             numberOfLines={1}
                           >
@@ -554,10 +504,10 @@ const Home = () => {
                       marginTop: 14,
                       borderRadius: 22,
                       borderWidth: 1.5,
-                      borderColor: WARM.gold,
+                      borderColor: PALETTE.accent,
                       backgroundColor: "#FFFFFF",
                       padding: 16,
-                      shadowColor: WARM.goldDeep,
+                      shadowColor: PALETTE.accentDeep,
                       shadowOffset: { width: 0, height: 10 },
                       shadowOpacity: 0.12,
                       shadowRadius: 18,
@@ -565,7 +515,7 @@ const Home = () => {
                     }}
                   >
                     <View className="flex-row items-center gap-2.5">
-                      <View className="h-8 w-8 items-center justify-center rounded-xl bg-[#F5B93C]">
+                      <View className="h-8 w-8 items-center justify-center rounded-xl bg-[#1FA574]">
                         <Text className="text-[13px] font-JakartaExtraBold text-[#2B2722]">
                           {selectedIndex! + 1}
                         </Text>
@@ -597,7 +547,7 @@ const Home = () => {
                 )}
               </>
             ) : (
-              <View className="rounded-3xl border border-dashed border-[#FCEBC4] bg-[#F4EDE1] p-5 items-center">
+              <View className="rounded-3xl border border-dashed border-[#E4EFEA] bg-white p-5 items-center">
                 <Text className="text-[13px] font-JakartaSemiBold text-[#2B2722]">
                   No carpool groups yet
                 </Text>
@@ -610,7 +560,7 @@ const Home = () => {
             {/* ── Recent rides heading ── */}
             <View className="mb-3 mt-7 flex-row items-center justify-between">
               <View className="flex-row items-center gap-2">
-                <View className="h-2 w-2 rounded-full bg-[#F5B93C]" />
+                <View className="h-2 w-2 rounded-full bg-[#1FA574]" />
                 <Text className="text-[17px] font-JakartaExtraBold text-[#2B2722]">
                   Recent rides
                 </Text>
@@ -622,10 +572,10 @@ const Home = () => {
                   activeOpacity={0.7}
                   className="flex-row items-center gap-1"
                 >
-                  <Text className="text-[13px] font-JakartaBold text-[#E0A11E]">
+                  <Text className="text-[13px] font-JakartaBold text-[#0A3B2E]">
                     See all
                   </Text>
-                  <Ionicons name="chevron-forward" size={13} color="#E0A11E" />
+                  <Ionicons name="chevron-forward" size={13} color="#0A3B2E" />
                 </TouchableOpacity>
               )}
             </View>
@@ -634,7 +584,7 @@ const Home = () => {
         ListEmptyComponent={
           loading ? (
             <View className="items-center py-12">
-              <ActivityIndicator size="large" color="#F5B93C" />
+              <ActivityIndicator size="large" color="#1FA574" />
               <Text className="mt-3 text-[12.5px] font-Jakarta text-[#9A928A]">
                 Loading your rides
               </Text>

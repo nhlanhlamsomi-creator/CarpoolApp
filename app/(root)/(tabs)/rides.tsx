@@ -1,5 +1,6 @@
-import { useAuth, useUser } from "@clerk/clerk-expo";
+import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
+import * as Location from "expo-location";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -7,6 +8,7 @@ import {
     Alert,
     FlatList,
     Linking,
+    Platform,
     Pressable,
     RefreshControl,
     Text,
@@ -16,7 +18,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { EmptyState } from "@/components/Cards";
 import RideCard from "@/components/RideCard";
-import { apiRequest, useApiFetch } from "@/lib/api";
+import { useFetch } from "@/lib/fetch";
 import { useLocationStore } from "@/store";
 import { Ride } from "@/types/type";
 
@@ -24,41 +26,20 @@ const SUPPORT_EMAIL = "support@lyftcarpool.co.za";
 
 type Tab = "upcoming" | "history";
 
-const normalizeRide = (ride: Ride) => {
-  const rawRide = ride as Ride & {
-    drivers?: Ride["driver"] | Ride["driver"][] | null;
-  };
-  const relatedDriver = Array.isArray(rawRide.drivers)
-    ? rawRide.drivers[0]
-    : rawRide.drivers;
-  const driver = ride.driver ?? relatedDriver ?? null;
-
-  return {
-    ...ride,
-    driver: driver
-      ? {
-          ...driver,
-          car_seats: Number.isFinite(Number(driver.car_seats))
-            ? Number(driver.car_seats)
-            : null,
-        }
-      : null,
-  } as Ride;
-};
-
 const Rides = () => {
   const { user } = useUser();
-  const { getToken } = useAuth();
   const { setUserLocation, setDestinationLocation } = useLocationStore();
 
   const [tab, setTab] = useState<Tab>("upcoming");
   const [safetyAlerts, setSafetyAlerts] = useState<Record<string, any>>({});
-  const {
-    data: recentRides,
-    error,
-    loading,
-    refetch,
-  } = useApiFetch<Ride[]>("/api/rides");
+
+  const fetchState = useFetch<Ride[]>(`/(api)/ride/${user?.id}`);
+  const { data: recentRides, loading, error } = fetchState;
+
+  // The template's useFetch exposes refetch; guard in case yours doesn't.
+  const refetch = (fetchState as any).refetch as
+    | (() => Promise<void> | void)
+    | undefined;
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -80,29 +61,25 @@ const Rides = () => {
   };
 
   const rides = useMemo(
-    () =>
-      Array.isArray(recentRides) ? recentRides.map(normalizeRide) : [],
+    () => (Array.isArray(recentRides) ? recentRides : []),
     [recentRides],
   );
 
+  // "Upcoming" is a state, not a date calculation. The status column decides
+  // it; scheduled_for is only a fallback for rows created before that existed.
   const isUpcoming = (ride: Ride) => {
-    const rideData = ride as Ride & {
-      scheduled_for?: string | null;
-      status?: string | null;
-    };
-    const status = String(rideData.status ?? "").toLowerCase();
-    const scheduledTime = rideData.scheduled_for
-      ? new Date(rideData.scheduled_for).getTime()
-      : NaN;
+    const status = (ride as any).status;
 
-    if (Number.isFinite(scheduledTime)) {
-      if (["cancelled", "completed"].includes(status)) return false;
-      // The schedule comparison must use the current time on each render.
-      // eslint-disable-next-line react-hooks/purity
-      return scheduledTime > Date.now();
+    if (status) {
+      return ["booked", "scheduled", "accepted", "in_progress"].includes(
+        status,
+      );
     }
 
-    return ["booked", "scheduled", "accepted", "in_progress"].includes(status);
+    const scheduled = (ride as any).scheduled_for;
+    if (scheduled) return new Date(scheduled).getTime() > Date.now();
+
+    return false;
   };
 
   const upcoming = useMemo(() => rides.filter(isUpcoming), [rides]);
@@ -119,31 +96,24 @@ const Rides = () => {
 
   const pollSafetyAlerts = useCallback(async () => {
     if (!user?.id || activeRides.length === 0) return;
-    const token = await getToken();
-    if (!token) return;
     const results = await Promise.all(
       activeRides.map(async (ride) => {
         const rideId = String((ride as any).ride_id);
-        const response = await apiRequest<{ data: unknown }>(
-          `/api/sos/${rideId}`,
-          { method: "GET" },
-          token,
+        const response = await fetch(
+          `/(api)/safety/${rideId}?passenger_id=${encodeURIComponent(user.id)}`,
         );
-        return [rideId, response.data] as const;
+        if (!response.ok) return [rideId, null] as const;
+        const json = await response.json();
+        return [rideId, json.data] as const;
       }),
     );
     setSafetyAlerts(Object.fromEntries(results.filter(([, alert]) => alert)));
-  }, [activeRides, getToken, user?.id]);
+  }, [activeRides, user?.id]);
 
   useEffect(() => {
-    const initialPoll = setTimeout(() => {
-      void pollSafetyAlerts();
-    }, 0);
+    pollSafetyAlerts();
     const interval = setInterval(pollSafetyAlerts, 15000);
-    return () => {
-      clearTimeout(initialPoll);
-      clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, [pollSafetyAlerts]);
 
   // ── Actions ────────────────────────────────────────────────────────────────
@@ -180,12 +150,25 @@ const Rides = () => {
           style: "destructive",
           onPress: async () => {
             try {
-              const token = await getToken();
-              await apiRequest(
-                `/api/rides/${(ride as any).ride_id}/cancel`,
-                { method: "POST" },
-                token,
-              );
+              const res = await fetch("/(api)/ride/cancel", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  ride_id: (ride as any).ride_id,
+                  user_id: user?.id,
+                }),
+              });
+
+              const json = await res.json();
+
+              if (!res.ok) {
+                console.error("Cancel failed:", json);
+                Alert.alert(
+                  "Cancel failed",
+                  json?.error || "Unable to cancel trip",
+                );
+                return;
+              }
 
               Alert.alert("Cancelled", "Your trip has been cancelled.");
               // Refresh list
@@ -237,7 +220,7 @@ const Rides = () => {
   const handleManualSOS = (ride: Ride) => {
     Alert.alert(
       "Send SOS?",
-      "This creates an urgent safety incident for this active ride.",
+      "This records an urgent safety incident and shares your current location if permission is available.",
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -245,24 +228,122 @@ const Rides = () => {
           style: "destructive",
           onPress: async () => {
             try {
-              const token = await getToken();
-              await apiRequest(
-                "/api/sos",
-                {
-                  method: "POST",
-                  body: JSON.stringify({ ride_id: (ride as any).ride_id }),
-                },
-                token,
-              );
-              await pollSafetyAlerts();
+              let location: { latitude: number; longitude: number } | null =
+                null;
+              try {
+                const permission =
+                  await Location.requestForegroundPermissionsAsync();
+                if (permission.granted) {
+                  const recentLocation =
+                    await Location.getLastKnownPositionAsync({
+                      maxAge: 60000,
+                      requiredAccuracy: 1500,
+                    });
+                  const position =
+                    recentLocation ??
+                    (await Location.getCurrentPositionAsync({
+                      accuracy: Location.Accuracy.Balanced,
+                    }));
+                  location = {
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                  };
+                }
+              } catch (locationError) {
+                console.warn("Unable to get location for SOS:", locationError);
+              }
+
+              const response = await fetch("/(api)/safety/manual", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  ride_id: (ride as any).ride_id,
+                  passenger_id: user?.id,
+                  latitude: location?.latitude ?? null,
+                  longitude: location?.longitude ?? null,
+                }),
+              });
+              if (!response.ok) throw new Error("SOS request failed");
+
+              void pollSafetyAlerts();
+              let emergencyContact: { name: string; phone: string } | null =
+                null;
+              try {
+                const profileResponse = await fetch(
+                  `/(api)/profile?clerkId=${encodeURIComponent(user?.id ?? "")}`,
+                );
+                if (profileResponse.ok) {
+                  const profileJson = await profileResponse.json();
+                  const rawContact =
+                    profileJson.data?.profile_data?.emergency_contact;
+                  const parsedContact =
+                    typeof rawContact === "string"
+                      ? JSON.parse(rawContact)
+                      : rawContact;
+                  if (parsedContact?.phone) {
+                    emergencyContact = {
+                      name: parsedContact.name || "emergency contact",
+                      phone: String(parsedContact.phone),
+                    };
+                  }
+                }
+              } catch (contactError) {
+                console.warn("Unable to load emergency contact:", contactError);
+              }
+
+              const message = location
+                ? `I need help during my carpool ride. My location is https://maps.google.com/?q=${location.latitude},${location.longitude}`
+                : "I need help during my carpool ride. My current location is unavailable.";
+              const smsUrl = emergencyContact
+                ? Platform.OS === "ios"
+                  ? `sms:${encodeURIComponent(emergencyContact.phone)}&body=${encodeURIComponent(message)}`
+                  : `sms:${encodeURIComponent(emergencyContact.phone)}?body=${encodeURIComponent(message)}`
+                : null;
+
               Alert.alert(
-                "SOS sent",
-                "Your safety incident has been created. Help is being notified.",
+                "SOS recorded",
+                "The incident was saved, but nobody was contacted automatically. Call 112 or open a text to your saved contact below. Texts must be sent by you.",
+                [
+                  {
+                    text: "Call 112",
+                    onPress: () => {
+                      void Linking.openURL("tel:112").catch(() =>
+                        Alert.alert(
+                          "Call unavailable",
+                          "Please dial 112 from your phone.",
+                        ),
+                      );
+                    },
+                  },
+                  ...(smsUrl
+                    ? [
+                        {
+                          text: `Text ${emergencyContact?.name}`,
+                          onPress: () => {
+                            void Linking.openURL(smsUrl).catch(() =>
+                              Alert.alert(
+                                "Messaging unavailable",
+                                "Please contact your emergency contact directly.",
+                              ),
+                            );
+                          },
+                        },
+                      ]
+                    : []),
+                  { text: "Done", style: "cancel" },
+                ],
               );
             } catch {
               Alert.alert(
                 "SOS failed",
-                "Please call emergency services if you are in immediate danger.",
+                "The safety incident could not be saved. If you are in immediate danger, call 112.",
+                [
+                  {
+                    text: "Call 112",
+                    onPress: () => void Linking.openURL("tel:112"),
+                  },
+                  { text: "Close", style: "cancel" },
+                ],
               );
             }
           },
@@ -277,12 +358,11 @@ const Rides = () => {
     status: "acknowledged" | "dismissed",
   ) => {
     const rideId = String((ride as any).ride_id);
-    const token = await getToken();
-    await apiRequest(
-      `/api/sos/${rideId}`,
-      { method: "PATCH", body: JSON.stringify({ response, status }) },
-      token,
-    );
+    await fetch(`/(api)/safety/${rideId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ passenger_id: user?.id, response, status }),
+    });
     setSafetyAlerts((current) => ({ ...current, [rideId]: null }));
   };
 
@@ -309,7 +389,7 @@ const Rides = () => {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F5F8F6]">
+    <SafeAreaView className="flex-1 bg-[#F4F6F5]">
       <FlatList
         data={visible}
         keyExtractor={(item, index) =>
@@ -323,8 +403,8 @@ const Rides = () => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#0E5C3F"
-            colors={["#0E5C3F"]}
+            tintColor="#0A3B2E"
+            colors={["#0A3B2E"]}
           />
         }
         renderItem={({ item }) => (
@@ -354,7 +434,7 @@ const Rides = () => {
             </Text>
 
             {/* Tabs, with counts so the split is obvious before you tap */}
-            <View className="mb-5 flex-row rounded-2xl bg-[#EEF1F0] p-1">
+            <View className="mb-5 flex-row rounded-2xl bg-[#E4EFEA] p-1">
               {(
                 [
                   {
@@ -377,8 +457,8 @@ const Rides = () => {
                     <Text
                       className={`text-[13px] ${
                         active
-                          ? "font-JakartaBold text-[#0E5C3F]"
-                          : "font-JakartaMedium text-[#68756F]"
+                          ? "font-JakartaBold text-[#0A3B2E]"
+                          : "font-JakartaMedium text-[#7A8580]"
                       }`}
                     >
                       {item.label}
@@ -386,12 +466,12 @@ const Rides = () => {
                     {item.count > 0 && (
                       <View
                         className={`rounded-full px-1.5 py-0.5 ${
-                          active ? "bg-[#E6F2EC]" : "bg-[#DFE6E2]"
+                          active ? "bg-[#E4EFEA]" : "bg-[#E3E7E5]"
                         }`}
                       >
                         <Text
                           className={`text-[10px] font-JakartaBold ${
-                            active ? "text-[#0E5C3F]" : "text-[#68756F]"
+                            active ? "text-[#0A3B2E]" : "text-[#7A8580]"
                           }`}
                         >
                           {item.count}
@@ -407,8 +487,8 @@ const Rides = () => {
         ListEmptyComponent={
           loading ? (
             <View className="items-center py-12">
-              <ActivityIndicator size="large" color="#0E5C3F" />
-              <Text className="mt-3 text-[12.5px] font-Jakarta text-[#68756F]">
+              <ActivityIndicator size="large" color="#0A3B2E" />
+              <Text className="mt-3 text-[12.5px] font-Jakarta text-[#7A8580]">
                 Loading your trips
               </Text>
             </View>
@@ -438,13 +518,13 @@ const Rides = () => {
         }
         ListFooterComponent={
           tab === "history" && history.length > 0 ? (
-            <View className="mt-2 flex-row gap-2.5 rounded-2xl border border-[#E2E9E5] bg-white p-4">
+            <View className="mt-2 flex-row gap-2.5 rounded-2xl border border-[#E3E7E5] bg-white p-4">
               <Ionicons
                 name="information-circle-outline"
                 size={16}
-                color="#0E5C3F"
+                color="#0A3B2E"
               />
-              <Text className="flex-1 text-[11.5px] font-Jakarta leading-4 text-[#68756F]">
+              <Text className="flex-1 text-[11.5px] font-Jakarta leading-4 text-[#7A8580]">
                 Past trips can&apos;t be deleted. We keep them as payment
                 records, and they&apos;re what we rely on if you ever report a
                 problem.

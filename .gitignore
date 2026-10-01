@@ -43,3 +43,12 @@ app-example
 # generated native folders
 /ios
 /android
+
+# Coverage reports
+coverage/
+*.lcov
+lcov.info
+
+# IDE
+.idea/
+.vscode/

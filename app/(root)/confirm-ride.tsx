@@ -1,5 +1,5 @@
-import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { Ionicons } from "@expo/vector-icons";
+import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { router } from "expo-router";
 import { useEffect, useRef } from "react";
 import { Animated, Easing, Text, TouchableOpacity, View } from "react-native";
@@ -8,19 +8,20 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { EmptyState } from "@/components/Cards";
 import DriverCard from "@/components/DriverCard";
 import RideLayout from "@/components/RideLayout";
+import { brand, ui } from "@/constants/theme";
 import { useDriverStore } from "@/store";
 
 // ─── Palette ─────────────────────────────────────────────────────────────────
-const WARM = {
-  cream:    "#FBF7F0",
-  sand:     "#F4EDE1",
-  gold:     "#F5B93C",
-  goldDeep: "#E0A11E",
-  goldSoft: "#FCEBC4",
-  charcoal: "#2B2722",
-  graphite: "#4A443D",
-  muted:    "#9A928A",
-  line:     "#E7DECF",
+const PALETTE = {
+  cream: ui.bg,
+  sand: ui.surface,
+  accent: brand.accent,
+  accentDeep: brand.dark,
+  accentSoft: brand.tint,
+  charcoal: ui.ink,
+  graphite: ui.muted,
+  muted: ui.muted,
+  line: ui.border,
 };
 
 const ConfirmRide = () => {
@@ -32,7 +33,7 @@ const ConfirmRide = () => {
 
   // ── Animations ─────────────────────────────────────────────────────────────
   // Footer slide-in when a driver is picked
-  const footerFade  = useRef(new Animated.Value(0)).current;
+  const footerFade = useRef(new Animated.Value(0)).current;
   const footerSlide = useRef(new Animated.Value(16)).current;
 
   // CTA press feedback
@@ -57,7 +58,7 @@ const ConfirmRide = () => {
           easing: Easing.in(Easing.quad),
           useNativeDriver: true,
         }),
-      ])
+      ]),
     ).start();
   }, []);
 
@@ -114,9 +115,9 @@ const ConfirmRide = () => {
           flexDirection: "row",
           alignItems: "center",
           gap: 10,
-          backgroundColor: WARM.cream,
+          backgroundColor: PALETTE.cream,
           borderWidth: 1,
-          borderColor: WARM.line,
+          borderColor: PALETTE.line,
           borderRadius: 18,
           paddingHorizontal: 14,
           paddingVertical: 10,
@@ -136,7 +137,8 @@ const ConfirmRide = () => {
               height: 12,
               width: 12,
               borderRadius: 6,
-              backgroundColor: listData.length > 0 ? WARM.gold : WARM.muted,
+              backgroundColor:
+                listData.length > 0 ? PALETTE.accent : PALETTE.muted,
               opacity: 0.3,
               transform: [{ scale: statusPulse }],
             }}
@@ -146,7 +148,8 @@ const ConfirmRide = () => {
               height: 8,
               width: 8,
               borderRadius: 4,
-              backgroundColor: listData.length > 0 ? WARM.gold : WARM.muted,
+              backgroundColor:
+                listData.length > 0 ? PALETTE.accent : PALETTE.muted,
             }}
           />
         </View>
@@ -156,7 +159,7 @@ const ConfirmRide = () => {
             flex: 1,
             fontSize: 12,
             fontFamily: "Jakarta-SemiBold",
-            color: WARM.graphite,
+            color: PALETTE.graphite,
           }}
           numberOfLines={1}
         >
@@ -170,14 +173,14 @@ const ConfirmRide = () => {
             paddingHorizontal: 8,
             paddingVertical: 3,
             borderRadius: 999,
-            backgroundColor: WARM.goldSoft,
+            backgroundColor: PALETTE.accentSoft,
           }}
         >
           <Text
             style={{
               fontSize: 10.5,
               fontFamily: "Jakarta-Bold",
-              color: WARM.goldDeep,
+              color: PALETTE.accentDeep,
               letterSpacing: 1,
             }}
           >
@@ -232,14 +235,14 @@ const ConfirmRide = () => {
                 style={{
                   height: 58,
                   borderRadius: 20,
-                  backgroundColor: hasSelection ? WARM.gold : WARM.sand,
+                  backgroundColor: hasSelection ? PALETTE.accent : PALETTE.sand,
                   flexDirection: "row",
                   alignItems: "center",
                   justifyContent: "center",
                   gap: 10,
                   borderWidth: 1,
-                  borderColor: hasSelection ? WARM.goldDeep : WARM.line,
-                  shadowColor: WARM.goldDeep,
+                  borderColor: hasSelection ? PALETTE.accentDeep : PALETTE.line,
+                  shadowColor: PALETTE.accentDeep,
                   shadowOffset: { width: 0, height: 10 },
                   shadowOpacity: hasSelection ? 0.35 : 0,
                   shadowRadius: 18,
@@ -248,7 +251,7 @@ const ConfirmRide = () => {
               >
                 <Text
                   style={{
-                    color: hasSelection ? WARM.charcoal : WARM.muted,
+                    color: hasSelection ? PALETTE.charcoal : PALETTE.muted,
                     fontSize: 16,
                     fontFamily: "Jakarta-Bold",
                     letterSpacing: 0.2,
@@ -270,7 +273,7 @@ const ConfirmRide = () => {
                     <Ionicons
                       name="arrow-forward"
                       size={16}
-                      color={WARM.charcoal}
+                      color={PALETTE.charcoal}
                     />
                   </View>
                 )}

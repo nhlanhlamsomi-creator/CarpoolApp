@@ -1,13 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import {
-    ActivityIndicator,
-    Image,
-    Keyboard,
-    Pressable,
-    Text,
-    TextInput,
-    View,
-} from "react-native";
+import { useState } from "react";
+import { Image, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 import { icons } from "@/constants";
 import { GoogleInputProps } from "@/types/type";
@@ -21,64 +13,40 @@ const GoogleTextInput = ({
   textInputBackgroundColor,
   handlePress,
 }: GoogleInputProps) => {
-
   const [text, setText] = useState("");
   const [places, setPlaces] = useState<any[]>([]);
-  const [searching, setSearching] = useState(false);
-  const requestId = useRef(0);
-  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [focused, setFocused] = useState(false);
 
-  useEffect(() => {
-    return () => {
-      if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    };
-  }, []);
-
-  const searchPlaces = (value: string) => {
+  const searchPlaces = async (value: string) => {
     setText(value);
-    setPlaces([]);
 
     if (value.length < 3) {
-      setSearching(false);
+      setPlaces([]);
       return;
     }
 
-    if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    const currentRequest = ++requestId.current;
-    setSearching(true);
+    try {
+      const response = await fetch(
+        `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(
+          value
+        )}&limit=5&apiKey=${geoapifyKey}`
+      );
 
-    debounceTimer.current = setTimeout(async () => {
-      if (!geoapifyKey) {
-        setSearching(false);
-        return;
+      const data = await response.json();
+
+      if (data.features) {
+        setPlaces(data.features);
+      } else {
+        setPlaces([]);
       }
-
-      try {
-        const response = await fetch(
-          `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(
-            value,
-          )}&filter=countrycode:za&limit=5&apiKey=${geoapifyKey}`,
-        );
-        const data = await response.json();
-
-        if (currentRequest !== requestId.current) return;
-        setPlaces(Array.isArray(data.features) ? data.features : []);
-      } catch (error) {
-        if (currentRequest === requestId.current) {
-          console.log("Geoapify autocomplete error:", error);
-          setPlaces([]);
-        }
-      } finally {
-        if (currentRequest === requestId.current) setSearching(false);
-      }
-    }, 250);
+    } catch (error) {
+      console.log("Geoapify autocomplete error:", error);
+      setPlaces([]);
+    }
   };
 
   const handleSelectPlace = (place: any) => {
     const location = place.properties;
-    const countryCode = String(location.country_code ?? "").toLowerCase();
-
-    if (countryCode && countryCode !== "za") return;
 
     handlePress({
       latitude: location.lat,
@@ -88,96 +56,70 @@ const GoogleTextInput = ({
 
     setText(location.formatted);
     setPlaces([]);
-    setSearching(false);
-    Keyboard.dismiss();
   };
 
-
   return (
-    <View
-      className={`w-full rounded-3xl ${containerStyle ?? "bg-white"}`}
-      style={{
-        zIndex: 20,
-        elevation: 8,
-        shadowColor: "#2B2722",
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.08,
-        shadowRadius: 14,
-      }}
-    >
-
-      {/* Search Input */}
+    <View className={`w-full ${containerStyle ?? ""}`}>
+      {/* Search input */}
       <View
-        className="flex-row items-center rounded-3xl border border-[#E7DECF] px-4"
+        className={`h-[54px] flex-row items-center rounded-2xl border-[1.5px] px-4 ${
+          focused ? "border-[#0A3B2E]" : "border-[#E3E7E5]"
+        }`}
         style={{
           backgroundColor:
-            textInputBackgroundColor ?? "#FFFFFF",
+            textInputBackgroundColor ?? (focused ? "#FFFFFF" : "#F4F6F5"),
         }}
       >
-
-        <View className="items-center justify-center">
-          <Image
-            source={icon ? icon : icons.search}
-            className="w-5 h-5"
-            resizeMode="contain"
-          />
-        </View>
-
+        <Image
+          source={icon ? icon : icons.search}
+          className="h-5 w-5"
+          resizeMode="contain"
+          tintColor={focused ? "#0A3B2E" : "#A9B1AD"}
+        />
 
         <TextInput
           value={text}
           onChangeText={searchPlaces}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
           placeholder={initialLocation ?? "Where do you want to go?"}
-          placeholderTextColor="#9A928A"
-          returnKeyType="search"
-          autoCorrect={false}
-          autoCapitalize="words"
-          className="ml-3 h-[54px] flex-1 text-[15px] font-JakartaSemiBold text-[#2B2722]"
+          placeholderTextColor="#A9B1AD"
+          className="ml-3 h-[52px] flex-1 text-[15px] font-JakartaMedium text-[#101814]"
         />
-
-        {searching ? (
-          <ActivityIndicator size="small" color="#E0A11E" />
-        ) : text.length > 0 ? (
-          <Pressable
-            onPress={() => searchPlaces("")}
-            hitSlop={8}
-            accessibilityRole="button"
-            accessibilityLabel="Clear destination search"
-          >
-            <Text className="text-xl font-JakartaMedium text-[#9A928A]">×</Text>
-          </Pressable>
-        ) : null}
-
       </View>
 
-
-      {/* Autocomplete Results */}
+      {/* Autocomplete results */}
       {places.length > 0 && (
-        <View className="mt-2 overflow-hidden rounded-2xl border border-[#E7DECF] bg-white">
+        <View className="mt-2 overflow-hidden rounded-2xl border border-[#E3E7E5] bg-white shadow-sm shadow-black/10">
           {places.map((place, index) => (
-            <Pressable
-              key={`${place.properties?.place_id ?? place.properties?.formatted}-${index}`}
+            <TouchableOpacity
+              key={index}
               onPress={() => handleSelectPlace(place)}
+              activeOpacity={0.7}
               className={`flex-row items-center px-4 py-3.5 ${
-                index < places.length - 1 ? "border-b border-[#F0E9DE]" : ""
+                index < places.length - 1 ? "border-b border-[#E3E7E5]" : ""
               }`}
             >
-              <View className="mr-3 h-8 w-8 items-center justify-center rounded-full bg-[#FCEBC4]">
-                <Text className="text-[#E0A11E]">⌖</Text>
+              <View className="mr-3 h-8 w-8 items-center justify-center rounded-full bg-[#E4EFEA]">
+                <Image
+                  source={icons.point}
+                  className="h-4 w-4"
+                  resizeMode="contain"
+                  tintColor="#0A3B2E"
+                />
               </View>
               <Text
-                className="flex-1 text-[13px] font-JakartaSemiBold text-[#2B2722]"
+                className="flex-1 text-[13.5px] font-JakartaSemiBold text-[#101814]"
                 numberOfLines={2}
               >
                 {place.properties.formatted}
               </Text>
-            </Pressable>
+            </TouchableOpacity>
           ))}
         </View>
       )}
     </View>
   );
 };
-
 
 export default GoogleTextInput;

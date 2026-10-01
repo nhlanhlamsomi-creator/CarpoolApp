@@ -20,29 +20,29 @@ import {
 import { ReactNativeModal } from "react-native-modal";
 
 import OAuth from "@/components/OAuth";
+import { brand, ui } from "@/constants/theme";
 import { fetchAPI } from "@/lib/fetch";
 
 const { width } = Dimensions.get("window");
 
 // ─── Palette ─────────────────────────────────────────────────────────────────
 // Matches the welcome screen exactly.
-const WARM = {
-  cream:      "#FBF7F0",
-  sand:       "#F4EDE1",
-  beige:      "#EDE3D2",
-  gold:       "#F5B93C",
-  goldDeep:   "#E0A11E",
-  goldSoft:   "#FCEBC4",
-  charcoal:   "#2B2722",
-  graphite:   "#4A443D",
-  muted:      "#9A928A",
-  line:       "#E7DECF",
+const PALETTE = {
+  cream: ui.bg,
+  sand: ui.surface,
+  beige: ui.border,
+  accent: brand.accent,
+  accentDeep: brand.dark,
+  accentSoft: brand.tint,
+  charcoal: ui.ink,
+  graphite: ui.muted,
+  muted: ui.muted,
+  line: ui.border,
 };
 
-const INK    = WARM.charcoal;
-const MUTED  = WARM.muted;
-const BORDER = WARM.line;
-const DANGER = "#E04545";
+const INK = PALETTE.charcoal;
+const MUTED = PALETTE.muted;
+const DANGER = ui.danger;
 
 // ─── Field ───────────────────────────────────────────────────────────────────
 
@@ -73,7 +73,7 @@ function Field({ label, icon, error, secure, hint, ...props }: FieldProps) {
         <Ionicons
           name={icon}
           size={19}
-          color={error ? DANGER : focused ? WARM.goldDeep : "#B8AE9E"}
+          color={error ? DANGER : focused ? PALETTE.accentDeep : ui.faint}
         />
 
         <TextInput
@@ -87,11 +87,14 @@ function Field({ label, icon, error, secure, hint, ...props }: FieldProps) {
         />
 
         {secure && (
-          <TouchableOpacity onPress={() => setHidden((h) => !h)} activeOpacity={0.7}>
+          <TouchableOpacity
+            onPress={() => setHidden((h) => !h)}
+            activeOpacity={0.7}
+          >
             <Ionicons
               name={hidden ? "eye-outline" : "eye-off-outline"}
               size={19}
-              color="#B8AE9E"
+              color={ui.faint}
             />
           </TouchableOpacity>
         )}
@@ -125,17 +128,17 @@ const SignUp = () => {
   });
 
   // ── Animations ─────────────────────────────────────────────────────────────
-  const headerFade  = useRef(new Animated.Value(0)).current;
+  const headerFade = useRef(new Animated.Value(0)).current;
   const headerSlide = useRef(new Animated.Value(-18)).current;
-  const cardFade    = useRef(new Animated.Value(0)).current;
-  const cardSlide   = useRef(new Animated.Value(34)).current;
-  const footerFade  = useRef(new Animated.Value(0)).current;
-  const ringSpin    = useRef(new Animated.Value(0)).current;
+  const cardFade = useRef(new Animated.Value(0)).current;
+  const cardSlide = useRef(new Animated.Value(34)).current;
+  const footerFade = useRef(new Animated.Value(0)).current;
+  const ringSpin = useRef(new Animated.Value(0)).current;
 
   // Badge float — gentle vertical bob
-  const badgeBob    = useRef(new Animated.Value(0)).current;
-  // Soft golden glow behind the badge
-  const badgeGlow   = useRef(new Animated.Value(1)).current;
+  const badgeBob = useRef(new Animated.Value(0)).current;
+  // Soft green glow behind the badge
+  const badgeGlow = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     Animated.loop(
@@ -144,7 +147,7 @@ const SignUp = () => {
         duration: 20000,
         easing: Easing.linear,
         useNativeDriver: true,
-      })
+      }),
     ).start();
 
     Animated.loop(
@@ -161,7 +164,7 @@ const SignUp = () => {
           easing: Easing.inOut(Easing.sin),
           useNativeDriver: true,
         }),
-      ])
+      ]),
     ).start();
 
     Animated.loop(
@@ -178,12 +181,16 @@ const SignUp = () => {
           easing: Easing.inOut(Easing.sin),
           useNativeDriver: true,
         }),
-      ])
+      ]),
     ).start();
 
     Animated.sequence([
       Animated.parallel([
-        Animated.timing(headerFade, { toValue: 1, duration: 460, useNativeDriver: true }),
+        Animated.timing(headerFade, {
+          toValue: 1,
+          duration: 460,
+          useNativeDriver: true,
+        }),
         Animated.spring(headerSlide, {
           toValue: 0,
           tension: 68,
@@ -192,7 +199,11 @@ const SignUp = () => {
         }),
       ]),
       Animated.parallel([
-        Animated.timing(cardFade, { toValue: 1, duration: 420, useNativeDriver: true }),
+        Animated.timing(cardFade, {
+          toValue: 1,
+          duration: 420,
+          useNativeDriver: true,
+        }),
         Animated.spring(cardSlide, {
           toValue: 0,
           tension: 66,
@@ -200,7 +211,11 @@ const SignUp = () => {
           useNativeDriver: true,
         }),
       ]),
-      Animated.timing(footerFade, { toValue: 1, duration: 360, useNativeDriver: true }),
+      Animated.timing(footerFade, {
+        toValue: 1,
+        duration: 360,
+        useNativeDriver: true,
+      }),
     ]).start();
   }, []);
 
@@ -304,7 +319,7 @@ const SignUp = () => {
       style={styles.root}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <StatusBar barStyle="dark-content" backgroundColor={WARM.cream} />
+      <StatusBar barStyle="dark-content" backgroundColor={PALETTE.cream} />
 
       <ScrollView
         contentContainerStyle={styles.scroll}
@@ -316,7 +331,9 @@ const SignUp = () => {
         <View style={styles.header}>
           <View style={styles.blobA} />
           <View style={styles.blobB} />
-          <Animated.View style={[styles.orbitRing, { transform: [{ rotate: spin }] }]} />
+          <Animated.View
+            style={[styles.orbitRing, { transform: [{ rotate: spin }] }]}
+          />
 
           <Animated.View
             style={[
@@ -329,7 +346,11 @@ const SignUp = () => {
               onPress={() => router.back()}
               activeOpacity={0.75}
             >
-              <Ionicons name="chevron-back" size={21} color={WARM.charcoal} />
+              <Ionicons
+                name="chevron-back"
+                size={21}
+                color={PALETTE.charcoal}
+              />
             </TouchableOpacity>
 
             <Animated.View
@@ -338,7 +359,7 @@ const SignUp = () => {
                 { transform: [{ translateY: badgeY }] },
               ]}
             >
-              {/* Breathing golden glow behind the badge */}
+              {/* Breathing green glow behind the badge */}
               <Animated.View
                 style={[
                   styles.logoBadgeGlow,
@@ -346,12 +367,18 @@ const SignUp = () => {
                 ]}
               />
               <View style={styles.logoBadge}>
-                <Ionicons name="person-add" size={28} color={WARM.charcoal} />
+                <Ionicons
+                  name="person-add"
+                  size={28}
+                  color={PALETTE.charcoal}
+                />
               </View>
             </Animated.View>
 
             <Text style={styles.headerTitle}>Create your account</Text>
-            <Text style={styles.headerSub}>Start sharing rides in under a minute</Text>
+            <Text style={styles.headerSub}>
+              Start sharing rides in under a minute
+            </Text>
           </Animated.View>
         </View>
 
@@ -389,7 +416,9 @@ const SignUp = () => {
             secure
             textContentType="password"
             value={form.password}
-            onChangeText={(value: string) => setForm({ ...form, password: value })}
+            onChangeText={(value: string) =>
+              setForm({ ...form, password: value })
+            }
           />
 
           <TouchableOpacity
@@ -403,7 +432,11 @@ const SignUp = () => {
             </Text>
             {!loading && (
               <View style={styles.ctaIconWrap}>
-                <Ionicons name="arrow-forward" size={16} color={WARM.charcoal} />
+                <Ionicons
+                  name="arrow-forward"
+                  size={16}
+                  color={PALETTE.charcoal}
+                />
               </View>
             )}
           </TouchableOpacity>
@@ -421,8 +454,14 @@ const SignUp = () => {
         {/* ── Footer ── */}
         <Animated.View style={[styles.footer, { opacity: footerFade }]}>
           <View style={styles.trustRow}>
-            <Ionicons name="lock-closed-outline" size={15} color={WARM.goldDeep} />
-            <Text style={styles.trustText}>Your details stay private and encrypted</Text>
+            <Ionicons
+              name="lock-closed-outline"
+              size={15}
+              color={PALETTE.accentDeep}
+            />
+            <Text style={styles.trustText}>
+              Your details stay private and encrypted
+            </Text>
           </View>
 
           <Link href="/sign-in" style={styles.signinLink}>
@@ -445,7 +484,11 @@ const SignUp = () => {
           <View style={styles.modalIconWrap}>
             <View style={styles.modalIconRing} />
             <View style={styles.modalIcon}>
-              <Ionicons name="mail-open-outline" size={30} color={WARM.goldDeep} />
+              <Ionicons
+                name="mail-open-outline"
+                size={30}
+                color={PALETTE.accentDeep}
+              />
             </View>
           </View>
 
@@ -479,7 +522,11 @@ const SignUp = () => {
           )}
 
           <TouchableOpacity
-            style={[styles.cta, styles.modalCta, verifying && { opacity: 0.72 }]}
+            style={[
+              styles.cta,
+              styles.modalCta,
+              verifying && { opacity: 0.72 },
+            ]}
             onPress={onPressVerify}
             activeOpacity={0.88}
             disabled={verifying}
@@ -489,13 +536,14 @@ const SignUp = () => {
             </Text>
             {!verifying && (
               <View style={styles.ctaIconWrap}>
-                <Ionicons name="checkmark" size={16} color={WARM.charcoal} />
+                <Ionicons name="checkmark" size={16} color={PALETTE.charcoal} />
               </View>
             )}
           </TouchableOpacity>
 
           <Text style={styles.modalNote}>
-            The code expires shortly. Check your spam folder if it hasn&apos;t arrived.
+            The code expires shortly. Check your spam folder if it hasn&apos;t
+            arrived.
           </Text>
         </View>
       </ReactNativeModal>
@@ -507,7 +555,7 @@ const SignUp = () => {
             <View style={styles.successRingOuter} />
             <View style={styles.successRingInner} />
             <View style={styles.successIcon}>
-              <Ionicons name="checkmark" size={38} color={WARM.charcoal} />
+              <Ionicons name="checkmark" size={38} color={PALETTE.charcoal} />
             </View>
           </View>
 
@@ -523,7 +571,11 @@ const SignUp = () => {
           >
             <Text style={styles.ctaText}>Browse rides</Text>
             <View style={styles.ctaIconWrap}>
-              <Ionicons name="arrow-forward" size={16} color={WARM.charcoal} />
+              <Ionicons
+                name="arrow-forward"
+                size={16}
+                color={PALETTE.charcoal}
+              />
             </View>
           </TouchableOpacity>
         </View>
@@ -539,16 +591,16 @@ export default SignUp;
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: WARM.cream,
+    backgroundColor: PALETTE.cream,
   },
   scroll: {
     paddingBottom: 40,
   },
 
-  // Header — soft cream with golden depth layers
+  // Header with soft green accent depth.
   header: {
     height: 292,
-    backgroundColor: WARM.cream,
+    backgroundColor: PALETTE.cream,
     borderBottomLeftRadius: 38,
     borderBottomRightRadius: 38,
     overflow: "hidden",
@@ -558,7 +610,7 @@ const styles = StyleSheet.create({
     width: width * 1.2,
     height: width * 1.2,
     borderRadius: width * 0.6,
-    backgroundColor: WARM.goldSoft,
+    backgroundColor: PALETTE.accentSoft,
     opacity: 0.7,
     top: -width * 0.72,
     left: -width * 0.3,
@@ -568,7 +620,7 @@ const styles = StyleSheet.create({
     width: width * 0.8,
     height: width * 0.8,
     borderRadius: width * 0.4,
-    backgroundColor: WARM.sand,
+    backgroundColor: PALETTE.sand,
     opacity: 0.9,
     bottom: -width * 0.5,
     right: -width * 0.3,
@@ -598,9 +650,9 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 14,
-    backgroundColor: WARM.sand,
+    backgroundColor: PALETTE.sand,
     borderWidth: 1,
-    borderColor: WARM.line,
+    borderColor: PALETTE.line,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -615,17 +667,17 @@ const styles = StyleSheet.create({
     width: 96,
     height: 96,
     borderRadius: 48,
-    backgroundColor: WARM.goldSoft,
+    backgroundColor: PALETTE.accentSoft,
     opacity: 0.85,
   },
   logoBadge: {
     width: 72,
     height: 72,
     borderRadius: 24,
-    backgroundColor: WARM.gold,
+    backgroundColor: PALETTE.accent,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: WARM.goldDeep,
+    shadowColor: PALETTE.accentDeep,
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.35,
     shadowRadius: 22,
@@ -634,7 +686,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 25,
     fontFamily: "Jakarta-ExtraBold",
-    color: WARM.charcoal,
+    color: PALETTE.charcoal,
     letterSpacing: -0.6,
     marginBottom: 6,
     textAlign: "center",
@@ -642,12 +694,12 @@ const styles = StyleSheet.create({
   headerSub: {
     fontSize: 13.5,
     fontFamily: "Jakarta",
-    color: WARM.graphite,
+    color: PALETTE.graphite,
     textAlign: "center",
     opacity: 0.85,
   },
 
-  // Card — soft white card, warm hairlines
+  // White card with soft borders
   card: {
     backgroundColor: "#FFFFFF",
     marginHorizontal: 20,
@@ -655,8 +707,8 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     padding: 22,
     borderWidth: 1,
-    borderColor: WARM.line,
-    shadowColor: WARM.charcoal,
+    borderColor: PALETTE.line,
+    shadowColor: PALETTE.charcoal,
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.06,
     shadowRadius: 22,
@@ -670,7 +722,7 @@ const styles = StyleSheet.create({
   fieldLabel: {
     fontSize: 12.5,
     fontFamily: "Jakarta-SemiBold",
-    color: WARM.graphite,
+    color: PALETTE.graphite,
     marginBottom: 8,
   },
   fieldBox: {
@@ -681,11 +733,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     borderRadius: 18,
     borderWidth: 1.5,
-    borderColor: WARM.line,
-    backgroundColor: WARM.cream,
+    borderColor: PALETTE.line,
+    backgroundColor: PALETTE.cream,
   },
   fieldBoxFocused: {
-    borderColor: WARM.gold,
+    borderColor: PALETTE.accent,
     backgroundColor: "#FFFFFF",
   },
   fieldBoxError: {
@@ -708,29 +760,29 @@ const styles = StyleSheet.create({
   fieldHint: {
     fontSize: 11.5,
     fontFamily: "Jakarta",
-    color: WARM.muted,
+    color: PALETTE.muted,
     marginTop: 6,
     marginLeft: 4,
   },
 
-  // CTA — golden yellow, big rounded, warm shadow
+  // Green primary action with an accent shadow.
   cta: {
     height: 56,
     borderRadius: 20,
-    backgroundColor: WARM.gold,
+    backgroundColor: PALETTE.accent,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 10,
     marginTop: 6,
-    shadowColor: WARM.goldDeep,
+    shadowColor: PALETTE.accentDeep,
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.32,
     shadowRadius: 16,
     elevation: 7,
   },
   ctaText: {
-    color: WARM.charcoal,
+    color: PALETTE.charcoal,
     fontSize: 16,
     fontFamily: "Jakarta-Bold",
     letterSpacing: 0.2,
@@ -755,12 +807,12 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: WARM.line,
+    backgroundColor: PALETTE.line,
   },
   dividerText: {
     fontSize: 11.5,
     fontFamily: "Jakarta-Medium",
-    color: WARM.muted,
+    color: PALETTE.muted,
   },
 
   // Footer
@@ -774,7 +826,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    backgroundColor: WARM.goldSoft,
+    backgroundColor: PALETTE.accentSoft,
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 999,
@@ -782,7 +834,7 @@ const styles = StyleSheet.create({
   trustText: {
     fontSize: 12,
     fontFamily: "Jakarta-Medium",
-    color: WARM.graphite,
+    color: PALETTE.graphite,
   },
   signinLink: {
     textAlign: "center",
@@ -795,10 +847,10 @@ const styles = StyleSheet.create({
   signinAction: {
     fontSize: 14,
     fontFamily: "Jakarta-Bold",
-    color: WARM.charcoal,
+    color: PALETTE.charcoal,
   },
 
-  // Modals — warm rounded sheets
+  // Rounded modal sheets
   modal: {
     backgroundColor: "#FFFFFF",
     borderRadius: 30,
@@ -807,7 +859,7 @@ const styles = StyleSheet.create({
     paddingBottom: 26,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: WARM.line,
+    borderColor: PALETTE.line,
   },
   modalIconWrap: {
     alignItems: "center",
@@ -819,7 +871,7 @@ const styles = StyleSheet.create({
     width: 96,
     height: 96,
     borderRadius: 48,
-    backgroundColor: WARM.goldSoft,
+    backgroundColor: PALETTE.accentSoft,
   },
   modalIcon: {
     width: 68,
@@ -829,7 +881,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1.5,
-    borderColor: WARM.goldSoft,
+    borderColor: PALETTE.accentSoft,
   },
   modalTitle: {
     fontSize: 22,
@@ -856,8 +908,8 @@ const styles = StyleSheet.create({
     height: 62,
     borderRadius: 20,
     borderWidth: 1.5,
-    borderColor: WARM.line,
-    backgroundColor: WARM.cream,
+    borderColor: PALETTE.line,
+    backgroundColor: PALETTE.cream,
     textAlign: "center",
     fontSize: 26,
     fontFamily: "Jakarta-ExtraBold",
@@ -884,7 +936,7 @@ const styles = StyleSheet.create({
     fontSize: 11.5,
     lineHeight: 17,
     fontFamily: "Jakarta",
-    color: WARM.muted,
+    color: PALETTE.muted,
     textAlign: "center",
     marginTop: 16,
   },
@@ -901,7 +953,7 @@ const styles = StyleSheet.create({
     width: 118,
     height: 118,
     borderRadius: 59,
-    backgroundColor: WARM.gold,
+    backgroundColor: PALETTE.accent,
     opacity: 0.15,
   },
   successRingInner: {
@@ -909,14 +961,14 @@ const styles = StyleSheet.create({
     width: 92,
     height: 92,
     borderRadius: 46,
-    backgroundColor: WARM.gold,
+    backgroundColor: PALETTE.accent,
     opacity: 0.25,
   },
   successIcon: {
     width: 68,
     height: 68,
     borderRadius: 34,
-    backgroundColor: WARM.gold,
+    backgroundColor: PALETTE.accent,
     alignItems: "center",
     justifyContent: "center",
   },

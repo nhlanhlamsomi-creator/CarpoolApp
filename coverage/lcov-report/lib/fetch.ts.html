@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/38</span>
+                <span class='fraction'>0/39</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/18</span>
+                <span class='fraction'>0/20</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/35</span>
+                <span class='fraction'>0/36</span>
             </div>
         
             
@@ -132,20 +132,26 @@
 <a name='L67'></a><a href='#L67'>67</a>
 <a name='L68'></a><a href='#L68'>68</a>
 <a name='L69'></a><a href='#L69'>69</a>
-<a name='L70'></a><a href='#L70'>70</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L70'></a><a href='#L70'>70</a>
+<a name='L71'></a><a href='#L71'>71</a>
+<a name='L72'></a><a href='#L72'>72</a>
+<a name='L73'></a><a href='#L73'>73</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -203,8 +209,12 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 &nbsp;
-export const fetchAPI = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >async (u</span>rl: string, options?: RequestInit) =&gt; {</span>
+export const fetchAPI = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (url: string, options?: RequestInit) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
+<span class="cstat-no" title="statement not covered" >    if (/^http:/i.test(url)) {</span>
+<span class="cstat-no" title="statement not covered" >      throw new Error("Insecure HTTP requests are not allowed");</span>
+    }
+&nbsp;
     const response = <span class="cstat-no" title="statement not covered" >await fetch(url, options);</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (!response.ok) {</span>
@@ -214,12 +224,11 @@ export const fetchAPI = <span class="cstat-no" title="statement not covered" ><s
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    return await response.json();</span>
   } catch (error) {
-<span class="cstat-no" title="statement not covered" >    console.warn("Fetch error:", error);</span>
 <span class="cstat-no" title="statement not covered" >    throw error;</span>
   }
 };
 &nbsp;
-export const <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >useFetch = &lt;T&gt;(u</span>rl: string, options?: RequestInit) =&gt; {</span>
+export const useFetch = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >&lt;T</span>&gt;(url: string, options?: RequestInit) =&gt; {</span>
   const [data, setData] = <span class="cstat-no" title="statement not covered" >useState&lt;T | null&gt;(null);</span>
   const [loading, setLoading] = <span class="cstat-no" title="statement not covered" >useState(false);</span>
   const [error, setError] = <span class="cstat-no" title="statement not covered" >useState&lt;string | null&gt;(null);</span>
@@ -228,8 +237,8 @@ export const <span class="cstat-no" title="statement not covered" ><span class="
   // objects, which are a new reference on every render, so fetchData changed
   // every render and the effect re-fired forever. Comparing the serialised
   // form instead keeps it stable.
-  const optionsKey = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >useMemo(</span></span>
-    () =&gt; (<span class="cstat-no" title="statement not covered" >options ? JSON.stringify(options) : ""),</span>
+  const optionsKey = <span class="cstat-no" title="statement not covered" >useMemo(</span>
+<span class="fstat-no" title="function not covered" >    ()</span> =&gt; (<span class="cstat-no" title="statement not covered" >options ? JSON.stringify(options) : "")</span>,
     [options],
   );
 &nbsp;
@@ -238,14 +247,14 @@ export const <span class="cstat-no" title="statement not covered" ><span class="
   const requestId = <span class="cstat-no" title="statement not covered" >useRef(0);</span>
   const mounted = <span class="cstat-no" title="statement not covered" >useRef(true);</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >  useEffect(() =&gt; {</span></span>
+<span class="cstat-no" title="statement not covered" >  useEffect(<span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    mounted.current = true;</span>
-<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >    return () =&gt; {</span></span>
+<span class="cstat-no" title="statement not covered" >    return <span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >      mounted.current = false;</span>
     };
   }, []);
 &nbsp;
-  const fetchData = <span class="cstat-no" title="statement not covered" >useCallback(<span class="fstat-no" title="function not covered" >async () =&gt; {</span></span>
+  const fetchData = <span class="cstat-no" title="statement not covered" >useCallback(<span class="fstat-no" title="function not covered" >as</span>ync () =&gt; {</span>
     const id = <span class="cstat-no" title="statement not covered" >++requestId.current;</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    setLoading(true);</span>
@@ -265,7 +274,7 @@ export const <span class="cstat-no" title="statement not covered" ><span class="
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url, optionsKey]);
 &nbsp;
-<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >  useEffect(() =&gt; {</span></span>
+<span class="cstat-no" title="statement not covered" >  useEffect(<span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    fetchData();</span>
   }, [fetchData]);
 &nbsp;
@@ -277,7 +286,7 @@ export const <span class="cstat-no" title="statement not covered" ><span class="
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-09-09T17:55:48.782Z
+                at 2026-09-29T22:29:12.335Z
             </div>
         <script src="../prettify.js"></script>
         <script>

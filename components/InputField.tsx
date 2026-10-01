@@ -29,20 +29,24 @@ const InputField = ({
   const [hidden, setHidden] = useState(secureTextEntry);
 
   const borderColor = error
-    ? "border-[#E04545]"
+    ? "border-[#E0575B]"
     : focused
-      ? "border-[#0E5C3F]"
-      : "border-[#E2E9E5]";
+      ? "border-[#0A3B2E]"
+      : "border-[#E3E7E5]";
 
-  const bgColor = error ? "bg-[#FEF3F3]" : focused ? "bg-white" : "bg-[#F8FAF9]";
+  const bgColor = error
+    ? "bg-[#FEF3F3]"
+    : focused
+      ? "bg-white"
+      : "bg-[#F4F6F5]";
 
-  const iconColor = error ? "#E04545" : focused ? "#0E5C3F" : "#A7B2AD";
+  const iconColor = error ? "#E0575B" : focused ? "#0A3B2E" : "#A9B1AD";
 
   return (
     <View className={`my-2 w-full ${className ?? ""}`}>
       {!!label && (
         <Text
-          className={`mb-2 text-[13px] font-JakartaSemiBold text-[#4A5450] ${labelStyle ?? ""}`}
+          className={`mb-2 text-[13px] font-JakartaSemiBold text-[#7A8580] ${labelStyle ?? ""}`}
         >
           {label}
         </Text>
@@ -59,7 +63,7 @@ const InputField = ({
 
         <TextInput
           className={`ml-3 flex-1 text-[15px] font-JakartaMedium text-[#101814] ${inputStyle ?? ""}`}
-          placeholderTextColor="#B4BEB9"
+          placeholderTextColor="#A9B1AD"
           secureTextEntry={hidden}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
@@ -75,7 +79,7 @@ const InputField = ({
             <Ionicons
               name={hidden ? "eye-outline" : "eye-off-outline"}
               size={19}
-              color="#A7B2AD"
+              color="#A9B1AD"
             />
           </TouchableOpacity>
         )}
@@ -83,15 +87,15 @@ const InputField = ({
 
       {!!error && (
         <View className="mt-1.5 flex-row items-center gap-1.5">
-          <Ionicons name="alert-circle-outline" size={14} color="#E04545" />
-          <Text className="text-xs font-JakartaMedium text-[#E04545]">
+          <Ionicons name="alert-circle-outline" size={14} color="#E0575B" />
+          <Text className="text-xs font-JakartaMedium text-[#E0575B]">
             {error}
           </Text>
         </View>
       )}
 
       {!error && !!hint && (
-        <Text className="ml-1 mt-1.5 text-xs font-Jakarta text-[#9BA6A1]">
+        <Text className="ml-1 mt-1.5 text-xs font-Jakarta text-[#A9B1AD]">
           {hint}
         </Text>
       )}

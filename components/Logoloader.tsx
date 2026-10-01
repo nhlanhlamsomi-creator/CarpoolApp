@@ -12,11 +12,11 @@ import {
 const { width } = Dimensions.get("window");
 
 const GREEN = {
-  deep:   "#06231A",
-  dark:   "#0E5C3F",
-  mid:    "#12724F",
-  accent: "#1FB574",
-  mint:   "#6FEFB4",
+  deep: "#04231C",
+  dark: "#0A3B2E",
+  mid: "#14523F",
+  accent: "#1FA574",
+  mint: "#5FD3A6",
 };
 
 type Props = {
@@ -33,13 +33,13 @@ export default function LogoLoader({
   duration = 1100,
   label = "Loading",
 }: Props) {
-  const rootFade  = useRef(new Animated.Value(1)).current;
+  const rootFade = useRef(new Animated.Value(1)).current;
   const logoScale = useRef(new Animated.Value(0.7)).current;
-  const logoFade  = useRef(new Animated.Value(0)).current;
-  const breathe   = useRef(new Animated.Value(1)).current;
-  const arcSpin   = useRef(new Animated.Value(0)).current;
+  const logoFade = useRef(new Animated.Value(0)).current;
+  const breathe = useRef(new Animated.Value(1)).current;
+  const arcSpin = useRef(new Animated.Value(0)).current;
   const haloScale = useRef(new Animated.Value(0.6)).current;
-  const haloFade  = useRef(new Animated.Value(0)).current;
+  const haloFade = useRef(new Animated.Value(0)).current;
   const labelFade = useRef(new Animated.Value(0)).current;
 
   // Three dots that rise in sequence
@@ -53,7 +53,7 @@ export default function LogoLoader({
         duration: 1600,
         easing: Easing.linear,
         useNativeDriver: true,
-      })
+      }),
     ).start();
 
     // Logo breathes
@@ -71,7 +71,7 @@ export default function LogoLoader({
           easing: Easing.inOut(Easing.sin),
           useNativeDriver: true,
         }),
-      ])
+      ]),
     ).start();
 
     // Halo pushes outward on repeat
@@ -91,10 +91,18 @@ export default function LogoLoader({
           }),
         ]),
         Animated.parallel([
-          Animated.timing(haloScale, { toValue: 0.6, duration: 0, useNativeDriver: true }),
-          Animated.timing(haloFade, { toValue: 0.4, duration: 0, useNativeDriver: true }),
+          Animated.timing(haloScale, {
+            toValue: 0.6,
+            duration: 0,
+            useNativeDriver: true,
+          }),
+          Animated.timing(haloFade, {
+            toValue: 0.4,
+            duration: 0,
+            useNativeDriver: true,
+          }),
         ]),
-      ])
+      ]),
     ).start();
 
     // Dots ripple left to right
@@ -103,12 +111,20 @@ export default function LogoLoader({
         150,
         dots.map((d) =>
           Animated.sequence([
-            Animated.timing(d, { toValue: 1, duration: 340, useNativeDriver: true }),
-            Animated.timing(d, { toValue: 0, duration: 340, useNativeDriver: true }),
+            Animated.timing(d, {
+              toValue: 1,
+              duration: 340,
+              useNativeDriver: true,
+            }),
+            Animated.timing(d, {
+              toValue: 0,
+              duration: 340,
+              useNativeDriver: true,
+            }),
             Animated.delay(220),
-          ])
-        )
-      )
+          ]),
+        ),
+      ),
     ).start();
 
     // Entrance
@@ -119,7 +135,11 @@ export default function LogoLoader({
         friction: 8,
         useNativeDriver: true,
       }),
-      Animated.timing(logoFade, { toValue: 1, duration: 320, useNativeDriver: true }),
+      Animated.timing(logoFade, {
+        toValue: 1,
+        duration: 320,
+        useNativeDriver: true,
+      }),
       Animated.timing(labelFade, {
         toValue: 1,
         duration: 400,
@@ -151,7 +171,10 @@ export default function LogoLoader({
   });
 
   return (
-    <Animated.View pointerEvents="none" style={[styles.root, { opacity: rootFade }]}>
+    <Animated.View
+      pointerEvents="none"
+      style={[styles.root, { opacity: rootFade }]}
+    >
       <View style={styles.blob} />
 
       <View style={styles.cluster}>
@@ -162,7 +185,9 @@ export default function LogoLoader({
           ]}
         />
         <View style={styles.track} />
-        <Animated.View style={[styles.arc, { transform: [{ rotate: spin }] }]} />
+        <Animated.View
+          style={[styles.arc, { transform: [{ rotate: spin }] }]}
+        />
 
         <Animated.View
           style={[
@@ -266,7 +291,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "transparent",
     borderTopColor: GREEN.mint,
-    borderRightColor: "rgba(31,181,116,0.4)",
+    borderRightColor: "rgba(31,165,116,0.4)",
   },
   card: {
     width: LOGO,

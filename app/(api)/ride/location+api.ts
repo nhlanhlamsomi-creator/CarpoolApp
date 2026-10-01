@@ -117,16 +117,16 @@ export async function POST(request: Request) {
         const { error: alertInsertError } = await supabase
           .from("safety_alerts")
           .insert({
-          ride_id: rideId,
-          passenger_id: ride.user_id,
-          driver_id: ride.driver_id,
-          trigger_source: "AUTOMATED",
-          severity: "high",
-          latitude,
-          longitude,
-          reason: anomaly.reason,
-          route_deviation_meters: anomaly.deviationMeters,
-          status: "open",
+            ride_id: rideId,
+            passenger_id: ride.user_id,
+            driver_id: ride.driver_id,
+            trigger_source: "AUTOMATED",
+            severity: "high",
+            latitude,
+            longitude,
+            reason: anomaly.reason,
+            route_deviation_meters: anomaly.deviationMeters,
+            status: "open",
           });
         if (alertInsertError) throw alertInsertError;
       }
