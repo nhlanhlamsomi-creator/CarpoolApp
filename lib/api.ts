@@ -1,5 +1,5 @@
 import { useAuth } from "@clerk/clerk-expo";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const configuredApiUrl = process.env.EXPO_PUBLIC_API_URL?.trim().replace(/\/+$/, "");
 
@@ -46,9 +46,14 @@ export async function apiRequest<T>(
 
 export function useApiFetch<T>(path: string) {
   const { getToken, userId } = useAuth();
+  const getTokenRef = useRef(getToken);
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    getTokenRef.current = getToken;
+  }, [getToken]);
 
   const refetch = useCallback(async () => {
     if (!userId) {
@@ -58,7 +63,7 @@ export function useApiFetch<T>(path: string) {
 
     setLoading(true);
     try {
-      const token = await getToken();
+      const token = await getTokenRef.current();
       const result = await apiRequest<{ data: T }>(
         path,
         { method: "GET" },
@@ -75,7 +80,7 @@ export function useApiFetch<T>(path: string) {
     } finally {
       setLoading(false);
     }
-  }, [getToken, path, userId]);
+  }, [path, userId]);
 
   return { data, error, loading, refetch };
 }

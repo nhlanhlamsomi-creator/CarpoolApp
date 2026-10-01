@@ -18,7 +18,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { EmptyState } from "@/components/Cards";
 import RideCard from "@/components/RideCard";
-import { useFetch } from "@/lib/fetch";
+import { useApiFetch } from "@/lib/api";
 import { useLocationStore } from "@/store";
 import { Ride } from "@/types/type";
 
@@ -33,13 +33,12 @@ const Rides = () => {
   const [tab, setTab] = useState<Tab>("upcoming");
   const [safetyAlerts, setSafetyAlerts] = useState<Record<string, any>>({});
 
-  const fetchState = useFetch<Ride[]>(`/(api)/ride/${user?.id}`);
-  const { data: recentRides, loading, error } = fetchState;
-
-  // The template's useFetch exposes refetch; guard in case yours doesn't.
-  const refetch = (fetchState as any).refetch as
-    | (() => Promise<void> | void)
-    | undefined;
+  const {
+    data: recentRides,
+    loading,
+    error,
+    refetch,
+  } = useApiFetch<Ride[]>("/api/rides");
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -47,14 +46,14 @@ const Rides = () => {
   // so a trip booked seconds ago never appears until the app restarts.
   useFocusEffect(
     useCallback(() => {
-      refetch?.();
+      void refetch();
     }, [refetch]),
   );
 
   const onRefresh = async () => {
     setRefreshing(true);
     try {
-      await refetch?.();
+      await refetch();
     } finally {
       setRefreshing(false);
     }
@@ -172,7 +171,7 @@ const Rides = () => {
 
               Alert.alert("Cancelled", "Your trip has been cancelled.");
               // Refresh list
-              await refetch?.();
+              await refetch();
             } catch (e) {
               console.error("Error calling cancel endpoint:", e);
               Alert.alert("Cancel failed", "Unable to cancel trip");
@@ -498,7 +497,7 @@ const Rides = () => {
               title="Couldn't load your trips"
               message={error}
               actionLabel="Retry"
-              onAction={refetch}
+              onAction={() => void refetch()}
             />
           ) : tab === "upcoming" ? (
             <EmptyState
