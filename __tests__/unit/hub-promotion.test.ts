@@ -1,6 +1,6 @@
 import {
-  HUB_PROMOTION_RATE,
-  getHubPromotionalFare,
+    HUB_PROMOTION_RATE,
+    getHubPromotionalFare,
 } from '../../lib/promotions.ts';
 
 describe('Hub promotion rules', () => {
