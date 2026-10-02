@@ -1,4 +1,4 @@
-import { useSignIn } from "@clerk/clerk-expo";
+import { useSignIn } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import { Link, router } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";

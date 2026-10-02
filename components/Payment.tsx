@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/clerk-expo";
+import { useAuth } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import { LinkDisplay, useStripe } from "@stripe/stripe-react-native";
 import { router } from "expo-router";
@@ -19,6 +19,7 @@ const Payment = ({
   amount,
   driverId,
   rideTime,
+  offerTripId,
 }: PaymentProps) => {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const {
@@ -29,6 +30,7 @@ const Payment = ({
     destinationAddress,
     destinationLongitude,
     selectedHubId,
+    setRideBooked,
   } = useLocationStore();
 
   const { userId, getToken } = useAuth();
@@ -37,7 +39,9 @@ const Payment = ({
   const promotionDate = new Date();
   const baseAmount = Number(amount);
   const hubPromotionActive =
-    selectedHubId != null && isHubPromotionActive(promotionDate);
+    offerTripId == null &&
+    selectedHubId != null &&
+    isHubPromotionActive(promotionDate);
   const chargeAmount = hubPromotionActive
     ? getHubPromotionalFare(baseAmount, promotionDate)
     : baseAmount;
@@ -60,10 +64,14 @@ const Payment = ({
       destinationLatitude,
       destinationLongitude,
     ];
+    const invalidStandardRide =
+      offerTripId == null &&
+      (!userAddress ||
+        !destinationAddress ||
+        coordinates.some((value) => !Number.isFinite(Number(value))));
+
     if (
-      !userAddress ||
-      !destinationAddress ||
-      coordinates.some((value) => !Number.isFinite(Number(value))) ||
+      invalidStandardRide ||
       !Number.isFinite(Number(driverId)) ||
       Number(driverId) <= 0 ||
       !Number.isFinite(Number(amount)) ||
@@ -89,30 +97,53 @@ const Payment = ({
       }
 
       const token = await getToken();
-      const rideResult = await apiRequest<{ data?: { ride_id?: number } }>(
-        "/api/rides",
-        {
-        method: "POST",
-        body: JSON.stringify({
-          origin_address: userAddress,
-          destination_address: destinationAddress,
-          origin_latitude: userLatitude,
-          origin_longitude: userLongitude,
-          destination_latitude: destinationLatitude,
-          destination_longitude: destinationLongitude,
-          ride_time: Math.round(rideTime),
-          fare_price: Math.round(chargeAmount * 100),
-          driver_id: driverId,
-          payment_intent_id: paymentIntentId,
-        }),
-        },
-        token,
-      );
+      if (!token) throw new Error("Sign in again to finish your booking.");
 
-      if (!rideResult?.data?.ride_id) {
-        throw new Error("The payment succeeded, but the ride was not created.");
+      if (offerTripId != null) {
+        const bookingResult = await apiRequest<{
+          data?: { ride?: { ride_id?: number } };
+        }>(
+          "/api/offer-trip",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              tripId: offerTripId,
+              payment_intent_id: paymentIntentId,
+            }),
+          },
+          token,
+        );
+
+        if (!bookingResult?.data?.ride?.ride_id) {
+          throw new Error("Payment succeeded, but the seat was not reserved.");
+        }
+      } else {
+        const rideResult = await apiRequest<{ data?: { ride_id?: number } }>(
+          "/api/rides",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              origin_address: userAddress,
+              destination_address: destinationAddress,
+              origin_latitude: userLatitude,
+              origin_longitude: userLongitude,
+              destination_latitude: destinationLatitude,
+              destination_longitude: destinationLongitude,
+              ride_time: Math.round(rideTime),
+              fare_price: Math.round(chargeAmount * 100),
+              driver_id: driverId,
+              payment_intent_id: paymentIntentId,
+            }),
+          },
+          token,
+        );
+
+        if (!rideResult?.data?.ride_id) {
+          throw new Error("The payment succeeded, but the ride was not created.");
+        }
       }
 
+      setRideBooked(true);
       setSuccess(true);
     } catch (err: any) {
       console.error("Stripe flow failed:", err);
@@ -140,6 +171,7 @@ const Payment = ({
             name: safeName,
             email: safeEmail,
             amount: paymentAmount,
+            offer_trip_id: offerTripId,
           }),
         },
         token,

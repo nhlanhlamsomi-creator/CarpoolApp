@@ -15,13 +15,17 @@ router.post("/intents", async (request, response) => {
   const amount = Number(body.amount);
   const name = String(body.name ?? "Passenger").trim().slice(0, 120) || "Passenger";
   const email = String(body.email ?? "").trim().slice(0, 254);
+  const offerTripId =
+    body.offer_trip_id == null ? null : Number(body.offer_trip_id);
 
   if (
     !Number.isFinite(amount) ||
     amount <= 0 ||
     !Number.isSafeInteger(Math.round(amount * 100)) ||
     !email ||
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
+    (offerTripId !== null &&
+      (!Number.isSafeInteger(offerTripId) || offerTripId <= 0))
   ) {
     throw new HttpError(400, "A valid amount and email are required");
   }
@@ -51,7 +55,10 @@ router.post("/intents", async (request, response) => {
     confirm: false,
     description: `Lyft ride booking for ${name}`,
     receipt_email: email,
-    metadata: { clerk_user_id: userId },
+    metadata: {
+      clerk_user_id: userId,
+      ...(offerTripId === null ? {} : { offer_trip_id: String(offerTripId) }),
+    },
   });
 
   response.status(201).json({

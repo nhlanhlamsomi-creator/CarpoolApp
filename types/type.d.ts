@@ -49,14 +49,18 @@ declare interface MapProps {
 }
 
 declare interface Ride {
+  ride_id?: number;
   origin_address: string;
   destination_address: string;
   origin_latitude: number;
   origin_longitude: number;
   destination_latitude: number;
   destination_longitude: number;
-  ride_time: number;
-  fare_price: number;
+  ride_time: string | number;
+  scheduled_for?: string | null;
+  duration_minutes?: number | null;
+  status?: string | null;
+  fare_price: number | string;
   payment_status: string;
   driver_id: number;
   user_id: string;
@@ -152,6 +156,7 @@ declare interface PaymentProps {
   amount: string;
   driverId: number;
   rideTime: number;
+  offerTripId?: number;
 }
 
 declare interface LocationStore {
@@ -160,6 +165,7 @@ declare interface LocationStore {
   userAddress: string | null;
   selectedHubId: number | null;
   selectedHubName: string | null;
+  rideBooked: boolean;
   destinationLatitude: number | null;
   destinationLongitude: number | null;
   destinationAddress: string | null;
@@ -188,6 +194,7 @@ declare interface LocationStore {
     longitude: number;
     address: string;
   }) => void;
+  setRideBooked: (booked: boolean) => void;
 }
 
 declare interface DriverStore {

@@ -1,4 +1,4 @@
-import { useAuth, useUser } from "@clerk/clerk-expo";
+import { useAuth, useUser } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";

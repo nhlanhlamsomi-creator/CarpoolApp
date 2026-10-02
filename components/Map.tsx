@@ -67,6 +67,9 @@ export default function Map() {
     userLongitude,
     destinationLatitude,
     destinationLongitude,
+    setHubPickup,
+    selectedHubId,
+    rideBooked,
   } = useLocationStore();
 
   const {
@@ -127,6 +130,17 @@ export default function Map() {
         if (!isMounted) return;
 
         if (error) {
+          const errorMessage = String((error as { message?: string })?.message ?? "");
+
+          if (
+            /permission|row level security|42501/i.test(errorMessage) ||
+            (error as { code?: string })?.code === "42501"
+          ) {
+            console.warn(
+              "Hubs are blocked by Supabase RLS. Add a public SELECT policy / grant for public.hubs to restore hub markers.",
+            );
+          }
+
           throw error;
         }
 
@@ -148,9 +162,17 @@ export default function Map() {
   }, []);
 
   useEffect(() => {
-    if (userLatitude != null && userLongitude != null && drivers.length > 0) {
+    const visibleDrivers = rideBooked
+      ? drivers.filter((driver) => Number(driver.id) === selectedDriver)
+      : drivers;
+
+    if (
+      userLatitude != null &&
+      userLongitude != null &&
+      visibleDrivers.length > 0
+    ) {
       const driverMarkers = generateMarkersFromData({
-        data: drivers,
+        data: visibleDrivers,
         userLatitude,
         userLongitude,
       });
@@ -159,7 +181,7 @@ export default function Map() {
     } else {
       setMarkers([]);
     }
-  }, [userLatitude, userLongitude, drivers]);
+  }, [userLatitude, userLongitude, drivers, rideBooked, selectedDriver]);
 
   useEffect(() => {
     if (
@@ -289,6 +311,9 @@ export default function Map() {
 
   const hasDestination =
     destinationLatitude != null && destinationLongitude != null;
+  const visibleHubs = rideBooked
+    ? hubs.filter((hub) => hub.id === selectedHubId)
+    : hubs;
 
   return (
     <MapView
@@ -310,7 +335,7 @@ export default function Map() {
         fillColor="rgba(31,165,116,0.18)"
       />
 
-      {hubs.map((hub) => (
+      {visibleHubs.map((hub) => (
         <React.Fragment key={hub.id}>
           <Circle
             center={{
@@ -323,13 +348,22 @@ export default function Map() {
             fillColor="rgba(31,165,116,0.12)"
           />
           <Marker
+            testID={`hub-marker-${hub.id}`}
             coordinate={{
               latitude: hub.latitude,
               longitude: hub.longitude,
             }}
             title={hub.name}
-            description={hub.address}
-            pinColor={THEME.primary}
+            pinColor={selectedHubId === hub.id ? THEME.accent : THEME.primary}
+            onPress={() =>
+              setHubPickup({
+                id: hub.id,
+                name: hub.name,
+                latitude: hub.latitude,
+                longitude: hub.longitude,
+                address: hub.address,
+              })
+            }
           />
         </React.Fragment>
       ))}
@@ -358,6 +392,7 @@ export default function Map() {
         return (
           <Marker
             key={marker.id}
+            testID={`driver-marker-${marker.id}`}
             coordinate={{
               latitude: marker.latitude,
               longitude: marker.longitude,

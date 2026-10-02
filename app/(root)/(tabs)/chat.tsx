@@ -1,4 +1,4 @@
-import { useUser } from "@clerk/clerk-expo";
+import { useUser } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useMemo } from "react";

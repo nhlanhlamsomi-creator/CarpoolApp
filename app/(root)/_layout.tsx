@@ -20,6 +20,7 @@ const Layout = () => {
       <Stack.Screen name="find-ride" />
       <Stack.Screen name="carpool-groups" />
       <Stack.Screen name="confirm-ride" />
+      <Stack.Screen name="offer-trip-booking" options={{ gestureEnabled: false }} />
       <Stack.Screen
         name="book-ride"
         // Payment is a commitment step, so a stray back-swipe shouldn't

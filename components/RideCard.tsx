@@ -25,6 +25,7 @@ const STATUS: Record<string, { bg: string; text: string }> = {
   pending: { bg: "#E4EFEA", text: "#0A3B2E" },
   failed: { bg: "#FEF3F3", text: "#B02A2A" },
   refunded: { bg: "#E3E7E5", text: "#7A8580" },
+  cancelled: { bg: "#FEF3F3", text: "#B02A2A" },
 };
 
 type Props = {
@@ -134,7 +135,8 @@ const RideCard = ({
   onSafetyResponse,
   onManualSOS,
 }: Props) => {
-  const status = STATUS[ride.payment_status] ?? STATUS.pending;
+  const statusKey = ride.status === "cancelled" ? "cancelled" : ride.payment_status;
+  const status = STATUS[statusKey] ?? STATUS.pending;
   const driverName = ride.driver
     ? `${ride.driver.first_name ?? ""} ${ride.driver.last_name ?? ""}`.trim() ||
       "Driver unavailable"
@@ -144,9 +146,15 @@ const RideCard = ({
     : null;
 
   const upcoming = variant === "upcoming";
+  const dateLabel =
+    ride.status === "cancelled"
+      ? "Cancelled"
+      : upcoming
+        ? "Departs"
+        : "Travelled";
 
-  const duration = (ride as any).duration_minutes ?? null;
-  const whenDate = (ride as any).scheduled_for ?? ride.created_at;
+  const duration = ride.duration_minutes ?? null;
+  const whenDate = ride.scheduled_for ?? ride.created_at;
 
   return (
     <View
@@ -238,7 +246,7 @@ const RideCard = ({
               textTransform: "capitalize",
             }}
           >
-            {ride.payment_status}
+            {statusKey}
           </Text>
         </View>
       </View>
@@ -389,7 +397,7 @@ const RideCard = ({
                 color: THEME.muted,
               }}
             >
-              {upcoming ? "Departs" : "Travelled"}
+              {dateLabel}
             </Text>
           </View>
 
@@ -411,7 +419,7 @@ const RideCard = ({
                 color: THEME.ink,
               }}
             >
-              R{((ride.fare_price ?? 0) / 100).toFixed(2)}
+              R{(Number(ride.fare_price ?? 0) / 100).toFixed(2)}
             </Text>
             <Text
               style={{

@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/clerk-expo";
+import { useAuth } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useStripe } from "@stripe/stripe-react-native";
 import { router } from "expo-router";

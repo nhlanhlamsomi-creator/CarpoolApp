@@ -2,23 +2,27 @@ import { create } from "zustand";
 
 import { DriverStore, LocationStore, MarkerData } from "@/types/type";
 
-export const useLocationStore = create<LocationStore>((set) => ({
+export const useLocationStore = create<LocationStore>((set, get) => ({
   userLatitude: null,
   userLongitude: null,
   userAddress: null,
   selectedHubId: null,
   selectedHubName: null,
+  rideBooked: false,
   destinationLatitude: null,
   destinationLongitude: null,
   destinationAddress: null,
 
   setUserLocation: ({ latitude, longitude, address }) => {
+    if (get().rideBooked) return;
+
     set({
       userLatitude: latitude,
       userLongitude: longitude,
       userAddress: address,
       selectedHubId: null,
       selectedHubName: null,
+      rideBooked: false,
     });
 
     const { selectedDriver, clearSelectedDriver } =
@@ -34,6 +38,7 @@ export const useLocationStore = create<LocationStore>((set) => ({
       userAddress: address,
       selectedHubId: id,
       selectedHubName: name,
+      rideBooked: false,
     });
 
     const { selectedDriver, clearSelectedDriver } =
@@ -47,6 +52,7 @@ export const useLocationStore = create<LocationStore>((set) => ({
       destinationLatitude: latitude,
       destinationLongitude: longitude,
       destinationAddress: address,
+      rideBooked: false,
     });
 
     const { selectedDriver, clearSelectedDriver } =
@@ -54,6 +60,8 @@ export const useLocationStore = create<LocationStore>((set) => ({
 
     if (selectedDriver) clearSelectedDriver();
   },
+
+  setRideBooked: (rideBooked) => set({ rideBooked }),
 }));
 
 export const useDriverStore = create<DriverStore>((set) => ({

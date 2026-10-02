@@ -1,4 +1,4 @@
-import { useUser } from "@clerk/clerk-expo";
+import { useUser } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";

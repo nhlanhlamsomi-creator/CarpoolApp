@@ -24,7 +24,6 @@ router.get("/", async (_request, response) => {
       "*, drivers(id, first_name, last_name, profile_image_url, car_image_url, car_seats, rating, phone_number)",
     )
     .eq("user_id", userId)
-    .order("scheduled_for", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false });
 
   if (error) throw error;
@@ -34,18 +33,8 @@ router.get("/", async (_request, response) => {
     return {
       ...ride,
       duration_minutes:
-        ride.duration_minutes ??
-        (ride.ride_time && ride.created_at
-          ? Math.max(
-              0,
-              Math.round(
-                (new Date(ride.ride_time).getTime() -
-                  new Date(ride.created_at).getTime()) /
-                  60000,
-              ),
-            )
-          : null),
-      status: ride.status ?? "completed",
+        ride.duration_minutes == null ? null : Number(ride.duration_minutes),
+      status: ride.status ?? null,
       driver: driver
         ? {
             driver_id: driver.id,

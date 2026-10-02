@@ -1,4 +1,4 @@
-import { useUser } from "@clerk/clerk-expo";
+import { useUser } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { router, useFocusEffect } from "expo-router";
@@ -67,7 +67,7 @@ const Rides = () => {
   // "Upcoming" is a state, not a date calculation. The status column decides
   // it; scheduled_for is only a fallback for rows created before that existed.
   const isUpcoming = (ride: Ride) => {
-    const status = (ride as any).status;
+    const status = ride.status;
 
     if (status) {
       return ["booked", "scheduled", "accepted", "in_progress"].includes(
@@ -75,14 +75,38 @@ const Rides = () => {
       );
     }
 
-    const scheduled = (ride as any).scheduled_for;
+    const scheduled = ride.scheduled_for;
     if (scheduled) return new Date(scheduled).getTime() > Date.now();
 
     return false;
   };
 
-  const upcoming = useMemo(() => rides.filter(isUpcoming), [rides]);
-  const history = useMemo(() => rides.filter((r) => !isUpcoming(r)), [rides]);
+  const upcoming = useMemo(
+    () =>
+      rides
+        .filter(isUpcoming)
+        .sort((left, right) => {
+          const leftTime = new Date(
+            left.scheduled_for ?? left.ride_time,
+          ).getTime();
+          const rightTime = new Date(
+            right.scheduled_for ?? right.ride_time,
+          ).getTime();
+          return leftTime - rightTime;
+        }),
+    [rides],
+  );
+  const history = useMemo(
+    () =>
+      rides
+        .filter((ride) => !isUpcoming(ride))
+        .sort(
+          (left, right) =>
+            new Date(right.created_at).getTime() -
+            new Date(left.created_at).getTime(),
+        ),
+    [rides],
+  );
   const visible = tab === "upcoming" ? upcoming : history;
 
   const activeRides = useMemo(
@@ -97,7 +121,7 @@ const Rides = () => {
     if (!user?.id || activeRides.length === 0) return;
     const results = await Promise.all(
       activeRides.map(async (ride) => {
-        const rideId = String((ride as any).ride_id);
+        const rideId = String(ride.ride_id);
         const response = await fetch(
           `/(api)/safety/${rideId}?passenger_id=${encodeURIComponent(user.id)}`,
         );
@@ -120,7 +144,7 @@ const Rides = () => {
   const handleMessage = (ride: Ride) => {
     router.push({
       pathname: "/(root)/(tabs)/chat",
-      params: { rideId: String((ride as any).ride_id ?? ride.created_at) },
+      params: { rideId: String(ride.ride_id ?? ride.created_at) },
     });
   };
 
@@ -415,12 +439,12 @@ const Rides = () => {
             onCancel={() => handleCancel(item)}
             onRebook={() => handleRebook(item)}
             onReport={() => handleReport(item)}
-            safetyAlert={safetyAlerts[String((item as any).ride_id)] ?? null}
+            safetyAlert={safetyAlerts[String(item.ride_id)] ?? null}
             onSafetyResponse={(response, status) =>
               handleSafetyResponse(item, response, status)
             }
             onManualSOS={
-              ["accepted", "in_progress"].includes((item as any).status)
+              ["accepted", "in_progress"].includes(item.status ?? "")
                 ? () => handleManualSOS(item)
                 : undefined
             }

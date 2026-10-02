@@ -1,4 +1,4 @@
-import { ClerkLoaded, ClerkProvider } from "@clerk/clerk-expo";
+import { ClerkLoaded, ClerkProvider } from "@clerk/expo";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -15,11 +15,17 @@ import { tokenCache } from "@/lib/auth";
 // splash registered, and the rejected promise surfaces as a red-box error.
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
-const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
+const rawPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ?? "";
+const publishableKey = rawPublishableKey.trim();
+const hasValidClerkKey = /^pk_(test|live)_[A-Za-z0-9]+$/.test(publishableKey);
 
 if (!publishableKey) {
-  throw new Error(
-    "Missing Publishable Key. Please set EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in your .env",
+  console.warn(
+    "Missing EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY. The app will render a safe fallback until the value is configured.",
+  );
+} else if (!hasValidClerkKey) {
+  console.warn(
+    "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY is not a valid Clerk publishable key. The app will skip Clerk until the real key is configured.",
   );
 }
 
@@ -51,18 +57,24 @@ export default function RootLayout() {
     return null;
   }
 
+  const content = hasValidClerkKey ? (
+    <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
+      <ClerkLoaded>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="(auth)" />
+          <Stack.Screen name="(root)" />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+      </ClerkLoaded>
+    </ClerkProvider>
+  ) : (
+    <View style={{ flex: 1, backgroundColor: "#0f172a" }} />
+  );
+
   return (
     <View style={{ flex: 1 }}>
-      <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
-        <ClerkLoaded>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="index" />
-            <Stack.Screen name="(auth)" />
-            <Stack.Screen name="(root)" />
-            <Stack.Screen name="+not-found" />
-          </Stack>
-        </ClerkLoaded>
-      </ClerkProvider>
+      {content}
 
       {/* Sits above everything, including Clerk's own loading gap, then lifts */}
       {!splashDone && <AnimatedSplash onFinish={() => setSplashDone(true)} />}
