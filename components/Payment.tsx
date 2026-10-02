@@ -9,7 +9,7 @@ import { ReactNativeModal } from "react-native-modal";
 import CustomButton from "@/components/CustomButton";
 import { images } from "@/constants";
 import { apiRequest } from "@/lib/api";
-import { getHubPromotionalFare, isHubPromotionActive } from "@/lib/promotions";
+import { getHubPromotionalFare } from "@/lib/promotions";
 import { useLocationStore } from "@/store";
 import { PaymentProps } from "@/types/type";
 
@@ -36,14 +36,11 @@ const Payment = ({
   const { userId, getToken } = useAuth();
   const [success, setSuccess] = useState<boolean>(false);
   const [processing, setProcessing] = useState(false);
-  const promotionDate = new Date();
   const baseAmount = Number(amount);
   const hubPromotionActive =
-    offerTripId == null &&
-    selectedHubId != null &&
-    isHubPromotionActive(promotionDate);
+    offerTripId == null && selectedHubId != null;
   const chargeAmount = hubPromotionActive
-    ? getHubPromotionalFare(baseAmount, promotionDate)
+    ? getHubPromotionalFare(baseAmount)
     : baseAmount;
 
   const safeName = fullName || email?.split("@")[0] || "Guest";
