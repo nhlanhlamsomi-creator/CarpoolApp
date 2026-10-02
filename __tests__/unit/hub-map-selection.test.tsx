@@ -1,5 +1,5 @@
-import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import React from 'react';
 
 import Map from '@/components/Map';
 import { useDriverStore, useLocationStore } from '@/store';

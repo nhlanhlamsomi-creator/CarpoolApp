@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Image, Platform, View } from "react-native";
 import MapView, {
-  Circle,
-  Marker,
-  Polyline,
-  PROVIDER_DEFAULT,
-  PROVIDER_GOOGLE,
+    Circle,
+    Marker,
+    Polyline,
+    PROVIDER_DEFAULT,
+    PROVIDER_GOOGLE,
 } from "react-native-maps";
 
 import { icons } from "@/constants";
 import {
-  calculateDriverTimes,
-  calculateRegion,
-  fetchRoutePolyline,
-  generateMarkersFromData,
+    calculateDriverTimes,
+    calculateRegion,
+    fetchRoutePolyline,
+    generateMarkersFromData,
 } from "@/lib/map";
 import { getSupabaseClient } from "@/lib/supabase";
 import { isDriverVisible } from "@/lib/utils";

@@ -3,12 +3,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useMemo } from "react";
 import {
-  ActivityIndicator,
-  FlatList,
-  Image,
-  Pressable,
-  Text,
-  View,
+    ActivityIndicator,
+    FlatList,
+    Image,
+    Pressable,
+    Text,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
