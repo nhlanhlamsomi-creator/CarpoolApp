@@ -8,6 +8,8 @@ import checkIdRouter from "./routes/checkId";
 import healthRouter from "./routes/health";
 import offerTripsRouter from "./routes/offerTrips";
 import paymentsRouter from "./routes/payments";
+import profileRouter from "./routes/profile";
+import ratingsRouter from "./routes/ratings";
 import ridesRouter from "./routes/rides";
 import sosRouter from "./routes/sos";
 
@@ -40,6 +42,8 @@ app.use(express.json({ limit: "32kb" }));
 app.use("/api/health", healthRouter);
 app.use("/api/check-id", requireAuth, checkIdRouter);
 app.use("/api/offer-trip", offerTripsRouter);
+app.use("/api/profile", requireAuth, profileRouter);
+app.use("/api/ratings", requireAuth, ratingsRouter);
 app.use("/api/rides", requireAuth, ridesRouter);
 app.use("/api/sos", requireAuth, sosRouter);
 app.use("/api/payments", requireAuth, paymentsRouter);

@@ -23,7 +23,7 @@ import OptionSheet, {
     VEHICLE_OPTIONS,
 } from "@/components/OptionSheet";
 import { brand, ui } from "@/constants/theme";
-import { fetchAPI } from "@/lib/fetch";
+import { apiRequest } from "@/lib/api";
 import {
     PickedImage,
     captureImage,
@@ -87,7 +87,7 @@ type RideSummary = {
 
 const Profile = () => {
   const { user } = useUser();
-  const { signOut } = useAuth();
+  const { signOut, getToken } = useAuth();
   const router = useRouter();
   const [profile, setProfile] = useState<ProfileRecord | null>(null);
   const [rideSummary, setRideSummary] = useState<RideSummary>({
@@ -130,15 +130,20 @@ const Profile = () => {
     setLoading(true);
 
     try {
-      const profileResult = await fetchAPI(
-        `/(api)/profile?clerkId=${encodeURIComponent(user.id)}`,
+      const token = await getToken();
+      const profileResult = await apiRequest<{ data: ProfileRecord | null }>(
+        "/api/profile",
+        {},
+        token,
       );
-      setProfile(profileResult?.data ?? null);
+      setProfile(profileResult.data ?? null);
 
-      const rideResult = await fetchAPI(
-        `/(api)/ride?clerkId=${encodeURIComponent(user.id)}`,
+      const rideResult = await apiRequest<{ data: RideSummary }>(
+        "/api/profile/summary",
+        {},
+        token,
       );
-      setRideSummary(rideResult?.data ?? rideSummary);
+      setRideSummary(rideResult.data ?? rideSummary);
     } catch (error) {
       console.warn("Unable to load profile data", error);
     } finally {
@@ -162,19 +167,25 @@ const Profile = () => {
     setSaving(true);
 
     try {
-      const result = await fetchAPI("/(api)/profile", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clerkId: user.id, ...payload }),
-      });
+      const token = await getToken();
+      const result = await apiRequest<{ data: ProfileRecord }>(
+        "/api/profile",
+        {
+          method: "POST",
+          body: JSON.stringify(payload),
+        },
+        token,
+      );
 
-      if (result?.data) {
+      if (result.data) {
         setProfile(result.data);
       }
     } catch (error) {
       Alert.alert(
         "Update failed",
-        "Your profile could not be saved right now.",
+        error instanceof Error
+          ? error.message
+          : "Your profile could not be saved right now.",
       );
       console.warn(error);
     } finally {

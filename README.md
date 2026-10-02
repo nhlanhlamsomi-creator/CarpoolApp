@@ -31,6 +31,7 @@ A Lyft-style carpooling platform for South African commuters, built as a Univers
 - Register, verify email and sign in (email/password or Google)
 - Search for trips, view results and book a ride
 - Pay for trips through Stripe
+- Rate drivers after completed trips
 - View pickup and drop-off points, live location and route polylines on a map
 - Browse pickup hubs on the map
 
@@ -123,7 +124,7 @@ npm install
 ### 3. Configure Supabase
 
 1. Create a Supabase project.
-2. Apply the database migrations to create the trip-related tables, views and Row Level Security policies.
+2. Apply the database migrations to create the trip-related tables, views and Row Level Security policies, including [`migrations/driver-ratings.sql`](migrations/driver-ratings.sql) for passenger reviews.
 3. Keep the service-role key **server-only**. Never prefix it with `EXPO_PUBLIC_`.
 
 ### 4. Configure local and cloud environment variables

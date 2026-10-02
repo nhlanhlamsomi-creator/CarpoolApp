@@ -36,6 +36,7 @@ type Props = {
   onCall?: () => void;
   onCancel?: () => void;
   onRebook?: () => void;
+  onRate?: () => void;
   onReport?: () => void;
   safetyAlert?: {
     reason: string;
@@ -130,6 +131,7 @@ const RideCard = ({
   onCall,
   onCancel,
   onRebook,
+  onRate,
   onReport,
   safetyAlert,
   onSafetyResponse,
@@ -537,6 +539,13 @@ const RideCard = ({
                 onPress={onRebook}
                 tone="primary"
               />
+              {ride.status === "completed" && (
+                <Action
+                  icon="star-outline"
+                  label="Rate driver"
+                  onPress={onRate}
+                />
+              )}
               <Action
                 icon="chatbubble-ellipses-outline"
                 label="Message"
