@@ -248,9 +248,11 @@ function Slide({ item, index, scrollX }: SlideProps) {
               resizeMode="contain"
             />
           ) : (
-            <View style={styles.iconContainer}>
-              <Ionicons name="car-outline" size={42} color={PALETTE.white} />
-            </View>
+            <Image
+              source={require("../../assets/icons/car.png")}
+              style={styles.slideImage}
+              resizeMode="contain"
+            />
           )}
         </Animated.View>
       </Animated.View>
@@ -556,8 +558,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   slideImage: {
-    width: ART_SIZE * 0.65,
-    height: ART_SIZE * 0.65,
+    width: ART_SIZE * 0.36,
+    height: ART_SIZE * 0.36,
   },
   iconContainer: {
     width: 70,

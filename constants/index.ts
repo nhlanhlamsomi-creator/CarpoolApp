@@ -1,8 +1,10 @@
 import arrowDown from "@/assets/icons/arrow-down.png";
 import arrowUp from "@/assets/icons/arrow-up.png";
 import backArrow from "@/assets/icons/back-arrow.png";
+import car from "@/assets/icons/car.png";
 import chat from "@/assets/icons/chat.png";
 import checkmark from "@/assets/icons/check.png";
+import route from "@/assets/icons/route.png";
 import close from "@/assets/icons/close.png";
 import dollar from "@/assets/icons/dollar.png";
 import email from "@/assets/icons/email.png";
@@ -41,14 +43,18 @@ export const images = {
   check,
   noResult,
   message,
+  car,
+  route,
 };
 
 export const icons = {
   arrowDown,
   arrowUp,
   backArrow,
+  car,
   chat,
   checkmark,
+  route,
   close,
   dollar,
   email,
@@ -77,7 +83,7 @@ export const onboarding = [
     title: "The perfect ride is just a tap away!",
     description:
       "Your journey begins with HopOn. Find your ideal ride effortlessly.",
-    image: images.onboarding1,
+    image: images.route,
   },
   {
     id: 2,
