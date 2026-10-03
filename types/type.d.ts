@@ -70,6 +70,7 @@ declare interface Ride {
     last_name: string;
     car_seats: number;
     rating?: number | null;
+    profile_image_url?: string | null;
   } | null;
 }
 

@@ -1,23 +1,21 @@
-import { useUser } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useMemo } from "react";
 import {
-    ActivityIndicator,
-    FlatList,
-    Image,
-    Pressable,
-    Text,
-    View,
+  ActivityIndicator,
+  FlatList,
+  Image,
+  Pressable,
+  Text,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { EmptyState } from "@/components/Cards";
 import { brand, ui } from "@/constants/theme";
-import { useFetch } from "@/lib/fetch";
-import { Ride } from "@/types/type";
+import { useApiFetch } from "@/lib/api";
+import type { Ride } from "@/types/type";
 
-// ─── Palette ─────────────────────────────────────────────────────────────────
 const WARM = {
   cream: ui.bg,
   sand: ui.surface,
@@ -25,35 +23,32 @@ const WARM = {
   accentDeep: brand.dark,
   accentSoft: brand.tint,
   charcoal: ui.ink,
-  graphite: ui.muted,
   muted: ui.muted,
   line: ui.border,
 };
 
-// PASSENGER APP — the Chat tab: one conversation per trip that has a driver
-// attached. Reuses the rides endpoint, so no new API is needed for the list.
-
 const Chat = () => {
-  const { user } = useUser();
-
-  const state = useFetch<Ride[]>(`/(api)/ride/${user?.id}`);
-  const { data, loading } = state;
-  const refetch = (state as any).refetch as (() => void) | undefined;
+  const {
+    data,
+    error,
+    loading,
+    refetch,
+  } = useApiFetch<Ride[]>("/api/rides");
 
   useFocusEffect(
     useCallback(() => {
-      refetch?.();
+      void refetch();
     }, [refetch]),
   );
 
   const threads = useMemo(() => {
     const rides = Array.isArray(data) ? data : [];
-    // Chat exists once a driver is attached and the trip isn't cancelled.
-    // Completed trips stay listed — lost-property conversations are real.
-    return rides.filter((r: any) =>
-      ["accepted", "in_progress", "completed", "booked"].includes(
-        r.status ?? "booked",
-      ),
+    return rides.filter(
+      (ride) =>
+        ride.driver &&
+        ["accepted", "in_progress", "completed", "booked"].includes(
+          ride.status ?? "booked",
+        ),
     );
   }, [data]);
 
@@ -61,15 +56,17 @@ const Chat = () => {
     <SafeAreaView style={{ flex: 1, backgroundColor: WARM.cream }}>
       <FlatList
         data={threads}
-        keyExtractor={(item: any, i) => `${item.ride_id ?? i}`}
+        keyExtractor={(item, index) => `${item.ride_id ?? index}`}
         className="px-5"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 130 }}
-        renderItem={({ item }: any) => {
+        renderItem={({ item }) => {
           const driverName = item.driver
             ? `${item.driver.first_name ?? ""} ${item.driver.last_name ?? ""}`.trim()
             : "Driver";
-          const active = ["accepted", "in_progress"].includes(item.status);
+          const active = ["accepted", "in_progress"].includes(
+            item.status ?? "",
+          );
 
           return (
             <Pressable
@@ -171,6 +168,17 @@ const Chat = () => {
             <Text className="text-[24px] font-JakartaExtraBold text-[#21152F]">
               Messages
             </Text>
+            {error ? (
+              <Text
+                style={{
+                  marginTop: 8,
+                  color: "#B42318",
+                  fontFamily: "Jakarta",
+                }}
+              >
+                {error}
+              </Text>
+            ) : null}
           </View>
         }
         ListEmptyComponent={
@@ -178,6 +186,22 @@ const Chat = () => {
             <View style={{ alignItems: "center", paddingVertical: 48 }}>
               <ActivityIndicator size="large" color={WARM.accent} />
             </View>
+          ) : error ? (
+            <Pressable
+              onPress={() => void refetch()}
+              style={{
+                alignItems: "center",
+                paddingVertical: 24,
+                flexDirection: "row",
+                justifyContent: "center",
+                gap: 8,
+              }}
+            >
+              <Ionicons name="refresh" size={18} color={WARM.accentDeep} />
+              <Text style={{ color: WARM.accentDeep, fontFamily: "Jakarta-Bold" }}>
+                Tap to try again
+              </Text>
+            </Pressable>
           ) : (
             <EmptyState
               icon="chatbubble-ellipses-outline"

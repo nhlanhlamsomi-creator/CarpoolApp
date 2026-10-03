@@ -7,6 +7,7 @@ import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
 import { requireAuth } from "./middleware/requireAuth";
 import checkIdRouter from "./routes/checkId";
 import healthRouter from "./routes/health";
+import messagesRouter from "./routes/messages";
 import offerTripsRouter from "./routes/offerTrips";
 import paymentsRouter from "./routes/payments";
 import ratingsRouter from "./routes/ratings";
@@ -229,6 +230,7 @@ app.use(express.json({ limit: "32kb" }));
 
 app.use("/api/health", healthRouter);
 app.use("/api/check-id", requireAuth, checkIdRouter);
+app.use("/api/messages", requireAuth, messagesRouter);
 app.use("/api/offer-trip", offerTripsRouter);
 app.use("/api/profile", requireAuth, profileRouter);
 app.use("/api/ratings", requireAuth, ratingsRouter);

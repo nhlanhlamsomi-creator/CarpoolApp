@@ -1,4 +1,4 @@
-import { useUser } from "@clerk/expo";
+import { useAuth } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -16,7 +16,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { brand, ui } from "@/constants/theme";
-import { fetchAPI } from "@/lib/fetch";
+import { apiRequest } from "@/lib/api";
 
 // ─── Palette ─────────────────────────────────────────────────────────────────
 const PALETTE = {
@@ -52,81 +52,93 @@ const POLL_MS = 4000;
 
 const ChatThread = () => {
   const { rideId } = useLocalSearchParams<{ rideId: string }>();
-  const { user } = useUser();
+  const { getToken, userId } = useAuth();
 
   const [thread, setThread] = useState<Thread | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const listRef = useRef<FlatList>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const load = useCallback(async () => {
-    if (!user?.id || !rideId) return;
+    if (!userId || !rideId) {
+      setLoading(false);
+      setError("Sign in to view this conversation.");
+      return;
+    }
     try {
-      const result = await fetchAPI(
-        `/(api)/messages/${rideId}?clerkId=${encodeURIComponent(user.id)}`,
+      const token = await getToken();
+      const result = await apiRequest<{ data: Thread }>(
+        `/api/messages/${encodeURIComponent(rideId)}`,
+        { method: "GET" },
+        token,
       );
-      setThread(result?.data ?? null);
-    } catch (error) {
-      console.warn("Could not load thread", error);
+      setThread(result.data);
+      setError(null);
+    } catch (requestError) {
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Could not load this conversation.",
+      );
     } finally {
       setLoading(false);
     }
-  }, [user?.id, rideId]);
+  }, [getToken, userId, rideId]);
+
+  const retryLoad = () => {
+    setLoading(true);
+    void load();
+  };
+
+  const closed = thread?.status === "cancelled";
+  const done = thread?.status === "completed";
 
   // Polling rather than websockets: works in Expo Go with nothing to set up.
   // Supabase Realtime is the upgrade path once the app leaves Expo Go.
   useEffect(() => {
-    load();
+    const initialLoad = setTimeout(() => {
+      void load();
+    }, 0);
     pollRef.current = setInterval(load, POLL_MS);
     return () => {
+      clearTimeout(initialLoad);
       if (pollRef.current) clearInterval(pollRef.current);
     };
   }, [load]);
 
   const send = async () => {
     const text = draft.trim();
-    if (!text || sending || !user?.id) return;
+    if (!text || sending || !userId || !thread || closed) return;
 
     setSending(true);
-    setDraft("");
-
-    // Show the message immediately; reconcile on the next poll
-    setThread((t) =>
-      t
-        ? {
-            ...t,
-            messages: [
-              ...t.messages,
-              {
-                id: -Date.now(),
-                body: text,
-                created_at: new Date().toISOString(),
-                mine: true,
-              },
-            ],
-          }
-        : t,
-    );
 
     try {
-      await fetchAPI(`/(api)/messages/${rideId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clerkId: user.id, body: text }),
-      });
-      await load();
-    } catch (error) {
-      setDraft(text); // give their words back rather than losing them
-      await load();
+      const token = await getToken();
+      const result = await apiRequest<{ data: Message }>(
+        `/api/messages/${encodeURIComponent(rideId)}`,
+        { method: "POST", body: JSON.stringify({ body: text }) },
+        token,
+      );
+      setThread((current) =>
+        current
+          ? { ...current, messages: [...current.messages, result.data] }
+          : current,
+      );
+      setDraft("");
+      setError(null);
+    } catch (requestError) {
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Message could not be sent.",
+      );
     } finally {
       setSending(false);
     }
   };
-
-  const closed = thread?.status === "cancelled";
-  const done = thread?.status === "completed";
 
   return (
     <SafeAreaView
@@ -226,6 +238,50 @@ const ChatThread = () => {
           >
             <ActivityIndicator size="large" color={PALETTE.accent} />
           </View>
+        ) : !thread && error ? (
+          <View
+            style={{
+              flex: 1,
+              alignItems: "center",
+              justifyContent: "center",
+              paddingHorizontal: 28,
+            }}
+          >
+            <Ionicons
+              name="alert-circle-outline"
+              size={36}
+              color={PALETTE.accentDeep}
+            />
+            <Text
+              style={{
+                marginTop: 12,
+                textAlign: "center",
+                color: PALETTE.charcoal,
+                fontFamily: "Jakarta",
+              }}
+            >
+              {error}
+            </Text>
+            <Pressable
+              onPress={retryLoad}
+              style={{
+                marginTop: 16,
+                borderRadius: 14,
+                backgroundColor: PALETTE.accent,
+                paddingHorizontal: 18,
+                paddingVertical: 12,
+              }}
+            >
+              <Text
+                style={{
+                  color: PALETTE.charcoal,
+                  fontFamily: "Jakarta-Bold",
+                }}
+              >
+                Try again
+              </Text>
+            </Pressable>
+          </View>
         ) : (
           <FlatList
             ref={listRef}
@@ -233,6 +289,22 @@ const ChatThread = () => {
             keyExtractor={(m) => String(m.id)}
             className="px-4"
             contentContainerStyle={{ paddingVertical: 14 }}
+            ListHeaderComponent={
+              error ? (
+                <Text
+                  style={{
+                    marginBottom: 12,
+                    borderRadius: 10,
+                    backgroundColor: "#FEF3F2",
+                    padding: 10,
+                    color: "#B42318",
+                    fontFamily: "Jakarta",
+                  }}
+                >
+                  {error}
+                </Text>
+              ) : null
+            }
             onContentSizeChange={() =>
               listRef.current?.scrollToEnd({ animated: false })
             }
@@ -327,7 +399,7 @@ const ChatThread = () => {
         )}
 
         {/* ── Composer ── */}
-        {closed ? (
+        {!thread ? null : closed ? (
           <View
             style={{
               borderTopWidth: 1,
@@ -401,7 +473,7 @@ const ChatThread = () => {
               />
               <Pressable
                 onPress={send}
-                disabled={!draft.trim() || sending}
+                disabled={!draft.trim() || sending || !thread}
                 style={{
                   height: 48,
                   width: 48,
@@ -409,17 +481,19 @@ const ChatThread = () => {
                   justifyContent: "center",
                   borderRadius: 18,
                   backgroundColor:
-                    draft.trim() && !sending ? PALETTE.accent : PALETTE.sand,
+                    draft.trim() && !sending && thread
+                      ? PALETTE.accent
+                      : PALETTE.sand,
                   borderWidth: 1.5,
                   borderColor:
-                    draft.trim() && !sending
+                    draft.trim() && !sending && thread
                       ? PALETTE.accentDeep
                       : PALETTE.line,
                   shadowColor: PALETTE.accentDeep,
                   shadowOffset: { width: 0, height: 6 },
-                  shadowOpacity: draft.trim() && !sending ? 0.3 : 0,
+                  shadowOpacity: draft.trim() && !sending && thread ? 0.3 : 0,
                   shadowRadius: 12,
-                  elevation: draft.trim() && !sending ? 5 : 0,
+                  elevation: draft.trim() && !sending && thread ? 5 : 0,
                 }}
               >
                 {sending ? (
