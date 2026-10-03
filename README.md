@@ -76,8 +76,8 @@ Progress as at **03 September 2026** (Sprint 5–6 progress report).
 
 | Area | Owner | Status | Completion |
 | ---- | ----- | ------ | ---------- |
-| Admin website development | G. Makwarela | Completed | 80% |
-| Admin dashboard UI/UX | G. Makwarela | Completed | 80% |
+| Admin website development | G. Makwarela | Completed | 90% |
+| Admin dashboard UI/UX | G. Makwarela | Completed | 100% |
 | Admin backend APIs | G. Makwarela | Completed | 100% |
 | Admin Clerk authentication | G. Makwarela | Completed | 100% |
 | Admin Supabase integration | G. Makwarela | Completed | 100% |
@@ -91,8 +91,8 @@ Progress as at **03 September 2026** (Sprint 5–6 progress report).
 | Hub system API (mobile) | L. Nama, M. Sithomola | Completed | 100% |
 | Time and distance API | M. Sithomola | In progress | 40% |
 | Trip cancellation endpoint | M. Sithomola | In progress | 50% |
-| Frontend integration | L. Nama, N. Msomi | In progress | 70% |
-| UI/UX design | T. Macholo | In progress | 70% |
+| Frontend integration |M. Sithomola  &  G. Makwarela  | In progress | 75% |
+| UI/UX design and bug fixing | T. Macholo | In progress | 70% |
 
 ---
 
@@ -420,7 +420,7 @@ These are not yet complete and should not be treated as working features:
 | Member | Role | Responsibility |
 | ------ | ---- | -------------- |
 | S. Mdala | Project Manager | Project management and process flows |
-| L.P. Nama | Business Analyst & Frontend Developer | Requirements gathering |
+| L.P. Nama | Business Analyst | Requirements gathering |
 | T. Macholo | UX/UI Designer | Figma design and navigation |
 | N.S. Msomi | Frontend Developer | UI components and screens |
 | M. Sithomola | Backend Developer | Supabase migrations, driver and trip APIs, Stripe payments, maps and routing |
