@@ -1,4 +1,3 @@
-import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -19,7 +18,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import LogoLoader from "@/components/Logoloader";
-import { onboarding } from "@/constants";
+import { icons, onboarding } from "@/constants";
 
 const { width, height } = Dimensions.get("window");
 
@@ -376,7 +375,11 @@ const Welcome: React.FC = () => {
             style={styles.closeBtn}
             activeOpacity={0.75}
           >
-            <Ionicons name="close" size={20} color={PALETTE.white} />
+            <Image
+              source={icons.close}
+              resizeMode="contain"
+              style={styles.navIcon}
+            />
           </TouchableOpacity>
         </View>
 
@@ -459,7 +462,11 @@ const Welcome: React.FC = () => {
             <Text style={styles.ctaText}>
               {isLastSlide ? "Get Started" : "Continue"}
             </Text>
-            <Ionicons name="arrow-forward" size={18} color={PALETTE.white} />
+            <Image
+              source={icons.to}
+              resizeMode="contain"
+              style={styles.ctaIcon}
+            />
           </TouchableOpacity>
 
           {/* Footer Auth Navigation */}
@@ -539,6 +546,11 @@ const styles = StyleSheet.create({
     backgroundColor: PALETTE.closeBtnBg,
     alignItems: "center",
     justifyContent: "center",
+  },
+  navIcon: {
+    width: 14,
+    height: 14,
+    tintColor: PALETTE.white,
   },
 
   // Slide Stage
@@ -671,6 +683,11 @@ const styles = StyleSheet.create({
     color: PALETTE.white,
     fontSize: 16,
     fontFamily: "Jakarta-Bold",
+  },
+  ctaIcon: {
+    width: 18,
+    height: 18,
+    tintColor: PALETTE.white,
   },
 
   // Auth Footer Row

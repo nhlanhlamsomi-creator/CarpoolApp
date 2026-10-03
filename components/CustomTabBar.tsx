@@ -1,57 +1,47 @@
-import { Feather, FontAwesome5, Ionicons } from "@expo/vector-icons";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useEffect, useState } from "react";
 import {
     Animated,
+    Image,
     Pressable,
     StyleSheet,
     Text,
     View,
 } from "react-native";
 
-type NavItem =
-	| {
-			label: string;
-			iconType: "ionicons";
-			iconName: keyof typeof Ionicons.glyphMap;
-			badge?: number;
-		}
-	| {
-			label: string;
-			iconType: "fontawesome";
-			iconName: keyof typeof FontAwesome5.glyphMap;
-			badge?: number;
-		}
-	| {
-			label: string;
-			iconType: "feather";
-			iconName: keyof typeof Feather.glyphMap;
-			badge?: number;
-		};
+import { icons } from "@/constants";
+
+type NavItem = {
+	label: string;
+	iconSource: any;
+	badge?: number;
+};
 
 const NAV_ITEMS: Record<string, NavItem> = {
-	home: { label: "Home", iconType: "ionicons", iconName: "home-outline" },
-	rides: { label: "Rides", iconType: "fontawesome", iconName: "car" },
+	home: { label: "Home", iconSource: icons.home },
+	rides: { label: "Rides", iconSource: icons.car },
 	chat: {
 		label: "Messages",
-		iconType: "ionicons",
-		iconName: "chatbubble-ellipses-outline",
+		iconSource: icons.chat,
 		badge: 1,
 	},
-	profile: { label: "Profile", iconType: "feather", iconName: "user" },
+	profile: { label: "Profile", iconSource: icons.person },
 };
 
 function TabIcon({ item, focused }: { item: NavItem; focused: boolean }) {
-	const color = focused ? "#FFFFFF" : "#C9B8DB";
+	const iconTint = focused ? "#FFFFFF" : "#C9B8DB";
 
-	switch (item.iconType) {
-		case "fontawesome":
-			return <FontAwesome5 name={item.iconName} size={18} color={color} />;
-		case "feather":
-			return <Feather name={item.iconName} size={19} color={color} />;
-		default:
-			return <Ionicons name={item.iconName} size={20} color={color} />;
-	}
+	return (
+		<Image
+			source={item.iconSource}
+			resizeMode="contain"
+			style={{
+				width: 20,
+				height: 20,
+				tintColor: iconTint,
+			}}
+		/>
+	);
 }
 
 function TabButton({
