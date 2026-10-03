@@ -2,11 +2,11 @@ import { Feather, FontAwesome5, Ionicons } from "@expo/vector-icons";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useEffect, useState } from "react";
 import {
-	Animated,
-	Pressable,
-	StyleSheet,
-	Text,
-	View,
+    Animated,
+    Pressable,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
 
 type NavItem =

@@ -1,14 +1,14 @@
 import { brand } from "@/constants/theme";
 import { useEffect, useRef } from "react";
 import {
-  Animated,
-  Dimensions,
-  Easing,
-  Image,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View,
+    Animated,
+    Dimensions,
+    Easing,
+    Image,
+    StatusBar,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
 
 type Props = {
