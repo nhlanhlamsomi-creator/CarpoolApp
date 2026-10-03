@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
 import {
-  Animated,
-  Dimensions,
-  Easing,
-  StyleSheet,
-  View,
+    Animated,
+    Dimensions,
+    Easing,
+    StyleSheet,
+    View,
 } from "react-native";
 
 type Props = {
