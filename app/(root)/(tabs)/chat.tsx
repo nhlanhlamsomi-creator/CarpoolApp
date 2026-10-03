@@ -167,16 +167,11 @@ const Chat = () => {
           );
         }}
         ListHeaderComponent={
-          <Text
-            style={{
-              marginVertical: 20,
-              fontSize: 24,
-              fontFamily: "Jakarta-ExtraBold",
-              color: WARM.charcoal,
-            }}
-          >
-            Messages
-          </Text>
+          <View style={{ marginVertical: 20 }}>
+            <Text className="text-[24px] font-JakartaExtraBold text-[#21152F]">
+              Messages
+            </Text>
+          </View>
         }
         ListEmptyComponent={
           loading ? (

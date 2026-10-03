@@ -123,7 +123,7 @@ const RateDriver = () => {
     : "Your driver";
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#F4F6F5" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#F7F4FB" }}>
       <ScrollView
         contentContainerStyle={{ flexGrow: 1, padding: 20, paddingBottom: 36 }}
         keyboardShouldPersistTaps="handled"
@@ -134,11 +134,11 @@ const RateDriver = () => {
             onPress={() => router.back()}
             accessibilityRole="button"
             accessibilityLabel="Go back"
-            className="h-11 w-11 items-center justify-center rounded-2xl border border-[#E3E7E5] bg-white"
+            className="h-11 w-11 items-center justify-center rounded-2xl border border-[#E9E2F0] bg-white"
           >
-            <Ionicons name="chevron-back" size={20} color="#0A3B2E" />
+            <Ionicons name="chevron-back" size={20} color="#5A189A" />
           </Pressable>
-          <Text className="text-[12px] font-JakartaBold uppercase tracking-[2px] text-[#7A8580]">
+          <Text className="text-[12px] font-JakartaBold uppercase tracking-[2px] text-[#746A7E]">
             Trip feedback
           </Text>
           <View className="h-11 w-11" />
@@ -146,24 +146,24 @@ const RateDriver = () => {
 
         {loading ? (
           <View className="flex-1 items-center justify-center">
-            <ActivityIndicator size="large" color="#0A3B2E" />
+            <ActivityIndicator size="large" color="#5A189A" />
           </View>
         ) : error && !details ? (
           <View className="flex-1 items-center justify-center rounded-[28px] bg-white p-6">
             <View className="mb-4 h-14 w-14 items-center justify-center rounded-full bg-[#FEF3F3]">
               <Ionicons name="alert-circle-outline" size={28} color="#B02A2A" />
             </View>
-            <Text className="text-center text-[18px] font-JakartaBold text-[#101814]">
+            <Text className="text-center text-[18px] font-JakartaBold text-[#21152F]">
               Couldn&apos;t load this trip
             </Text>
-            <Text className="mt-2 text-center text-[13px] leading-5 text-[#7A8580]">
+            <Text className="mt-2 text-center text-[13px] leading-5 text-[#746A7E]">
               {error}
             </Text>
           </View>
         ) : details ? (
           <>
-            <View className="overflow-hidden rounded-[30px] bg-[#0A3B2E] p-6">
-              <View className="absolute -right-8 -top-12 h-40 w-40 rounded-full bg-[#1FA574]/20" />
+            <View className="overflow-hidden rounded-[30px] bg-[#5A189A] p-6">
+              <View className="absolute -right-8 -top-12 h-40 w-40 rounded-full bg-[#9D4EDD]/20" />
               <View className="absolute -bottom-16 -left-10 h-40 w-40 rounded-full bg-white/5" />
               <View className="h-10 w-10 items-center justify-center rounded-2xl bg-white/10">
                 <Ionicons name="checkmark-done" size={20} color="#8FE0BD" />
@@ -180,23 +180,23 @@ const RateDriver = () => {
               </Text>
             </View>
 
-            <View className="-mt-4 mx-3 flex-row items-center rounded-3xl border border-[#E3E7E5] bg-white p-4">
+            <View className="-mt-4 mx-3 flex-row items-center rounded-3xl border border-[#E9E2F0] bg-white p-4">
               {details.driver.profile_image_url ? (
                 <Image
                   source={{ uri: details.driver.profile_image_url }}
-                  className="h-14 w-14 rounded-2xl bg-[#E4EFEA]"
+                  className="h-14 w-14 rounded-2xl bg-[#F0E6FA]"
                 />
               ) : (
-                <View className="h-14 w-14 items-center justify-center rounded-2xl bg-[#E4EFEA]">
-                  <Ionicons name="person" size={24} color="#0A3B2E" />
+                <View className="h-14 w-14 items-center justify-center rounded-2xl bg-[#F0E6FA]">
+                  <Ionicons name="person" size={24} color="#5A189A" />
                 </View>
               )}
               <View className="ml-3 flex-1">
-                <Text className="text-[10px] font-JakartaBold uppercase tracking-[1.5px] text-[#7A8580]">
+                <Text className="text-[10px] font-JakartaBold uppercase tracking-[1.5px] text-[#746A7E]">
                   Your driver
                 </Text>
                 <Text
-                  className="mt-1 text-[16px] font-JakartaBold text-[#101814]"
+                  className="mt-1 text-[16px] font-JakartaBold text-[#21152F]"
                   numberOfLines={1}
                 >
                   {driverName}
@@ -212,11 +212,11 @@ const RateDriver = () => {
               </View>
             </View>
 
-            <View className="mt-5 rounded-[26px] border border-[#E3E7E5] bg-white p-5">
-              <Text className="text-[17px] font-JakartaBold text-[#101814]">
+            <View className="mt-5 rounded-[26px] border border-[#E9E2F0] bg-white p-5">
+              <Text className="text-[17px] font-JakartaBold text-[#21152F]">
                 {submitted ? "Your rating" : "Rate your driver"}
               </Text>
-              <Text className="mt-1 text-[12.5px] leading-5 text-[#7A8580]">
+              <Text className="mt-1 text-[12.5px] leading-5 text-[#746A7E]">
                 {submitted
                   ? "Thanks for taking a moment to share your experience."
                   : completed
@@ -236,22 +236,22 @@ const RateDriver = () => {
                     className={`h-[54px] w-[54px] items-center justify-center rounded-2xl border ${
                       star <= rating
                         ? "border-[#F2D590] bg-[#FFF7E6]"
-                        : "border-[#E3E7E5] bg-[#F8FAF9]"
+                        : "border-[#E9E2F0] bg-[#F8FAF9]"
                     }`}
                   >
                     <Ionicons
                       name={star <= rating ? "star" : "star-outline"}
                       size={25}
-                      color={star <= rating ? "#D89B26" : "#A9B1AD"}
+                      color={star <= rating ? "#D89B26" : "#A69BAF"}
                     />
                   </Pressable>
                 ))}
               </View>
-              <Text className="mt-3 text-center text-[13px] font-JakartaBold text-[#0A3B2E]">
+              <Text className="mt-3 text-center text-[13px] font-JakartaBold text-[#5A189A]">
                 {STAR_LABELS[rating] ?? "Choose a star rating"}
               </Text>
 
-              <Text className="mb-2 mt-6 text-[12px] font-JakartaBold uppercase tracking-[1.3px] text-[#7A8580]">
+              <Text className="mb-2 mt-6 text-[12px] font-JakartaBold uppercase tracking-[1.3px] text-[#746A7E]">
                 Add a note <Text className="font-Jakarta">(optional)</Text>
               </Text>
               <TextInput
@@ -259,13 +259,13 @@ const RateDriver = () => {
                 onChangeText={setFeedback}
                 editable={!submitted && completed}
                 placeholder="What made the trip good?"
-                placeholderTextColor="#A9B1AD"
+                placeholderTextColor="#A69BAF"
                 maxLength={500}
                 multiline
                 textAlignVertical="top"
-                className="min-h-[108px] rounded-2xl border border-[#E3E7E5] bg-[#F8FAF9] px-4 py-3 text-[13px] font-Jakarta text-[#101814]"
+                className="min-h-[108px] rounded-2xl border border-[#E9E2F0] bg-[#F8FAF9] px-4 py-3 text-[13px] font-Jakarta text-[#21152F]"
               />
-              <Text className="mt-1 text-right text-[10px] font-Jakarta text-[#A9B1AD]">
+              <Text className="mt-1 text-right text-[10px] font-Jakarta text-[#A69BAF]">
                 {feedback.length}/500
               </Text>
 
@@ -279,13 +279,13 @@ const RateDriver = () => {
               )}
 
               {submitted ? (
-                <View className="mt-4 flex-row items-center justify-center rounded-2xl bg-[#E4EFEA] py-4">
+                <View className="mt-4 flex-row items-center justify-center rounded-2xl bg-[#F0E6FA] py-4">
                   <Ionicons
                     name="checkmark-circle"
                     size={19}
-                    color="#0A3B2E"
+                    color="#5A189A"
                   />
-                  <Text className="ml-2 text-[13px] font-JakartaBold text-[#0A3B2E]">
+                  <Text className="ml-2 text-[13px] font-JakartaBold text-[#5A189A]">
                     Feedback submitted
                   </Text>
                 </View>
@@ -297,7 +297,7 @@ const RateDriver = () => {
                   style={{
                     opacity: !completed || rating === 0 || submitting ? 0.55 : 1,
                   }}
-                  className="mt-4 flex-row items-center justify-center rounded-2xl bg-[#0A3B2E] py-4"
+                  className="mt-4 flex-row items-center justify-center rounded-2xl bg-[#5A189A] py-4"
                 >
                   {submitting ? (
                     <ActivityIndicator color="#FFFFFF" />
@@ -319,8 +319,8 @@ const RateDriver = () => {
             </View>
 
             <View className="mt-4 flex-row items-center justify-center">
-              <Ionicons name="lock-closed-outline" size={12} color="#7A8580" />
-              <Text className="ml-1.5 text-[10.5px] font-Jakarta text-[#7A8580]">
+              <Ionicons name="lock-closed-outline" size={12} color="#746A7E" />
+              <Text className="ml-1.5 text-[10.5px] font-Jakarta text-[#746A7E]">
                 Your feedback is tied to this completed trip
               </Text>
             </View>

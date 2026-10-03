@@ -24,10 +24,10 @@ type SectionCardProps = {
 };
 
 const STATUS_PILL = {
-  verified: { bg: "bg-[#E4EFEA]", text: "text-[#0A3B2E]", label: "Verified" },
-  pending: { bg: "bg-[#E4EFEA]", text: "text-[#0A3B2E]", label: "In review" },
+  verified: { bg: "bg-[#F0E6FA]", text: "text-[#5A189A]", label: "Verified" },
+  pending: { bg: "bg-[#F0E6FA]", text: "text-[#5A189A]", label: "In review" },
   rejected: { bg: "bg-[#FEF3F3]", text: "text-[#B02A2A]", label: "Rejected" },
-  required: { bg: "bg-[#E3E7E5]", text: "text-[#7A8580]", label: "Required" },
+  required: { bg: "bg-[#E9E2F0]", text: "text-[#746A7E]", label: "Required" },
 };
 
 export const SectionCard = ({
@@ -45,32 +45,32 @@ export const SectionCard = ({
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      className="mb-2.5 flex-row items-center justify-between rounded-2xl border border-[#E3E7E5] bg-white px-4 py-3.5 active:opacity-70"
+      className="mb-2.5 flex-row items-center justify-between rounded-2xl border border-[#E9E2F0] bg-white px-4 py-3.5 active:opacity-70"
     >
       <View className="flex-1 flex-row items-center gap-3">
         <View
           className={`h-10 w-10 items-center justify-center rounded-xl ${
-            danger ? "bg-[#FEF3F3]" : "bg-[#E4EFEA]"
+            danger ? "bg-[#FEF3F3]" : "bg-[#F0E6FA]"
           }`}
         >
           <Ionicons
             name={icon}
             size={18}
-            color={danger ? "#E0575B" : "#0A3B2E"}
+            color={danger ? "#E0575B" : "#5A189A"}
           />
         </View>
 
         <View className="flex-1">
           <Text
             className={`text-[14px] font-JakartaSemiBold ${
-              danger ? "text-[#E0575B]" : "text-[#101814]"
+              danger ? "text-[#E0575B]" : "text-[#21152F]"
             }`}
           >
             {title}
           </Text>
           {!!value && (
             <Text
-              className="mt-0.5 text-[12px] font-Jakarta text-[#7A8580]"
+              className="mt-0.5 text-[12px] font-Jakarta text-[#746A7E]"
               numberOfLines={1}
             >
               {value}
@@ -87,7 +87,7 @@ export const SectionCard = ({
         </View>
       ) : null}
 
-      <Ionicons name="chevron-forward" size={18} color="#A9B1AD" />
+      <Ionicons name="chevron-forward" size={18} color="#A69BAF" />
     </Pressable>
   );
 };
@@ -103,19 +103,19 @@ type StatCardProps = {
 };
 
 export const StatCard = ({ icon, label, value, delta }: StatCardProps) => (
-  <View className="flex-1 rounded-2xl border border-[#E3E7E5] bg-white px-3.5 py-4">
-    <View className="h-9 w-9 items-center justify-center rounded-xl bg-[#E4EFEA]">
-      <Ionicons name={icon} size={17} color="#0A3B2E" />
+  <View className="flex-1 rounded-2xl border border-[#E9E2F0] bg-white px-3.5 py-4">
+    <View className="h-9 w-9 items-center justify-center rounded-xl bg-[#F0E6FA]">
+      <Ionicons name={icon} size={17} color="#5A189A" />
     </View>
 
-    <Text className="mt-3 text-[20px] font-JakartaExtraBold text-[#101814]">
+    <Text className="mt-3 text-[20px] font-JakartaExtraBold text-[#21152F]">
       {value}
     </Text>
 
     <View className="mt-0.5 flex-row items-center gap-1.5">
-      <Text className="text-[11.5px] font-Jakarta text-[#7A8580]">{label}</Text>
+      <Text className="text-[11.5px] font-Jakarta text-[#746A7E]">{label}</Text>
       {!!delta && (
-        <Text className="text-[11px] font-JakartaBold text-[#1FA574]">
+        <Text className="text-[11px] font-JakartaBold text-[#9D4EDD]">
           {delta}
         </Text>
       )}
@@ -142,21 +142,21 @@ export const EmptyState = ({
   onAction,
 }: EmptyStateProps) => (
   <View className="items-center px-8 py-14">
-    <View className="h-20 w-20 items-center justify-center rounded-3xl bg-[#E4EFEA]">
-      <Ionicons name={icon} size={34} color="#0A3B2E" />
+    <View className="h-20 w-20 items-center justify-center rounded-3xl bg-[#F0E6FA]">
+      <Ionicons name={icon} size={34} color="#5A189A" />
     </View>
 
-    <Text className="mt-5 text-center text-[17px] font-JakartaExtraBold text-[#101814]">
+    <Text className="mt-5 text-center text-[17px] font-JakartaExtraBold text-[#21152F]">
       {title}
     </Text>
-    <Text className="mt-2 text-center text-[13.5px] font-Jakarta leading-5 text-[#7A8580]">
+    <Text className="mt-2 text-center text-[13.5px] font-Jakarta leading-5 text-[#746A7E]">
       {message}
     </Text>
 
     {!!actionLabel && !!onAction && (
       <Pressable
         onPress={onAction}
-        className="mt-6 rounded-2xl bg-[#0A3B2E] px-6 py-3.5 active:opacity-80"
+        className="mt-6 rounded-2xl bg-[#5A189A] px-6 py-3.5 active:opacity-80"
       >
         <Text className="text-[14px] font-JakartaBold text-white">
           {actionLabel}
@@ -175,11 +175,11 @@ type BadgeProps = {
 };
 
 const TONES = {
-  brand: { bg: "bg-[#E4EFEA]", text: "text-[#0A3B2E]", icon: "#0A3B2E" },
-  success: { bg: "bg-[#E4EFEA]", text: "text-[#0A3B2E]", icon: "#1FA574" },
-  warning: { bg: "bg-[#E4EFEA]", text: "text-[#0A3B2E]", icon: "#1FA574" },
+  brand: { bg: "bg-[#F0E6FA]", text: "text-[#5A189A]", icon: "#5A189A" },
+  success: { bg: "bg-[#F0E6FA]", text: "text-[#5A189A]", icon: "#9D4EDD" },
+  warning: { bg: "bg-[#F0E6FA]", text: "text-[#5A189A]", icon: "#9D4EDD" },
   danger: { bg: "bg-[#FEF3F3]", text: "text-[#B02A2A]", icon: "#E0575B" },
-  neutral: { bg: "bg-[#E3E7E5]", text: "text-[#7A8580]", icon: "#7A8580" },
+  neutral: { bg: "bg-[#E9E2F0]", text: "text-[#746A7E]", icon: "#746A7E" },
 };
 
 export const Badge = ({ label, tone = "brand", icon }: BadgeProps) => {

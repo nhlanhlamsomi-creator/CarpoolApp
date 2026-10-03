@@ -178,46 +178,47 @@ const Home = () => {
         ListHeaderComponent={
           <>
             {/* ── Greeting ── */}
-            <View className="my-5 flex-row items-center justify-between">
-              <View className="flex-1 pr-3 flex-row items-center gap-3">
-                <Animated.View
-                  style={{ transform: [{ translateY: avatarY }] }}
-                  className="h-12 w-12 items-center justify-center rounded-2xl bg-[#1FA574] border border-[#0A3B2E]"
-                >
-                  <Text className="text-[18px] font-JakartaExtraBold text-[#2B2722]">
-                    {initial}
-                  </Text>
-                </Animated.View>
-
-                <View className="flex-1">
-                  <Text className="text-[12px] font-JakartaBold text-[#9A928A] tracking-widest uppercase">
-                    Welcome back
-                  </Text>
-                  <Text
-                    className="mt-0.5 text-[22px] font-JakartaExtraBold text-[#2B2722]"
-                    numberOfLines={1}
+            <View className="my-5">
+              <View className="flex-row items-center justify-between">
+                <View className="flex-1 flex-row items-center gap-3 pr-3">
+                  <Animated.View
+                    style={{ transform: [{ translateY: avatarY }] }}
+                    className="h-12 w-12 items-center justify-center rounded-2xl border border-[#E9E2F0] bg-[#F0E6FA]"
                   >
-                    {user?.firstName ?? "there"}
-                  </Text>
+                    <Text className="text-[18px] font-JakartaExtraBold text-[#5A189A]">
+                      {initial}
+                    </Text>
+                  </Animated.View>
+
+                  <View className="flex-1">
+                    <Text className="text-[12px] font-JakartaBold uppercase tracking-widest text-[#746A7E]">
+                      Welcome back
+                    </Text>
+                    <Text
+                      className="mt-0.5 text-[22px] font-JakartaExtraBold text-[#21152F]"
+                      numberOfLines={1}
+                    >
+                      {user?.firstName ?? "there"}
+                    </Text>
+                  </View>
                 </View>
+
+                <TouchableOpacity
+                  onPress={() => {
+                    signOut();
+                    router.replace("/(auth)/sign-in");
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel="Sign out"
+                  activeOpacity={0.8}
+                  className="h-11 w-11 items-center justify-center rounded-2xl border border-[#E9E2F0] bg-white"
+                >
+                  <Ionicons name="log-out-outline" size={19} color="#5A189A" />
+                </TouchableOpacity>
               </View>
 
-              <TouchableOpacity
-                onPress={() => {
-                  signOut();
-                  router.replace("/(auth)/sign-in");
-                }}
-                accessibilityRole="button"
-                accessibilityLabel="Sign out"
-                activeOpacity={0.8}
-                className="h-11 w-11 items-center justify-center rounded-2xl border border-[#E3E7E5] bg-white"
-              >
-                <Ionicons name="log-out-outline" size={19} color="#4A443D" />
-              </TouchableOpacity>
-            </View>
-
             {/* ── Search ── */}
-            <Text className="text-[12px] font-JakartaBold text-[#9A928A] tracking-widest uppercase mb-2">
+            <Text className="mb-2 mt-5 text-[12px] font-JakartaBold uppercase tracking-widest text-[#746A7E]">
               Where to?
             </Text>
 
@@ -227,43 +228,44 @@ const Home = () => {
               biasLat={userLatitude}
               biasLng={userLongitude}
             />
+            </View>
 
             {/* ── Map ── */}
-            <View className="mt-6 overflow-hidden rounded-3xl border border-[#E3E7E5] bg-white">
+            <View className="mt-6 overflow-hidden rounded-3xl border border-[#E9E2F0] bg-white">
               <View className="h-[260px]">
                 <Map />
               </View>
 
-              <View className="flex-row items-center gap-3 px-4 py-3.5 bg-[#F4F6F5]">
-                <View className="h-9 w-9 items-center justify-center rounded-full bg-[#E4EFEA]">
-                  <Ionicons name="navigate" size={16} color="#0A3B2E" />
+              <View className="flex-row items-center gap-3 px-4 py-3.5 bg-[#F7F4FB]">
+                <View className="h-9 w-9 items-center justify-center rounded-full bg-[#F0E6FA]">
+                  <Ionicons name="navigate" size={16} color="#5A189A" />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-[10.5px] font-JakartaBold text-[#9A928A] tracking-widest uppercase">
+                  <Text className="text-[10.5px] font-JakartaBold text-[#746A7E] tracking-widest uppercase">
                     Your location
                   </Text>
                   <Text
-                    className="mt-0.5 text-[13.5px] font-JakartaSemiBold text-[#2B2722]"
+                    className="mt-0.5 text-[13.5px] font-JakartaSemiBold text-[#21152F]"
                     numberOfLines={1}
                   >
                     {userAddress ?? "Finding you…"}
                   </Text>
                 </View>
-                <View className="h-2 w-2 rounded-full bg-[#1FA574]" />
+                <View className="h-2 w-2 rounded-full bg-[#9D4EDD]" />
               </View>
             </View>
 
             {/* ── Available rides heading ── */}
             <View className="mt-7 mb-3 flex-row items-center justify-between">
               <View className="flex-row items-center gap-2">
-                <View className="h-2 w-2 rounded-full bg-[#1FA574]" />
-                <Text className="text-[17px] font-JakartaExtraBold text-[#2B2722]">
+                <View className="h-2 w-2 rounded-full bg-[#9D4EDD]" />
+                <Text className="text-[17px] font-JakartaExtraBold text-[#21152F]">
                   Available rides
                 </Text>
               </View>
               {offerTrips.length > 0 && (
-                <View className="rounded-full bg-[#E4EFEA] px-2.5 py-1">
-                  <Text className="text-[11px] font-JakartaBold text-[#0A3B2E]">
+                <View className="rounded-full bg-[#F0E6FA] px-2.5 py-1">
+                  <Text className="text-[11px] font-JakartaBold text-[#5A189A]">
                     {offerTrips.length}{" "}
                     {offerTrips.length === 1 ? "ride" : "rides"}
                   </Text>
@@ -272,8 +274,8 @@ const Home = () => {
             </View>
 
             {availableTripsLoading ? (
-              <View className="mb-2 items-center rounded-3xl border border-[#E3E7E5] bg-white py-5">
-                <ActivityIndicator size="small" color="#1FA574" />
+              <View className="mb-2 items-center rounded-3xl border border-[#E9E2F0] bg-white py-5">
+                <ActivityIndicator size="small" color="#9D4EDD" />
               </View>
             ) : availableTripsError ? (
               <View className="mb-2 rounded-3xl border border-[#F1C8C5] bg-white px-4 py-5">
@@ -301,8 +303,8 @@ const Home = () => {
                 ))}
               </ScrollView>
             ) : (
-              <View className="mb-2 rounded-3xl border border-dashed border-[#E4EFEA] bg-white px-4 py-5">
-                <Text className="text-center text-[12.5px] font-Jakarta text-[#9A928A]">
+              <View className="mb-2 rounded-3xl border border-dashed border-[#F0E6FA] bg-white px-4 py-5">
+                <Text className="text-center text-[12.5px] font-Jakarta text-[#746A7E]">
                   No rides are available right now.
                 </Text>
               </View>
@@ -311,8 +313,8 @@ const Home = () => {
             {/* ── Recent rides heading ── */}
             <View className="mb-3 mt-7 flex-row items-center justify-between">
               <View className="flex-row items-center gap-2">
-                <View className="h-2 w-2 rounded-full bg-[#1FA574]" />
-                <Text className="text-[17px] font-JakartaExtraBold text-[#2B2722]">
+                <View className="h-2 w-2 rounded-full bg-[#9D4EDD]" />
+                <Text className="text-[17px] font-JakartaExtraBold text-[#21152F]">
                   Recent rides
                 </Text>
               </View>
@@ -323,10 +325,10 @@ const Home = () => {
                   activeOpacity={0.7}
                   className="flex-row items-center gap-1"
                 >
-                  <Text className="text-[13px] font-JakartaBold text-[#0A3B2E]">
+                  <Text className="text-[13px] font-JakartaBold text-[#5A189A]">
                     See all
                   </Text>
-                  <Ionicons name="chevron-forward" size={13} color="#0A3B2E" />
+                  <Ionicons name="chevron-forward" size={13} color="#5A189A" />
                 </TouchableOpacity>
               )}
             </View>
@@ -335,8 +337,8 @@ const Home = () => {
         ListEmptyComponent={
           loading ? (
             <View className="items-center py-12">
-              <ActivityIndicator size="large" color="#1FA574" />
-              <Text className="mt-3 text-[12.5px] font-Jakarta text-[#9A928A]">
+              <ActivityIndicator size="large" color="#9D4EDD" />
+              <Text className="mt-3 text-[12.5px] font-Jakarta text-[#746A7E]">
                 Loading your rides
               </Text>
             </View>

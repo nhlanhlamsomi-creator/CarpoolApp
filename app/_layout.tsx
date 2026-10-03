@@ -69,7 +69,7 @@ export default function RootLayout() {
       </ClerkLoaded>
     </ClerkProvider>
   ) : (
-    <View style={{ flex: 1, backgroundColor: "#0f172a" }} />
+    <View style={{ flex: 1, backgroundColor: "#1d1135" }} />
   );
 
   return (

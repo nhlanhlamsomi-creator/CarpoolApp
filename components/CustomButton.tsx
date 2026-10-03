@@ -12,32 +12,32 @@ type Props = ButtonProps & {
 const getBgVariantStyle = (variant: ButtonProps["bgVariant"]) => {
   switch (variant) {
     case "secondary":
-      return "bg-[#14523F]";
+      return "bg-[#7B2CBF]";
     case "danger":
       return "bg-[#E0575B]";
     case "success":
-      return "bg-[#1FA574]";
+      return "bg-[#9D4EDD]";
     case "outline":
-      return "bg-white border-[1.5px] border-[#E3E7E5]";
+      return "bg-white border-[1.5px] border-[#E9E2F0]";
     case "ghost":
-      return "bg-[#E4EFEA]";
+      return "bg-[#F0E6FA]";
     default:
-      return "bg-[#0A3B2E]";
+      return "bg-[#5A189A]";
   }
 };
 
 const getTextVariantStyle = (variant: ButtonProps["textVariant"]) => {
   switch (variant) {
     case "primary":
-      return "text-[#101814]";
+      return "text-[#21152F]";
     case "secondary":
-      return "text-[#7A8580]";
+      return "text-[#746A7E]";
     case "danger":
       return "text-white";
     case "success":
       return "text-white";
     case "brand":
-      return "text-[#0A3B2E]";
+      return "text-[#5A189A]";
     default:
       return "text-white";
   }
@@ -86,7 +86,7 @@ const CustomButton = ({
   const elevation =
     bgVariant === "outline" || bgVariant === "ghost"
       ? ""
-      : "shadow-lg shadow-[#0A3B2E]/25";
+      : "shadow-lg shadow-[#5A189A]/25";
 
   return (
     <TouchableOpacity
@@ -107,7 +107,7 @@ const CustomButton = ({
           size="small"
           color={
             bgVariant === "outline" || bgVariant === "ghost"
-              ? "#0A3B2E"
+              ? "#5A189A"
               : "#FFFFFF"
           }
         />

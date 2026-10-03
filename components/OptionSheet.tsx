@@ -50,16 +50,16 @@ export default function OptionSheet({
         style={{ paddingBottom: insets.bottom + 12, maxHeight: "78%" }}
       >
         <View className="items-center pb-1 pt-3">
-          <View className="h-1 w-11 rounded-full bg-[#E3E7E5]" />
+          <View className="h-1 w-11 rounded-full bg-[#E9E2F0]" />
         </View>
 
         <View className="flex-row items-start justify-between px-5 pb-3 pt-3">
           <View className="flex-1 pr-3">
-            <Text className="text-[18px] font-JakartaExtraBold text-[#101814]">
+            <Text className="text-[18px] font-JakartaExtraBold text-[#21152F]">
               {title}
             </Text>
             {!!subtitle && (
-              <Text className="mt-1 text-[12.5px] font-Jakarta text-[#7A8580]">
+              <Text className="mt-1 text-[12.5px] font-Jakarta text-[#746A7E]">
                 {subtitle}
               </Text>
             )}
@@ -68,9 +68,9 @@ export default function OptionSheet({
           <Pressable
             onPress={onClose}
             hitSlop={10}
-            className="h-8 w-8 items-center justify-center rounded-full bg-[#E4EFEA] active:opacity-70"
+            className="h-8 w-8 items-center justify-center rounded-full bg-[#F0E6FA] active:opacity-70"
           >
-            <Ionicons name="close" size={17} color="#7A8580" />
+            <Ionicons name="close" size={17} color="#746A7E" />
           </Pressable>
         </View>
 
@@ -91,22 +91,22 @@ export default function OptionSheet({
                 }}
                 className={`mb-2 flex-row items-center rounded-2xl border-[1.5px] px-4 py-3.5 ${
                   active
-                    ? "border-[#0A3B2E] bg-[#E4EFEA]"
-                    : "border-[#E3E7E5] bg-white"
+                    ? "border-[#5A189A] bg-[#F0E6FA]"
+                    : "border-[#E9E2F0] bg-white"
                 } active:opacity-80`}
               >
                 <View className="flex-1">
                   <Text
                     className={`text-[14.5px] ${
                       active
-                        ? "font-JakartaBold text-[#0A3B2E]"
-                        : "font-JakartaSemiBold text-[#101814]"
+                        ? "font-JakartaBold text-[#5A189A]"
+                        : "font-JakartaSemiBold text-[#21152F]"
                     }`}
                   >
                     {option.label}
                   </Text>
                   {!!option.description && (
-                    <Text className="mt-0.5 text-[12px] font-Jakarta text-[#7A8580]">
+                    <Text className="mt-0.5 text-[12px] font-Jakarta text-[#746A7E]">
                       {option.description}
                     </Text>
                   )}
@@ -115,8 +115,8 @@ export default function OptionSheet({
                 <View
                   className={`ml-3 h-5 w-5 items-center justify-center rounded-full border-2 ${
                     active
-                      ? "border-[#0A3B2E] bg-[#0A3B2E]"
-                      : "border-[#E3E7E5]"
+                      ? "border-[#5A189A] bg-[#5A189A]"
+                      : "border-[#E9E2F0]"
                   }`}
                 >
                   {active && (

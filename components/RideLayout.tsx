@@ -54,7 +54,7 @@ const RideLayout = ({
   };
 
   return (
-    <GestureHandlerRootView className="flex-1 bg-[#04231C]">
+    <GestureHandlerRootView className="flex-1 bg-[#1D1135]">
       <View className="flex-1">
         {/* Full-screen map */}
         <Map />
@@ -72,18 +72,18 @@ const RideLayout = ({
             hitSlop={8}
             className="h-11 w-11 items-center justify-center rounded-2xl bg-white shadow-lg shadow-black/20"
           >
-            <Ionicons name="chevron-back" size={21} color="#101814" />
+            <Ionicons name="chevron-back" size={21} color="#21152F" />
           </TouchableOpacity>
 
           <View className="ml-3 flex-shrink rounded-2xl bg-white px-4 py-2.5 shadow-lg shadow-black/20">
             <Text
-              className="text-[15px] font-JakartaBold text-[#101814]"
+              className="text-[15px] font-JakartaBold text-[#21152F]"
               numberOfLines={1}
             >
               {title}
             </Text>
             {!!subtitle && (
-              <Text className="mt-0.5 text-[11.5px] font-Jakarta text-[#7A8580]">
+              <Text className="mt-0.5 text-[11.5px] font-Jakarta text-[#746A7E]">
                 {subtitle}
               </Text>
             )}
@@ -102,7 +102,7 @@ const RideLayout = ({
             borderTopRightRadius: 30,
           }}
           handleIndicatorStyle={{
-            backgroundColor: "#E3E7E5",
+            backgroundColor: "#E9E2F0",
             width: 44,
             height: 4,
           }}
