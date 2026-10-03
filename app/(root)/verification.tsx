@@ -6,6 +6,7 @@ import {
     ActivityIndicator,
     Alert,
     Image,
+    ImageSourcePropType,
     Pressable,
     ScrollView,
     Text,
@@ -15,6 +16,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import CustomButton from "@/components/CustomButton";
+import { icons } from "@/constants";
 import {
     CheckIdResponse,
     CheckIdServiceError,
@@ -42,12 +44,20 @@ type Picked = Partial<Record<DocKind, PickedImage>>;
 
 const STATUS_BANNER: Record<
   VerificationStatus,
-  { bg: string; icon: any; title: string; body: string; tint: string }
+  {
+    bg: string;
+    icon: keyof typeof Ionicons.glyphMap;
+    iconSource?: ImageSourcePropType;
+    title: string;
+    body: string;
+    tint: string;
+  }
 > = {
   not_submitted: {
     bg: "bg-[#F0E6FA]",
     tint: "#5A189A",
     icon: "shield-outline",
+    iconSource: icons.verifyIdentity,
     title: "Verify your identity",
     body: "This takes about two minutes and only has to be done once.",
   },
@@ -62,6 +72,7 @@ const STATUS_BANNER: Record<
     bg: "bg-[#F0E6FA]",
     tint: "#5A189A",
     icon: "shield-checkmark",
+    iconSource: icons.verified,
     title: "You're verified",
     body: "Your identity is confirmed. Nothing further is needed.",
   },
@@ -290,6 +301,11 @@ const Verification = () => {
     const image = picked[kind];
     const busy = busyKind === kind;
     const label = DOC_LABELS[kind];
+    const iconSource = {
+      id_front: icons.idDocument,
+      id_back: icons.idBack,
+      selfie: icons.selfie,
+    }[kind];
 
     return (
       <Pressable
@@ -306,10 +322,11 @@ const Verification = () => {
           />
         ) : (
           <View className="h-14 w-14 items-center justify-center rounded-xl bg-[#F0E6FA]">
-            <Ionicons
-              name={kind === "selfie" ? "person-outline" : "card-outline"}
-              size={22}
-              color="#5A189A"
+            <Image
+              source={iconSource}
+              style={{ width: 30, height: 30 }}
+              resizeMode="contain"
+              accessibilityLabel={`${label.title} icon`}
             />
           </View>
         )}
@@ -378,7 +395,16 @@ const Verification = () => {
         >
           {/* Status banner */}
           <View className={`mb-5 rounded-3xl p-5 ${banner.bg}`}>
-            <Ionicons name={banner.icon} size={26} color={banner.tint} />
+            {banner.iconSource ? (
+              <Image
+                source={banner.iconSource}
+                style={{ width: 28, height: 28 }}
+                resizeMode="contain"
+                accessibilityLabel="Verification status icon"
+              />
+            ) : (
+              <Ionicons name={banner.icon} size={26} color={banner.tint} />
+            )}
             <Text
               className="mt-3 text-[17px] font-JakartaExtraBold"
               style={{ color: banner.tint }}

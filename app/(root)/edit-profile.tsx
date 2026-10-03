@@ -102,6 +102,11 @@ const CONFIG: Record<string, FieldConfig> = {
     autoCapitalize: "words",
     nested: true,
   },
+  ride_preference: {
+    placeholder: "Enter your ride preference",
+    autoCapitalize: "sentences",
+    nested: true,
+  },
   favorite_locations: {
     placeholder: "e.g. Home, Sandton office",
     autoCapitalize: "words",

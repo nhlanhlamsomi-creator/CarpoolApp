@@ -7,24 +7,50 @@ import checkmark from "@/assets/icons/check.png";
 import close from "@/assets/icons/close.png";
 import dollar from "@/assets/icons/dollar.png";
 import email from "@/assets/icons/email.png";
+import emailUs from "@/assets/icons/Email us.png";
 import eyecross from "@/assets/icons/eyecross.png";
+import callSupport from "@/assets/icons/call support.png";
 import google from "@/assets/icons/google.png";
+import emergencyContacts from "@/assets/icons/emergencycontacts.png";
+import favouriteLocations from "@/assets/icons/favourite locations.png";
+import gender from "@/assets/icons/gender.png";
 import home from "@/assets/icons/home.png";
+import idBack from "@/assets/icons/id back.png";
+import identityAndSecurity from "@/assets/icons/identityandsecurity.png";
+import idDocument from "@/assets/icons/ID-Document.png";
+import language from "@/assets/icons/language.png";
 import list from "@/assets/icons/list.png";
 import lock from "@/assets/icons/lock.png";
 import map from "@/assets/icons/map.png";
 import marker from "@/assets/icons/marker.png";
 import out from "@/assets/icons/out.png";
+import paymentMethod from "@/assets/icons/Paymentmethod.png";
+import personalInformation from "@/assets/icons/Personal-Information.png";
+import phone from "@/assets/icons/Phone.png";
 import person from "@/assets/icons/person.png";
 import pin from "@/assets/icons/pin.png";
 import point from "@/assets/icons/point.png";
+import preferredVehicle from "@/assets/icons/preferred vehicle.png";
+import privacyPolicy from "@/assets/icons/privacypolicy.png";
 import profile from "@/assets/icons/profile.png";
+import reportAProblem from "@/assets/icons/ReportAproblem.png";
+import ridePreference from "@/assets/icons/ride preference.png";
 import route from "@/assets/icons/route.png";
 import search from "@/assets/icons/search.png";
 import selectedMarker from "@/assets/icons/selected-marker.png";
+import selfie from "@/assets/icons/selfie.png";
+import signOut from "@/assets/icons/signout.png";
+import support from "@/assets/icons/support.png";
 import star from "@/assets/icons/star.png";
 import target from "@/assets/icons/target.png";
+import termsOfUse from "@/assets/icons/terms of use.png";
 import to from "@/assets/icons/to.png";
+import tripHistory from "@/assets/icons/trip history.png";
+import tripNotifications from "@/assets/icons/trip notifications.png";
+import trips from "@/assets/icons/trips.png";
+import verified from "@/assets/icons/verified.png";
+import verifyIdentity from "@/assets/icons/verifyidentity.png";
+import whatsappSupport from "@/assets/icons/Whatsapp Support.png";
 import check from "@/assets/images/check.png";
 import getStarted from "@/assets/images/get-started.png";
 import message from "@/assets/images/message.png";
@@ -59,22 +85,48 @@ export const icons = {
   dollar,
   email,
   eyecross,
+  emailUs,
+  callSupport,
+  emergencyContacts,
+  favouriteLocations,
+  gender,
   google,
   home,
+  idBack,
+  identityAndSecurity,
+  idDocument,
+  language,
   list,
   lock,
   map,
   marker,
   out,
+  paymentMethod,
+  personalInformation,
+  phone,
   person,
   pin,
   point,
+  preferredVehicle,
+  privacyPolicy,
   profile,
+  reportAProblem,
+  ridePreference,
   search,
   selectedMarker,
+  selfie,
+  signOut,
+  support,
   star,
   target,
+  termsOfUse,
   to,
+  tripHistory,
+  tripNotifications,
+  trips,
+  verified,
+  verifyIdentity,
+  whatsappSupport,
 };
 
 export const onboarding = [

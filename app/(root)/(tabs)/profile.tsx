@@ -6,6 +6,7 @@ import {
     ActivityIndicator,
     Alert,
     Image,
+    ImageSourcePropType,
     Linking,
     Pressable,
     ScrollView,
@@ -17,6 +18,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { SectionCard, StatCard } from "@/components/Cards";
+import { icons } from "@/constants";
 import OptionSheet, {
     GENDER_OPTIONS,
     SA_LANGUAGES,
@@ -72,6 +74,8 @@ type ProfileRecord = {
   verification_percentage?: number;
   government_id_url?: string;
   selfie_image_url?: string;
+  government_id_back_url?: string;
+  verification_status?: string;
   phone_number?: string;
   profile_data?: Record<string, any>;
 };
@@ -109,12 +113,14 @@ const Profile = () => {
     ridePreferences: boolean;
     trips: boolean;
     support: boolean;
+    accountLegal: boolean;
   }>({
     identitySecurity: false,
     personalInfo: false,
     ridePreferences: false,
     trips: false,
     support: false,
+    accountLegal: false,
   });
 
   const [editingEmergency, setEditingEmergency] = useState(false);
@@ -292,6 +298,9 @@ const Profile = () => {
     typeof profile?.verification_percentage === "number"
       ? profile.verification_percentage
       : 0;
+  const verificationStatus = (profile?.verification_status ?? "Not submitted")
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 
   const hasPhoto = Boolean(
     profile?.profile_image_url ||
@@ -301,6 +310,9 @@ const Profile = () => {
   const hasPhone = Boolean(phoneNumber && phoneNumber !== "Add a phone number");
   const hasId = Boolean(
     profile?.government_id_url || profileData.government_id_url,
+  );
+  const hasIdBack = Boolean(
+    profile?.government_id_back_url || profileData.government_id_back_url,
   );
   const hasSelfie = Boolean(
     profile?.selfie_image_url || profileData.selfie_image_url,
@@ -373,9 +385,10 @@ const Profile = () => {
   const renderSectionHeader = (
     title: string,
     section: keyof typeof expandedSections,
-    iconName: string,
+    iconName: keyof typeof Ionicons.glyphMap,
     iconBgColor: string = PALETTE.accentSoft,
     iconColor: string = PALETTE.accentDeep,
+    iconSource?: ImageSourcePropType,
   ) => (
     <Pressable
       onPress={() => toggleSection(section)}
@@ -403,7 +416,15 @@ const Profile = () => {
             backgroundColor: iconBgColor,
           }}
         >
-          <Ionicons name={iconName as any} size={20} color={iconColor} />
+          {iconSource ? (
+            <Image
+              source={iconSource}
+              style={{ width: 22, height: 22 }}
+              resizeMode="contain"
+            />
+          ) : (
+            <Ionicons name={iconName} size={20} color={iconColor} />
+          )}
         </View>
         <Text
           style={{
@@ -525,16 +546,33 @@ const Profile = () => {
               </Text>
             </View>
 
-            {/* ── Stats ── */}
+            {/* ── Profile overview ── */}
+            <Text
+              style={{
+                marginBottom: 12,
+                color: PALETTE.charcoal,
+                fontSize: 16,
+                fontFamily: "Jakarta-ExtraBold",
+              }}
+            >
+              Profile overview
+            </Text>
             <View style={{ marginBottom: 20, flexDirection: "row", gap: 12 }}>
-              <StatCard icon="star" label="Rating" value={rating.toFixed(1)} />
+              <StatCard
+                icon="star"
+                iconSource={icons.star}
+                label="Rating"
+                value={rating.toFixed(1)}
+              />
               <StatCard
                 icon="car-sport"
+                iconSource={icons.trips}
                 label="Trips"
                 value={String(totalTrips)}
               />
               <StatCard
                 icon="shield-checkmark"
+                iconSource={icons.verified}
                 label="Verified"
                 value={`${verification}%`}
               />
@@ -697,14 +735,42 @@ const Profile = () => {
               "shield-checkmark",
               PALETTE.accentSoft,
               PALETTE.accentDeep,
+              icons.identityAndSecurity,
             )}
             {expandedSections.identitySecurity && (
               <View style={{ marginBottom: 20 }}>
                 <SectionCard
-                  title="Identity verification"
-                  value="ID document and selfie"
-                  icon="shield-checkmark-outline"
+                  title="Verification status"
+                  value={`${verificationStatus} · ${verification}% complete`}
+                  iconSource={icons.verified}
                   status={hasId && hasSelfie ? "verified" : "required"}
+                  onPress={() => router.push("/(root)/verification")}
+                />
+                <SectionCard
+                  title="Verify identity"
+                  value="Submit your documents for review"
+                  iconSource={icons.verifyIdentity}
+                  onPress={() => router.push("/(root)/verification")}
+                />
+                <SectionCard
+                  title="ID document"
+                  value={hasId ? "Document uploaded" : "Add the front of your ID"}
+                  iconSource={icons.idDocument}
+                  status={hasId ? "verified" : "required"}
+                  onPress={() => router.push("/(root)/verification")}
+                />
+                <SectionCard
+                  title="ID back (document back)"
+                  value={hasIdBack ? "Document uploaded" : "Add the back of your ID"}
+                  iconSource={icons.idBack}
+                  status={hasIdBack ? "verified" : "required"}
+                  onPress={() => router.push("/(root)/verification")}
+                />
+                <SectionCard
+                  title="Selfie verification"
+                  value={hasSelfie ? "Selfie uploaded" : "Add a verification selfie"}
+                  iconSource={icons.selfie}
+                  status={hasSelfie ? "verified" : "required"}
                   onPress={() => router.push("/(root)/verification")}
                 />
                 <SectionCard
@@ -732,8 +798,9 @@ const Profile = () => {
               "Personal information",
               "personalInfo",
               "person",
-              "#E8EEF7",
-              "#4A6FA5",
+              PALETTE.accentSoft,
+              PALETTE.accentDeep,
+              icons.personalInformation,
             )}
             {expandedSections.personalInfo && (
               <View style={{ marginBottom: 20 }}>
@@ -751,7 +818,7 @@ const Profile = () => {
                 <SectionCard
                   title="Email"
                   value={emailAddress}
-                  icon="mail-outline"
+                  iconSource={icons.email}
                   onPress={() =>
                     router.push({
                       pathname: "/(root)/edit-profile",
@@ -762,7 +829,7 @@ const Profile = () => {
                 <SectionCard
                   title="Phone number"
                   value={phoneNumber}
-                  icon="call-outline"
+                  iconSource={icons.phone}
                   status={hasPhone ? "verified" : "required"}
                   onPress={() =>
                     router.push({
@@ -774,7 +841,7 @@ const Profile = () => {
                 <SectionCard
                   title="Gender"
                   value={profileData.gender || "Not set"}
-                  icon="male-female-outline"
+                  iconSource={icons.gender}
                   onPress={() => setSheet("gender")}
                 />
 
@@ -944,10 +1011,10 @@ const Profile = () => {
                             backgroundColor: "#F0E6FA",
                           }}
                         >
-                          <Ionicons
-                            name="alert-circle-outline"
-                            size={18}
-                            color="#5A189A"
+                          <Image
+                            source={icons.emergencyContacts}
+                            style={{ width: 22, height: 22 }}
+                            resizeMode="contain"
                           />
                         </View>
                         <View style={{ flex: 1 }}>
@@ -1014,21 +1081,36 @@ const Profile = () => {
               "Ride preferences",
               "ridePreferences",
               "car",
-              "#EEF7EE",
-              "#2E7D32",
+              PALETTE.accentSoft,
+              PALETTE.accentDeep,
+              icons.ridePreference,
             )}
             {expandedSections.ridePreferences && (
               <View style={{ marginBottom: 20 }}>
                 <SectionCard
+                  title="Ride preference"
+                  value={profileData.ride_preference || "No preference set"}
+                  iconSource={icons.ridePreference}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(root)/edit-profile",
+                      params: {
+                        field: "ride_preference",
+                        label: "Ride preference",
+                      },
+                    })
+                  }
+                />
+                <SectionCard
                   title="Preferred vehicle"
                   value={profileData.preferred_vehicle || "Any vehicle"}
-                  icon="car-outline"
+                  iconSource={icons.preferredVehicle}
                   onPress={() => setSheet("vehicle")}
                 />
                 <SectionCard
                   title="Payment method"
                   value={profileData.payment_method || "Card"}
-                  icon="card-outline"
+                  iconSource={icons.paymentMethod}
                   onPress={() => router.push("/(root)/payment-methods")}
                 />
                 <SectionCard
@@ -1036,7 +1118,7 @@ const Profile = () => {
                   value={
                     profileData.favorite_locations || "Add a favourite place"
                   }
-                  icon="location-outline"
+                  iconSource={icons.favouriteLocations}
                   onPress={() =>
                     router.push({
                       pathname: "/(root)/edit-profile",
@@ -1080,10 +1162,10 @@ const Profile = () => {
                         backgroundColor: PALETTE.accentSoft,
                       }}
                     >
-                      <Ionicons
-                        name="notifications-outline"
-                        size={18}
-                        color={PALETTE.accentDeep}
+                      <Image
+                        source={icons.tripNotifications}
+                        style={{ width: 22, height: 22 }}
+                        resizeMode="contain"
                       />
                     </View>
                     <View style={{ flex: 1 }}>
@@ -1122,7 +1204,7 @@ const Profile = () => {
                 <SectionCard
                   title="Language"
                   value={profileData.language || "English"}
-                  icon="language-outline"
+                  iconSource={icons.language}
                   onPress={() => setSheet("language")}
                 />
               </View>
@@ -1133,8 +1215,9 @@ const Profile = () => {
               "Trips",
               "trips",
               "time",
-              "#F3E5F5",
-              "#7B1FA2",
+              PALETTE.accentSoft,
+              PALETTE.accentDeep,
+              icons.trips,
             )}
             {expandedSections.trips && (
               <View style={{ marginBottom: 20 }}>
@@ -1149,7 +1232,7 @@ const Profile = () => {
                         } spent`
                       : "No trips yet"
                   }
-                  icon="receipt-outline"
+                  iconSource={icons.tripHistory}
                   onPress={() => router.push("/(root)/(tabs)/rides")}
                 />
               </View>
@@ -1160,21 +1243,22 @@ const Profile = () => {
               "Support",
               "support",
               "help-circle",
-              "#FFEBEE",
-              "#C62828",
+              PALETTE.accentSoft,
+              PALETTE.accentDeep,
+              icons.support,
             )}
             {expandedSections.support && (
               <View style={{ marginBottom: 20 }}>
                 <SectionCard
                   title="WhatsApp support"
                   value="Fastest reply, usually within an hour"
-                  icon="logo-whatsapp"
+                  iconSource={icons.whatsappSupport}
                   onPress={() => openLink(`https://wa.me/${SUPPORT_WHATSAPP}`)}
                 />
                 <SectionCard
                   title="Email us"
                   value={SUPPORT_EMAIL}
-                  icon="mail-outline"
+                  iconSource={icons.emailUs}
                   onPress={() =>
                     openLink(
                       `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
@@ -1188,17 +1272,31 @@ const Profile = () => {
                 <SectionCard
                   title="Call support"
                   value={SUPPORT_PHONE}
-                  icon="call-outline"
+                  iconSource={icons.callSupport}
                   onPress={() => openLink(`tel:${SUPPORT_PHONE}`)}
                 />
                 <SectionCard
                   title="Report a problem with a trip"
-                  icon="flag-outline"
+                  iconSource={icons.reportAProblem}
                   onPress={() => router.push("/(root)/(tabs)/rides")}
                 />
+              </View>
+            )}
+
+            {/* ── Account & legal ── */}
+            {renderSectionHeader(
+              "Account & legal",
+              "accountLegal",
+              "document-text",
+              PALETTE.accentSoft,
+              PALETTE.accentDeep,
+              icons.termsOfUse,
+            )}
+            {expandedSections.accountLegal && (
+              <View style={{ marginBottom: 20 }}>
                 <SectionCard
                   title="Privacy policy"
-                  icon="shield-checkmark-outline"
+                  iconSource={icons.privacyPolicy}
                   onPress={() =>
                     router.push({
                       pathname: "/(root)/legal",
@@ -1208,7 +1306,7 @@ const Profile = () => {
                 />
                 <SectionCard
                   title="Terms of use"
-                  icon="document-text-outline"
+                  iconSource={icons.termsOfUse}
                   onPress={() =>
                     router.push({
                       pathname: "/(root)/legal",
@@ -1216,16 +1314,14 @@ const Profile = () => {
                     })
                   }
                 />
+                <SectionCard
+                  title="Sign out"
+                  iconSource={icons.signOut}
+                  tone="danger"
+                  onPress={handleLogout}
+                />
               </View>
             )}
-
-            {/* ── Sign out ── */}
-            <SectionCard
-              title="Sign out"
-              icon="log-out-outline"
-              tone="danger"
-              onPress={handleLogout}
-            />
           </>
         )}
       </ScrollView>

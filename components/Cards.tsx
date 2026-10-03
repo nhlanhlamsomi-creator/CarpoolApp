@@ -6,7 +6,13 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { Ionicons } from "@expo/vector-icons";
-import { Pressable, Text, View } from "react-native";
+import {
+  Image,
+  ImageSourcePropType,
+  Pressable,
+  Text,
+  View,
+} from "react-native";
 
 type IoniconName = keyof typeof Ionicons.glyphMap;
 
@@ -17,6 +23,7 @@ type SectionCardProps = {
   title: string;
   value?: string;
   icon?: IoniconName;
+  iconSource?: ImageSourcePropType;
   onPress?: () => void;
   /** Shows a coloured pill on the right — use for verification status. */
   status?: "verified" | "pending" | "rejected" | "required";
@@ -34,6 +41,7 @@ export const SectionCard = ({
   title,
   value,
   icon = "ellipse-outline",
+  iconSource,
   onPress,
   status,
   tone = "default",
@@ -53,11 +61,15 @@ export const SectionCard = ({
             danger ? "bg-[#FEF3F3]" : "bg-[#F0E6FA]"
           }`}
         >
-          <Ionicons
-            name={icon}
-            size={18}
-            color={danger ? "#E0575B" : "#5A189A"}
-          />
+          {iconSource ? (
+            <Image source={iconSource} style={{ width: 22, height: 22 }} resizeMode="contain" />
+          ) : (
+            <Ionicons
+              name={icon}
+              size={18}
+              color={danger ? "#E0575B" : "#5A189A"}
+            />
+          )}
         </View>
 
         <View className="flex-1">
@@ -96,16 +108,27 @@ export const SectionCard = ({
 
 type StatCardProps = {
   icon: IoniconName;
+  iconSource?: ImageSourcePropType;
   label: string;
   value: string;
   /** Optional change indicator, e.g. "+12%" */
   delta?: string;
 };
 
-export const StatCard = ({ icon, label, value, delta }: StatCardProps) => (
+export const StatCard = ({
+  icon,
+  iconSource,
+  label,
+  value,
+  delta,
+}: StatCardProps) => (
   <View className="flex-1 rounded-2xl border border-[#E9E2F0] bg-white px-3.5 py-4">
     <View className="h-9 w-9 items-center justify-center rounded-xl bg-[#F0E6FA]">
-      <Ionicons name={icon} size={17} color="#5A189A" />
+      {iconSource ? (
+        <Image source={iconSource} style={{ width: 22, height: 22 }} resizeMode="contain" />
+      ) : (
+        <Ionicons name={icon} size={17} color="#5A189A" />
+      )}
     </View>
 
     <Text className="mt-3 text-[20px] font-JakartaExtraBold text-[#21152F]">
