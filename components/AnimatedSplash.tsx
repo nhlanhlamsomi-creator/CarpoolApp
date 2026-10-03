@@ -1,70 +1,53 @@
-import { brand } from "@/constants/theme";
 import { useEffect, useRef } from "react";
 import {
-    Animated,
-    Dimensions,
-    Easing,
-    Image,
-    StatusBar,
-    StyleSheet,
-    Text,
-    View,
+  Animated,
+  Dimensions,
+  Easing,
+  StyleSheet,
+  View,
 } from "react-native";
 
 type Props = {
   onFinish: () => void;
 };
 
-const { width } = Dimensions.get("window");
+const { width: screenWidth } = Dimensions.get("window");
+
+const ringSize = Math.min(Math.max(screenWidth * 0.19, 90), 155);
+const ringGap = Math.min(Math.max(screenWidth * 0.016, 6), 12);
+const archWidth = Math.min(Math.max(screenWidth * 0.38, 170), 280);
+const archHeight = Math.min(Math.max(screenWidth * 0.16, 70), 120);
+const archStroke = Math.min(Math.max(screenWidth * 0.05, 22), 42);
+const paddingBottom = Math.min(Math.max(screenWidth * 0.05, 20), 48);
+const overlapOffset = Math.min(Math.max(screenWidth * 0.02, 8), 18);
 
 export default function AnimatedSplash({ onFinish }: Props) {
+  const progress = useRef(new Animated.Value(0)).current;
   const rootFade = useRef(new Animated.Value(1)).current;
   const rootScale = useRef(new Animated.Value(1)).current;
-  const logoFade = useRef(new Animated.Value(0)).current;
-  const logoScale = useRef(new Animated.Value(0.6)).current;
-  const markFade = useRef(new Animated.Value(0)).current;
-  const markSlide = useRef(new Animated.Value(16)).current;
-  const lineWidth = useRef(new Animated.Value(0)).current;
-  const tagFade = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    const splashAnimation = Animated.sequence([
-      Animated.parallel([
-        Animated.spring(logoScale, {
+    const logoAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(progress, {
           toValue: 1,
-          tension: 88,
-          friction: 8,
+          duration: 2400,
+          easing: Easing.inOut(Easing.quad),
           useNativeDriver: true,
         }),
-        Animated.timing(logoFade, {
-          toValue: 1,
-          duration: 360,
-          useNativeDriver: true,
-        }),
-        Animated.timing(markFade, {
-          toValue: 1,
-          duration: 360,
-          useNativeDriver: true,
-        }),
-        Animated.timing(markSlide, {
+        Animated.timing(progress, {
           toValue: 0,
-          duration: 360,
-          easing: Easing.out(Easing.quad),
+          duration: 2400,
+          easing: Easing.inOut(Easing.quad),
           useNativeDriver: true,
         }),
-      ]),
-      Animated.timing(lineWidth, {
-        toValue: 1,
-        duration: 300,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: false,
-      }),
-      Animated.timing(tagFade, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-      Animated.delay(850),
+      ])
+    );
+
+    logoAnimation.start();
+
+    const splashAnimation = Animated.sequence([
+      Animated.delay(10000),
       Animated.parallel([
         Animated.timing(rootFade, {
           toValue: 0,
@@ -83,166 +66,190 @@ export default function AnimatedSplash({ onFinish }: Props) {
 
     splashAnimation.start(({ finished }) => {
       if (finished) {
+        logoAnimation.stop();
         onFinish();
       }
     });
 
     return () => {
+      logoAnimation.stop();
       splashAnimation.stop();
     };
-  }, [
-    lineWidth,
-    logoFade,
-    logoScale,
-    markFade,
-    markSlide,
-    onFinish,
-    rootFade,
-    rootScale,
-    tagFade,
-  ]);
+  }, [onFinish, progress, rootFade, rootScale]);
 
-  const ruleWidth = lineWidth.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 44],
+  const archRotation = progress.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: ["-6deg", "0deg", "6deg"],
+  });
+
+  const archTranslateY = progress.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [-2, 0, -2],
+  });
+
+  const leftScaleX = progress.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [1.04, 0.97, 1],
+  });
+
+  const leftScaleY = progress.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0.96, 1.03, 1],
+  });
+
+  const leftRotation = progress.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: ["-3deg", "0deg", "2deg"],
+  });
+
+  const rightScaleX = progress.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [1, 0.97, 1.04],
+  });
+
+  const rightScaleY = progress.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [1, 1.03, 0.96],
+  });
+
+  const rightRotation = progress.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: ["-2deg", "0deg", "3deg"],
   });
 
   return (
     <Animated.View
       pointerEvents="none"
-      style={[styles.root, { opacity: rootFade, transform: [{ scale: rootScale }] }]}
+      style={[
+        styles.root,
+        {
+          opacity: rootFade,
+          transform: [{ scale: rootScale }],
+        },
+      ]}
     >
-      <StatusBar barStyle="light-content" backgroundColor={brand.deep} />
-      <View style={styles.blobTop} />
-      <View style={styles.blobBottom} />
-
-      <View style={styles.logoWrap}>
+      <View style={styles.logoStage}>
         <Animated.View
           style={[
-            styles.logoBadge,
-            { opacity: logoFade, transform: [{ scale: logoScale }] },
+            styles.archWrap,
+            {
+              transform: [
+                { rotate: archRotation },
+                { translateY: archTranslateY },
+              ],
+            },
           ]}
         >
-          <Image
-            source={require("../assets/images/hopon.logo.png")}
-            style={styles.logoImage}
-            resizeMode="contain"
-          />
+          <View style={styles.topArch} />
         </Animated.View>
-      </View>
 
-      <Animated.Text
-        style={[
-          styles.wordmark,
-          { opacity: markFade, transform: [{ translateY: markSlide }] },
-        ]}
-      >
-        HopOn
-      </Animated.Text>
-      <Animated.View style={[styles.rule, { width: ruleWidth }]} />
-      <Animated.Text style={[styles.tagline, { opacity: tagFade }]}>
-        Ride smart. Save more.
-      </Animated.Text>
-      <Animated.View style={[styles.footer, { opacity: tagFade }]}>
-        <View style={styles.footerDot} />
-        <Text style={styles.footerText}>by DevSphere Inc.</Text>
-        <View style={styles.footerDot} />
-      </Animated.View>
+        <View style={styles.ringsRow}>
+          <Animated.View
+            style={[
+              styles.logoRing,
+              styles.leftRing,
+              {
+                transform: [
+                  { scaleX: leftScaleX },
+                  { scaleY: leftScaleY },
+                  { rotate: leftRotation },
+                ],
+              },
+            ]}
+          >
+            <View style={styles.ringHole} />
+          </Animated.View>
+
+          <Animated.View
+            style={[
+              styles.logoRing,
+              styles.rightRing,
+              {
+                transform: [
+                  { scaleX: rightScaleX },
+                  { scaleY: rightScaleY },
+                  { rotate: rightRotation },
+                ],
+              },
+            ]}
+          >
+            <View style={styles.ringHole} />
+          </Animated.View>
+        </View>
+      </View>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   root: {
-    ...StyleSheet.absoluteFill,
-    zIndex: 999,
-    elevation: 999,
-    backgroundColor: brand.deep,
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "#ffffff",
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
   },
-  blobTop: {
-    position: "absolute",
-    width: width * 1.4,
-    height: width * 1.4,
-    borderRadius: width * 0.7,
-    backgroundColor: brand.dark,
-    opacity: 0.5,
-    top: -width * 0.9,
-    right: -width * 0.4,
-  },
-  blobBottom: {
-    position: "absolute",
-    width: width * 1.1,
-    height: width * 1.1,
-    borderRadius: width * 0.55,
-    backgroundColor: brand.mid,
-    opacity: 0.18,
-    bottom: -width * 0.7,
-    left: -width * 0.35,
-  },
-  logoWrap: {
+  logoStage: {
+    position: "relative",
+    width: Math.min(screenWidth * 0.68, 420),
+    height: Math.min(screenWidth * 0.46, 330),
+    minHeight: 220,
     alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 34,
+    justifyContent: "flex-end",
+    paddingBottom: paddingBottom,
   },
-  logoBadge: {
-    width: 118,
-    height: 118,
-    borderRadius: 32,
-    backgroundColor: "#FFFFFF",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: brand.accent,
-    shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 0.45,
-    shadowRadius: 30,
-    elevation: 20,
-  },
-  logoImage: {
-    width: 78,
-    height: 78,
-  },
-  wordmark: {
-    fontSize: 44,
-    fontFamily: "Jakarta-ExtraBold",
-    color: "#FFFFFF",
-    letterSpacing: -1.4,
-  },
-  rule: {
-    height: 2,
-    borderRadius: 2,
-    backgroundColor: brand.accent,
-    marginTop: 16,
-    marginBottom: 14,
-  },
-  tagline: {
-    fontSize: 12.5,
-    fontFamily: "Jakarta-SemiBold",
-    color: "rgba(255,255,255,0.6)",
-    letterSpacing: 1.8,
-    textTransform: "uppercase",
-  },
-  footer: {
+  archWrap: {
     position: "absolute",
-    bottom: 54,
+    left: "50%",
+    marginLeft: -archWidth / 2,
+    bottom: paddingBottom + ringSize - overlapOffset,
+    width: archWidth,
+    height: archHeight,
+    pointerEvents: "none",
+  },
+  topArch: {
+    width: "100%",
+    height: "100%",
+    backgroundColor: "transparent",
+    borderWidth: archStroke,
+    borderColor: "rgb(48, 52, 56)",
+    borderBottomWidth: 0,
+    borderTopLeftRadius: archWidth,
+    borderTopRightRadius: archWidth,
+  },
+  ringsRow: {
+    position: "relative",
+    zIndex: 2,
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    justifyContent: "center",
+    marginTop: 10,
   },
-  footerDot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: brand.accent,
-    opacity: 0.55,
+  logoRing: {
+    position: "relative",
+    width: ringSize,
+    height: ringSize,
+    borderRadius: ringSize / 2,
+    flexShrink: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: ringGap / 2,
   },
-  footerText: {
-    fontSize: 11,
-    fontFamily: "Jakarta-SemiBold",
-    color: "rgba(255,255,255,0.36)",
-    letterSpacing: 1.6,
-    textTransform: "uppercase",
+  leftRing: {
+    backgroundColor: "#d2fe52",
+  },
+  rightRing: {
+    backgroundColor: "#d2fe52",
+  },
+  ringHole: {
+    position: "absolute",
+    width: "47%",
+    height: "47%",
+    borderRadius: 999,
+    backgroundColor: "#ffffff",
   },
 });
