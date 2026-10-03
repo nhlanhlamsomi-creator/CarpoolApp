@@ -457,7 +457,7 @@ const Welcome: React.FC = () => {
             activeOpacity={0.85}
           >
             <Text style={styles.ctaText}>
-              {isLastSlide ? "Get Started" : "Try Now"}
+              {isLastSlide ? "Get Started" : "Continue"}
             </Text>
             <Ionicons name="arrow-forward" size={18} color={PALETTE.white} />
           </TouchableOpacity>
