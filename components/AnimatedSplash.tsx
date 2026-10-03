@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     height: "100%",
     backgroundColor: "transparent",
     borderWidth: archStroke,
-    borderColor: "rgb(48, 52, 56)",
+    borderColor: "#10002B",
     borderBottomWidth: 0,
     borderTopLeftRadius: archWidth,
     borderTopRightRadius: archWidth,
@@ -240,10 +240,10 @@ const styles = StyleSheet.create({
     marginHorizontal: ringGap / 2,
   },
   leftRing: {
-    backgroundColor: "#d2fe52",
+    backgroundColor: "#180c23",
   },
   rightRing: {
-    backgroundColor: "#d2fe52",
+    backgroundColor: "#7B2CBF",
   },
   ringHole: {
     position: "absolute",
