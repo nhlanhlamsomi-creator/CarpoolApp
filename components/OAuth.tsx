@@ -7,7 +7,6 @@ import { Alert, Image, Text, TouchableOpacity, View } from "react-native";
 import { icons } from "@/constants";
 import { googleOAuth } from "@/lib/auth";
 
-// Palette — dark green / black / white
 const THEME = {
   ink: "#101814",
   line: "#E3E7E5",
@@ -15,11 +14,27 @@ const THEME = {
   onDark: "#FFFFFF",
 };
 
-const OAuth = ({ showDivider = false }: { showDivider?: boolean }) => {
+type OAuthProps = {
+  showDivider?: boolean;
+  showApple?: boolean;
+  googleLabel?: string;
+  disabled?: boolean;
+  variant?: "default" | "purple";
+};
+
+const OAuth = ({
+  showDivider = false,
+  showApple = true,
+  googleLabel = "Login with Google",
+  disabled = false,
+  variant = "default",
+}: OAuthProps) => {
   const { startOAuthFlow: startGoogle } = useOAuth({ strategy: "oauth_google" });
   const { startOAuthFlow: startApple } = useOAuth({ strategy: "oauth_apple" });
 
   const [loading, setLoading] = useState<null | "google" | "apple">(null);
+  const lineColor = variant === "purple" ? "#E9E2F0" : THEME.line;
+  const googleTextColor = variant === "purple" ? "#21152F" : THEME.ink;
 
   const handleGoogleSignIn = async () => {
     if (loading) return;
@@ -65,11 +80,11 @@ const OAuth = ({ showDivider = false }: { showDivider?: boolean }) => {
       {/* The auth screens already draw their own divider, so this is opt-in */}
       {showDivider && (
         <View className="my-4 flex-row items-center gap-2.5">
-          <View className="h-[1px] flex-1 bg-[#E3E7E5]" />
+          <View className="h-[1px] flex-1" style={{ backgroundColor: lineColor }} />
           <Text className="text-[11.5px] font-JakartaMedium text-[#7A8580]">
             or continue with
           </Text>
-          <View className="h-[1px] flex-1 bg-[#E3E7E5]" />
+          <View className="h-[1px] flex-1" style={{ backgroundColor: lineColor }} />
         </View>
       )}
 
@@ -77,34 +92,39 @@ const OAuth = ({ showDivider = false }: { showDivider?: boolean }) => {
         {/* Google — white */}
         <TouchableOpacity
           onPress={handleGoogleSignIn}
-          disabled={!!loading}
+          disabled={disabled || !!loading}
           activeOpacity={0.85}
           accessibilityRole="button"
-          className={`h-[52px] w-full flex-row items-center justify-center gap-2.5 rounded-full border-[1.5px] border-[#E3E7E5] bg-white ${
-            loading && loading !== "google" ? "opacity-60" : ""
+          className={`h-[52px] w-full flex-row items-center justify-center gap-2.5 rounded-full border-[1.5px] bg-white ${
+            disabled || loading ? "opacity-60" : ""
           }`}
+          style={{ borderColor: lineColor }}
         >
           <Image source={icons.google} resizeMode="contain" className="h-5 w-5" />
-          <Text className="text-[15px] font-JakartaSemiBold text-[#101814]">
-            {loading === "google" ? "Connecting…" : "Login with Google"}
+          <Text
+            className="text-[15px] font-JakartaSemiBold"
+            style={{ color: googleTextColor }}
+          >
+            {loading === "google" ? "Connecting…" : googleLabel}
           </Text>
         </TouchableOpacity>
 
-        {/* Apple — black */}
-        <TouchableOpacity
-          onPress={handleAppleSignIn}
-          disabled={!!loading}
-          activeOpacity={0.85}
-          accessibilityRole="button"
-          className={`h-[52px] w-full flex-row items-center justify-center gap-2.5 rounded-full border-[1.5px] border-[#101814] bg-[#101814] ${
-            loading && loading !== "apple" ? "opacity-60" : ""
-          }`}
-        >
-          <Ionicons name="logo-apple" size={20} color={THEME.onDark} />
-          <Text className="text-[15px] font-JakartaSemiBold text-white">
-            {loading === "apple" ? "Connecting…" : "Login with Apple"}
-          </Text>
-        </TouchableOpacity>
+        {showApple && (
+          <TouchableOpacity
+            onPress={handleAppleSignIn}
+            disabled={!!loading}
+            activeOpacity={0.85}
+            accessibilityRole="button"
+            className={`h-[52px] w-full flex-row items-center justify-center gap-2.5 rounded-full border-[1.5px] border-[#101814] bg-[#101814] ${
+              loading && loading !== "apple" ? "opacity-60" : ""
+            }`}
+          >
+            <Ionicons name="logo-apple" size={20} color={THEME.onDark} />
+            <Text className="text-[15px] font-JakartaSemiBold text-white">
+              {loading === "apple" ? "Connecting…" : "Login with Apple"}
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
