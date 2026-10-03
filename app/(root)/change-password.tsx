@@ -75,7 +75,7 @@ const ChangePassword = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F4F6F5]">
+    <SafeAreaView className="flex-1 bg-[#F7F4FB]">
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -84,11 +84,11 @@ const ChangePassword = () => {
           <Pressable
             onPress={() => router.back()}
             hitSlop={8}
-            className="h-10 w-10 items-center justify-center rounded-xl border border-[#E3E7E5] bg-white active:opacity-70"
+            className="h-10 w-10 items-center justify-center rounded-xl border border-[#E9E2F0] bg-white active:opacity-70"
           >
-            <Ionicons name="chevron-back" size={20} color="#101814" />
+            <Ionicons name="chevron-back" size={20} color="#21152F" />
           </Pressable>
-          <Text className="text-[19px] font-JakartaExtraBold text-[#101814]">
+          <Text className="text-[19px] font-JakartaExtraBold text-[#21152F]">
             Change password
           </Text>
         </View>
@@ -99,7 +99,7 @@ const ChangePassword = () => {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View className="rounded-3xl border border-[#E3E7E5] bg-white p-5">
+          <View className="rounded-3xl border border-[#E9E2F0] bg-white p-5">
             <InputField
               label="Current password"
               ionicon="lock-closed-outline"
@@ -133,13 +133,13 @@ const ChangePassword = () => {
                     <Ionicons
                       name={passed[i] ? "checkmark-circle" : "ellipse-outline"}
                       size={14}
-                      color={passed[i] ? "#1FA574" : "#A9B1AD"}
+                      color={passed[i] ? "#9D4EDD" : "#A69BAF"}
                     />
                     <Text
                       className={`text-[11.5px] ${
                         passed[i]
-                          ? "font-JakartaMedium text-[#0A3B2E]"
-                          : "font-Jakarta text-[#A9B1AD]"
+                          ? "font-JakartaMedium text-[#5A189A]"
+                          : "font-Jakarta text-[#A69BAF]"
                       }`}
                     >
                       {rule.label}
@@ -162,13 +162,13 @@ const ChangePassword = () => {
             />
           </View>
 
-          <View className="mt-4 flex-row gap-2.5 rounded-2xl border border-[#E3E7E5] bg-white p-4">
+          <View className="mt-4 flex-row gap-2.5 rounded-2xl border border-[#E9E2F0] bg-white p-4">
             <Ionicons
               name="information-circle-outline"
               size={16}
-              color="#0A3B2E"
+              color="#5A189A"
             />
-            <Text className="flex-1 text-[11.5px] font-Jakarta leading-4 text-[#7A8580]">
+            <Text className="flex-1 text-[11.5px] font-Jakarta leading-4 text-[#746A7E]">
               Changing your password signs you out everywhere else. You&apos;ll
               stay signed in on this device.
             </Text>

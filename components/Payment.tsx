@@ -228,7 +228,7 @@ const Payment = ({
           borderColor: "#E7DECF",
           backgroundColor: "#FFFFFF",
           padding: 18,
-          shadowColor: "#2B2722",
+          shadowColor: "#21152F",
           shadowOffset: { width: 0, height: 8 },
           shadowOpacity: 0.05,
           shadowRadius: 18,
@@ -260,7 +260,7 @@ const Payment = ({
                 style={{
                   fontSize: 15,
                   fontFamily: "Jakarta-Bold",
-                  color: "#2B2722",
+                  color: "#21152F",
                 }}
               >
                 Payment summary
@@ -270,7 +270,7 @@ const Payment = ({
                   marginTop: 2,
                   fontSize: 11,
                   fontFamily: "Jakarta",
-                  color: "#9A928A",
+                  color: "#746A7E",
                 }}
               >
                 Secure checkout with LYFT
@@ -292,7 +292,7 @@ const Payment = ({
                 marginTop: 1,
                 fontSize: 10,
                 fontFamily: "Jakarta-Bold",
-                color: "#9A928A",
+                color: "#746A7E",
                 textTransform: "uppercase",
                 letterSpacing: 1,
               }}
@@ -348,18 +348,18 @@ const Payment = ({
         disabled={processing}
         IconRight={() =>
           processing ? null : (
-            <Ionicons name="arrow-forward" size={18} color="#2B2722" />
+            <Ionicons name="arrow-forward" size={18} color="#21152F" />
           )
         }
       />
 
       <View style={{ flexDirection: "row", justifyContent: "center", gap: 6 }}>
-        <Ionicons name="lock-closed-outline" size={12} color="#9A928A" />
+        <Ionicons name="lock-closed-outline" size={12} color="#746A7E" />
         <Text
           style={{
             fontSize: 10.5,
             fontFamily: "Jakarta",
-            color: "#9A928A",
+            color: "#746A7E",
           }}
         >
           Protected by Stripe

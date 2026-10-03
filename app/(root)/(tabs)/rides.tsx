@@ -427,7 +427,7 @@ const Rides = () => {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F4F6F5]">
+    <SafeAreaView className="flex-1 bg-[#F7F4FB]">
       <FlatList
         data={visible}
         keyExtractor={(item, index) =>
@@ -441,8 +441,8 @@ const Rides = () => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#0A3B2E"
-            colors={["#0A3B2E"]}
+            tintColor="#5A189A"
+            colors={["#5A189A"]}
           />
         }
         renderItem={({ item }) => (
@@ -468,12 +468,14 @@ const Rides = () => {
         )}
         ListHeaderComponent={
           <>
-            <Text className="my-5 text-2xl font-JakartaExtraBold text-[#101814]">
-              My trips
-            </Text>
+            <View className="my-5">
+              <Text className="text-[24px] font-JakartaExtraBold text-[#21152F]">
+                My trips
+              </Text>
+            </View>
 
             {/* Tabs, with counts so the split is obvious before you tap */}
-            <View className="mb-5 flex-row rounded-2xl bg-[#E4EFEA] p-1">
+            <View className="mb-5 flex-row rounded-2xl bg-[#F0E6FA] p-1">
               {(
                 [
                   {
@@ -496,8 +498,8 @@ const Rides = () => {
                     <Text
                       className={`text-[13px] ${
                         active
-                          ? "font-JakartaBold text-[#0A3B2E]"
-                          : "font-JakartaMedium text-[#7A8580]"
+                          ? "font-JakartaBold text-[#5A189A]"
+                          : "font-JakartaMedium text-[#746A7E]"
                       }`}
                     >
                       {item.label}
@@ -505,12 +507,12 @@ const Rides = () => {
                     {item.count > 0 && (
                       <View
                         className={`rounded-full px-1.5 py-0.5 ${
-                          active ? "bg-[#E4EFEA]" : "bg-[#E3E7E5]"
+                          active ? "bg-[#F0E6FA]" : "bg-[#E9E2F0]"
                         }`}
                       >
                         <Text
                           className={`text-[10px] font-JakartaBold ${
-                            active ? "text-[#0A3B2E]" : "text-[#7A8580]"
+                            active ? "text-[#5A189A]" : "text-[#746A7E]"
                           }`}
                         >
                           {item.count}
@@ -526,8 +528,8 @@ const Rides = () => {
         ListEmptyComponent={
           loading ? (
             <View className="items-center py-12">
-              <ActivityIndicator size="large" color="#0A3B2E" />
-              <Text className="mt-3 text-[12.5px] font-Jakarta text-[#7A8580]">
+              <ActivityIndicator size="large" color="#5A189A" />
+              <Text className="mt-3 text-[12.5px] font-Jakarta text-[#746A7E]">
                 Loading your trips
               </Text>
             </View>
@@ -557,13 +559,13 @@ const Rides = () => {
         }
         ListFooterComponent={
           tab === "history" && history.length > 0 ? (
-            <View className="mt-2 flex-row gap-2.5 rounded-2xl border border-[#E3E7E5] bg-white p-4">
+            <View className="mt-2 flex-row gap-2.5 rounded-2xl border border-[#E9E2F0] bg-white p-4">
               <Ionicons
                 name="information-circle-outline"
                 size={16}
-                color="#0A3B2E"
+                color="#5A189A"
               />
-              <Text className="flex-1 text-[11.5px] font-Jakarta leading-4 text-[#7A8580]">
+              <Text className="flex-1 text-[11.5px] font-Jakarta leading-4 text-[#746A7E]">
                 Past trips can&apos;t be deleted. We keep them as payment
                 records, and they&apos;re what we rely on if you ever report a
                 problem.

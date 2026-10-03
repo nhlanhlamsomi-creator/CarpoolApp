@@ -76,18 +76,18 @@ const GoogleTextInput = ({
       {/* Search input */}
       <View
         className={`h-[54px] flex-row items-center rounded-2xl border-[1.5px] px-4 ${
-          focused ? "border-[#0A3B2E]" : "border-[#E3E7E5]"
+          focused ? "border-[#5A189A]" : "border-[#E9E2F0]"
         }`}
         style={{
           backgroundColor:
-            textInputBackgroundColor ?? (focused ? "#FFFFFF" : "#F4F6F5"),
+            textInputBackgroundColor ?? (focused ? "#FFFFFF" : "#F7F4FB"),
         }}
       >
         <Image
           source={icon ? icon : icons.search}
           className="h-5 w-5"
           resizeMode="contain"
-          tintColor={focused ? "#0A3B2E" : "#A9B1AD"}
+          tintColor={focused ? "#5A189A" : "#A69BAF"}
         />
 
         <TextInput
@@ -96,8 +96,8 @@ const GoogleTextInput = ({
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           placeholder={initialLocation ?? "Where do you want to go?"}
-          placeholderTextColor="#A9B1AD"
-          className="ml-3 h-[52px] flex-1 text-[15px] font-JakartaMedium text-[#101814]"
+          placeholderTextColor="#A69BAF"
+          className="ml-3 h-[52px] flex-1 text-[15px] font-JakartaMedium text-[#21152F]"
           returnKeyType="search"
         />
         {text.length > 0 && (
@@ -106,9 +106,9 @@ const GoogleTextInput = ({
             accessibilityRole="button"
             accessibilityLabel="Clear location"
             hitSlop={10}
-            className="ml-2 h-8 w-8 items-center justify-center rounded-full bg-[#E4EFEA]"
+            className="ml-2 h-8 w-8 items-center justify-center rounded-full bg-[#F0E6FA]"
           >
-            <Text className="text-[18px] font-JakartaBold text-[#0A3B2E]">
+            <Text className="text-[18px] font-JakartaBold text-[#5A189A]">
               ×
             </Text>
           </TouchableOpacity>
@@ -117,26 +117,26 @@ const GoogleTextInput = ({
 
       {/* Autocomplete results */}
       {places.length > 0 && (
-        <View className="mt-2 overflow-hidden rounded-2xl border border-[#E3E7E5] bg-white shadow-sm shadow-black/10">
+        <View className="mt-2 overflow-hidden rounded-2xl border border-[#E9E2F0] bg-white shadow-sm shadow-black/10">
           {places.map((place, index) => (
             <TouchableOpacity
               key={index}
               onPress={() => handleSelectPlace(place)}
               activeOpacity={0.7}
               className={`flex-row items-center px-4 py-3.5 ${
-                index < places.length - 1 ? "border-b border-[#E3E7E5]" : ""
+                index < places.length - 1 ? "border-b border-[#E9E2F0]" : ""
               }`}
             >
-              <View className="mr-3 h-8 w-8 items-center justify-center rounded-full bg-[#E4EFEA]">
+              <View className="mr-3 h-8 w-8 items-center justify-center rounded-full bg-[#F0E6FA]">
                 <Image
                   source={icons.point}
                   className="h-4 w-4"
                   resizeMode="contain"
-                  tintColor="#0A3B2E"
+                  tintColor="#5A189A"
                 />
               </View>
               <Text
-                className="flex-1 text-[13.5px] font-JakartaSemiBold text-[#101814]"
+                className="flex-1 text-[13.5px] font-JakartaSemiBold text-[#21152F]"
                 numberOfLines={2}
               >
                 {place.properties.formatted}

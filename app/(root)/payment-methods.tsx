@@ -98,23 +98,23 @@ const PaymentMethods = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F4F6F5]">
+    <SafeAreaView className="flex-1 bg-[#F7F4FB]">
       <View className="flex-row items-center gap-3 px-5 pb-2 pt-2">
         <Pressable
           onPress={() => router.back()}
           hitSlop={8}
-          className="h-10 w-10 items-center justify-center rounded-xl border border-[#E3E7E5] bg-white active:opacity-70"
+          className="h-10 w-10 items-center justify-center rounded-xl border border-[#E9E2F0] bg-white active:opacity-70"
         >
-          <Ionicons name="chevron-back" size={20} color="#101814" />
+          <Ionicons name="chevron-back" size={20} color="#21152F" />
         </Pressable>
-        <Text className="text-[19px] font-JakartaExtraBold text-[#101814]">
+        <Text className="text-[19px] font-JakartaExtraBold text-[#21152F]">
           Payment method
         </Text>
       </View>
 
       {loading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#0A3B2E" />
+          <ActivityIndicator size="large" color="#5A189A" />
         </View>
       ) : (
         <ScrollView
@@ -122,7 +122,7 @@ const PaymentMethods = () => {
           contentContainerStyle={{ paddingTop: 14, paddingBottom: 40 }}
           showsVerticalScrollIndicator={false}
         >
-          <Text className="mb-4 text-[13px] font-Jakarta leading-5 text-[#7A8580]">
+          <Text className="mb-4 text-[13px] font-Jakarta leading-5 text-[#746A7E]">
             This is how you&apos;ll pay by default. You can still change it on
             any individual booking.
           </Text>
@@ -136,27 +136,27 @@ const PaymentMethods = () => {
                 onPress={() => choose(method.id)}
                 className={`mb-3 flex-row items-center rounded-2xl border-[1.5px] p-4 ${
                   active
-                    ? "border-[#0A3B2E] bg-[#E4EFEA]"
-                    : "border-[#E3E7E5] bg-white"
+                    ? "border-[#5A189A] bg-[#F0E6FA]"
+                    : "border-[#E9E2F0] bg-white"
                 } active:opacity-80`}
               >
                 <View
                   className={`h-11 w-11 items-center justify-center rounded-xl ${
-                    active ? "bg-[#0A3B2E]" : "bg-[#E4EFEA]"
+                    active ? "bg-[#5A189A]" : "bg-[#F0E6FA]"
                   }`}
                 >
                   <Ionicons
                     name={method.icon}
                     size={20}
-                    color={active ? "#FFFFFF" : "#7A8580"}
+                    color={active ? "#FFFFFF" : "#746A7E"}
                   />
                 </View>
 
                 <View className="ml-3.5 flex-1">
-                  <Text className="text-[15px] font-JakartaBold text-[#101814]">
+                  <Text className="text-[15px] font-JakartaBold text-[#21152F]">
                     {method.title}
                   </Text>
-                  <Text className="mt-1 text-[12px] font-Jakarta leading-4 text-[#7A8580]">
+                  <Text className="mt-1 text-[12px] font-Jakarta leading-4 text-[#746A7E]">
                     {method.description}
                   </Text>
                 </View>
@@ -164,8 +164,8 @@ const PaymentMethods = () => {
                 <View
                   className={`ml-2 h-5 w-5 items-center justify-center rounded-full border-2 ${
                     active
-                      ? "border-[#0A3B2E] bg-[#0A3B2E]"
-                      : "border-[#E3E7E5]"
+                      ? "border-[#5A189A] bg-[#5A189A]"
+                      : "border-[#E9E2F0]"
                   }`}
                 >
                   {active && (
@@ -178,9 +178,9 @@ const PaymentMethods = () => {
 
           {/* Card details are Stripe's problem, not ours — saying so is
               reassuring and it's also literally true */}
-          <View className="mt-4 flex-row gap-2.5 rounded-2xl border border-[#E3E7E5] bg-white p-4">
-            <Ionicons name="lock-closed-outline" size={16} color="#0A3B2E" />
-            <Text className="flex-1 text-[11.5px] font-Jakarta leading-4 text-[#7A8580]">
+          <View className="mt-4 flex-row gap-2.5 rounded-2xl border border-[#E9E2F0] bg-white p-4">
+            <Ionicons name="lock-closed-outline" size={16} color="#5A189A" />
+            <Text className="flex-1 text-[11.5px] font-Jakarta leading-4 text-[#746A7E]">
               Card details are entered and stored by Stripe when you pay. We
               never see or keep your card number.
             </Text>
@@ -188,8 +188,8 @@ const PaymentMethods = () => {
 
           {saving && (
             <View className="mt-4 flex-row items-center justify-center gap-2">
-              <ActivityIndicator size="small" color="#0A3B2E" />
-              <Text className="text-[12px] font-JakartaMedium text-[#7A8580]">
+              <ActivityIndicator size="small" color="#5A189A" />
+              <Text className="text-[12px] font-JakartaMedium text-[#746A7E]">
                 Saving…
               </Text>
             </View>

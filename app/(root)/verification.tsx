@@ -45,22 +45,22 @@ const STATUS_BANNER: Record<
   { bg: string; icon: any; title: string; body: string; tint: string }
 > = {
   not_submitted: {
-    bg: "bg-[#E4EFEA]",
-    tint: "#0A3B2E",
+    bg: "bg-[#F0E6FA]",
+    tint: "#5A189A",
     icon: "shield-outline",
     title: "Verify your identity",
     body: "This takes about two minutes and only has to be done once.",
   },
   pending: {
-    bg: "bg-[#E4EFEA]",
-    tint: "#0A3B2E",
+    bg: "bg-[#F0E6FA]",
+    tint: "#5A189A",
     icon: "time-outline",
     title: "We're reviewing your documents",
     body: "Most checks finish within 24 hours. We'll notify you either way.",
   },
   approved: {
-    bg: "bg-[#E4EFEA]",
-    tint: "#0A3B2E",
+    bg: "bg-[#F0E6FA]",
+    tint: "#5A189A",
     icon: "shield-checkmark",
     title: "You're verified",
     body: "Your identity is confirmed. Nothing further is needed.",
@@ -296,38 +296,38 @@ const Verification = () => {
         onPress={() => !locked && !busy && choose(kind)}
         disabled={locked || busy}
         className={`mb-3 flex-row items-center rounded-2xl border-[1.5px] p-3.5 ${
-          image ? "border-[#0A3B2E] bg-[#E4EFEA]" : "border-[#E3E7E5] bg-white"
+          image ? "border-[#5A189A] bg-[#F0E6FA]" : "border-[#E9E2F0] bg-white"
         } ${locked ? "opacity-60" : "active:opacity-80"}`}
       >
         {image ? (
           <Image
             source={{ uri: image.uri }}
-            className="h-14 w-14 rounded-xl bg-[#E4EFEA]"
+            className="h-14 w-14 rounded-xl bg-[#F0E6FA]"
           />
         ) : (
-          <View className="h-14 w-14 items-center justify-center rounded-xl bg-[#E4EFEA]">
+          <View className="h-14 w-14 items-center justify-center rounded-xl bg-[#F0E6FA]">
             <Ionicons
               name={kind === "selfie" ? "person-outline" : "card-outline"}
               size={22}
-              color="#0A3B2E"
+              color="#5A189A"
             />
           </View>
         )}
 
         <View className="ml-3.5 flex-1">
           <View className="flex-row items-center gap-2">
-            <Text className="text-[14.5px] font-JakartaBold text-[#101814]">
+            <Text className="text-[14.5px] font-JakartaBold text-[#21152F]">
               {label.title}
             </Text>
             {optional && (
-              <Text className="text-[10.5px] font-JakartaMedium text-[#A9B1AD]">
+              <Text className="text-[10.5px] font-JakartaMedium text-[#A69BAF]">
                 Optional
               </Text>
             )}
           </View>
 
           <Text
-            className="mt-1 text-[11.5px] font-Jakarta leading-4 text-[#7A8580]"
+            className="mt-1 text-[11.5px] font-Jakarta leading-4 text-[#746A7E]"
             numberOfLines={2}
           >
             {image ? "Ready to submit. Tap to replace." : label.help}
@@ -336,13 +336,13 @@ const Verification = () => {
 
         <View className="ml-2">
           {busy ? (
-            <ActivityIndicator size="small" color="#0A3B2E" />
+            <ActivityIndicator size="small" color="#5A189A" />
           ) : image ? (
-            <View className="h-6 w-6 items-center justify-center rounded-full bg-[#1FA574]">
+            <View className="h-6 w-6 items-center justify-center rounded-full bg-[#9D4EDD]">
               <Ionicons name="checkmark" size={14} color="#fff" />
             </View>
           ) : (
-            <Ionicons name="add-circle-outline" size={22} color="#A9B1AD" />
+            <Ionicons name="add-circle-outline" size={22} color="#A69BAF" />
           )}
         </View>
       </Pressable>
@@ -350,24 +350,24 @@ const Verification = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F4F6F5]">
+    <SafeAreaView className="flex-1 bg-[#F7F4FB]">
       {/* Header */}
       <View className="flex-row items-center gap-3 px-5 pb-2 pt-2">
         <Pressable
           onPress={() => router.back()}
           hitSlop={8}
-          className="h-10 w-10 items-center justify-center rounded-xl border border-[#E3E7E5] bg-white active:opacity-70"
+          className="h-10 w-10 items-center justify-center rounded-xl border border-[#E9E2F0] bg-white active:opacity-70"
         >
-          <Ionicons name="chevron-back" size={20} color="#101814" />
+          <Ionicons name="chevron-back" size={20} color="#21152F" />
         </Pressable>
-        <Text className="text-[19px] font-JakartaExtraBold text-[#101814]">
+        <Text className="text-[19px] font-JakartaExtraBold text-[#21152F]">
           Identity verification
         </Text>
       </View>
 
       {loading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#0A3B2E" />
+          <ActivityIndicator size="large" color="#5A189A" />
         </View>
       ) : (
         <ScrollView
@@ -385,7 +385,7 @@ const Verification = () => {
             >
               {banner.title}
             </Text>
-            <Text className="mt-1.5 text-[13px] font-Jakarta leading-5 text-[#7A8580]">
+            <Text className="mt-1.5 text-[13px] font-Jakarta leading-5 text-[#746A7E]">
               {banner.body}
             </Text>
 
@@ -394,7 +394,7 @@ const Verification = () => {
                 <Text className="text-[11px] font-JakartaBold uppercase tracking-wider text-[#B02A2A]">
                   Reason
                 </Text>
-                <Text className="mt-1 text-[13px] font-JakartaMedium text-[#101814]">
+                <Text className="mt-1 text-[13px] font-JakartaMedium text-[#21152F]">
                   {rejectionReason}
                 </Text>
               </View>
@@ -404,11 +404,11 @@ const Verification = () => {
           {status !== "approved" && (
             <>
               {/* ── Step 1: ID number ── */}
-              <Text className="mb-3 text-[15px] font-JakartaExtraBold text-[#101814]">
+              <Text className="mb-3 text-[15px] font-JakartaExtraBold text-[#21152F]">
                 Your ID number
               </Text>
 
-              <View className="mb-3 rounded-2xl border border-[#E3E7E5] bg-white p-4">
+              <View className="mb-3 rounded-2xl border border-[#E9E2F0] bg-white p-4">
                 <TextInput
                   value={formatIdNumber(idInput)}
                   onChangeText={(text) => {
@@ -422,12 +422,12 @@ const Verification = () => {
                   placeholderTextColor="#C9D2CD"
                   keyboardType="number-pad"
                   maxLength={15} // 13 digits plus the two display spaces
-                  className={`rounded-xl border-[1.5px] px-4 py-3.5 text-[18px] font-JakartaBold tracking-[2px] text-[#101814] ${
+                  className={`rounded-xl border-[1.5px] px-4 py-3.5 text-[18px] font-JakartaBold tracking-[2px] text-[#21152F] ${
                     showIdError
                       ? "border-[#E0575B] bg-[#FEF3F3]"
                       : idResult.valid
-                        ? "border-[#0A3B2E] bg-[#E4EFEA]"
-                        : "border-[#E3E7E5] bg-[#F4F6F5]"
+                        ? "border-[#5A189A] bg-[#F0E6FA]"
+                        : "border-[#E9E2F0] bg-[#F7F4FB]"
                   }`}
                 />
 
@@ -494,7 +494,7 @@ const Verification = () => {
                           <Text className="text-[12px] font-Jakarta text-[#4A5450]">
                             {row!.label}
                           </Text>
-                          <Text className="text-[12px] font-JakartaBold text-[#101814]">
+                          <Text className="text-[12px] font-JakartaBold text-[#21152F]">
                             {row!.value}
                           </Text>
                         </View>
@@ -514,14 +514,14 @@ const Verification = () => {
                 {/* Showing what we read back proves the check ran, and lets
                     people catch a typo that still happens to be valid */}
                 {idResult.valid && (
-                  <View className="mt-3 rounded-xl bg-[#E4EFEA] p-3.5">
+                  <View className="mt-3 rounded-xl bg-[#F0E6FA] p-3.5">
                     <View className="mb-2 flex-row items-center gap-1.5">
                       <Ionicons
                         name="checkmark-circle"
                         size={15}
-                        color="#0A3B2E"
+                        color="#5A189A"
                       />
-                      <Text className="text-[12px] font-JakartaBold text-[#0A3B2E]">
+                      <Text className="text-[12px] font-JakartaBold text-[#5A189A]">
                         Valid ID number
                       </Text>
                     </View>
@@ -545,10 +545,10 @@ const Verification = () => {
                         key={row.label}
                         className="flex-row items-center justify-between py-0.5"
                       >
-                        <Text className="text-[12px] font-Jakarta text-[#7A8580]">
+                        <Text className="text-[12px] font-Jakarta text-[#746A7E]">
                           {row.label}
                         </Text>
-                        <Text className="text-[12px] font-JakartaBold text-[#101814]">
+                        <Text className="text-[12px] font-JakartaBold text-[#21152F]">
                           {row.value}
                         </Text>
                       </View>
@@ -562,14 +562,14 @@ const Verification = () => {
                 {warnings.map((warning) => (
                   <View
                     key={warning}
-                    className="mt-2.5 flex-row items-start gap-2 rounded-xl bg-[#E4EFEA] p-3"
+                    className="mt-2.5 flex-row items-start gap-2 rounded-xl bg-[#F0E6FA] p-3"
                   >
                     <Ionicons
                       name="warning-outline"
                       size={14}
-                      color="#0A3B2E"
+                      color="#5A189A"
                     />
-                    <Text className="flex-1 text-[11.5px] font-Jakarta leading-4 text-[#0A3B2E]">
+                    <Text className="flex-1 text-[11.5px] font-Jakarta leading-4 text-[#5A189A]">
                       {warning}
                     </Text>
                   </View>
@@ -577,7 +577,7 @@ const Verification = () => {
               </View>
 
               {/* ── Step 2: Documents ── */}
-              <Text className="mb-3 mt-4 text-[15px] font-JakartaExtraBold text-[#101814]">
+              <Text className="mb-3 mt-4 text-[15px] font-JakartaExtraBold text-[#21152F]">
                 Documents
               </Text>
 
@@ -585,13 +585,13 @@ const Verification = () => {
               <DocRow kind="id_back" optional />
               <DocRow kind="selfie" />
 
-              <View className="mt-2 flex-row gap-2.5 rounded-2xl border border-[#E3E7E5] bg-white p-4">
+              <View className="mt-2 flex-row gap-2.5 rounded-2xl border border-[#E9E2F0] bg-white p-4">
                 <Ionicons
                   name="lock-closed-outline"
                   size={16}
-                  color="#0A3B2E"
+                  color="#5A189A"
                 />
-                <Text className="flex-1 text-[11.5px] font-Jakarta leading-4 text-[#7A8580]">
+                <Text className="flex-1 text-[11.5px] font-Jakarta leading-4 text-[#746A7E]">
                   Your documents are encrypted and stored privately. Only our
                   verification team can open them, and they&apos;re deleted once
                   your account is closed.
@@ -607,7 +607,7 @@ const Verification = () => {
                     onPress={submit}
                   />
                   {!canSubmit && !submitting && (
-                    <Text className="mt-2.5 text-center text-[11.5px] font-Jakarta text-[#A9B1AD]">
+                    <Text className="mt-2.5 text-center text-[11.5px] font-Jakarta text-[#A69BAF]">
                       {!idResult.valid
                         ? "Enter a valid ID number to continue"
                         : idVerification?.isValid !== true

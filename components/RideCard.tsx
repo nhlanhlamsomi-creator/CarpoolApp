@@ -4,27 +4,27 @@ import { Image, Pressable, Text, View } from "react-native";
 import { formatDate, formatTime } from "@/lib/utils";
 import { Ride } from "@/types/type";
 
-// ─── Palette (dark green / black / white) ────────────────────────────────────
+// ─── Palette (deep violet / charcoal / white) ────────────────────────────────
 const THEME = {
-  primary: "#0A3B2E", // main fill: buttons, badges, pickup dot
-  primaryDeep: "#14523F", // borders on primary
-  accent: "#1FA574", // icon tint
-  mint: "#5FD3A6", // dot on dark surfaces
-  tint: "#E4EFEA", // pale green surfaces
-  surface: "#F4F6F5", // facts strip, secondary buttons
-  ink: "#101814", // primary text
-  graphite: "#7A8580", // secondary button text
-  muted: "#7A8580", // captions
-  line: "#E3E7E5", // borders and dividers
+  primary: "#5A189A", // main fill: buttons, badges, pickup dot
+  primaryDeep: "#7B2CBF", // borders on primary
+  accent: "#9D4EDD", // icon tint
+  mint: "#C77DFF", // dot on dark surfaces
+  tint: "#F0E6FA", // pale violet surfaces
+  surface: "#F7F4FB", // facts strip, secondary buttons
+  ink: "#21152F", // primary text
+  graphite: "#746A7E", // secondary button text
+  muted: "#746A7E", // captions
+  line: "#E9E2F0", // borders and dividers
   onPrimary: "#FFFFFF", // text/icons on primary fill
 };
 
 // Status → pill colours
 const STATUS: Record<string, { bg: string; text: string }> = {
-  paid: { bg: "#E4EFEA", text: "#0A3B2E" },
-  pending: { bg: "#E4EFEA", text: "#0A3B2E" },
+  paid: { bg: "#F0E6FA", text: "#5A189A" },
+  pending: { bg: "#F0E6FA", text: "#5A189A" },
   failed: { bg: "#FEF3F3", text: "#B02A2A" },
-  refunded: { bg: "#E3E7E5", text: "#7A8580" },
+  refunded: { bg: "#E9E2F0", text: "#746A7E" },
   cancelled: { bg: "#FEF3F3", text: "#B02A2A" },
 };
 
@@ -63,7 +63,7 @@ const Action = ({
   onPress?: () => void;
   tone?: "default" | "primary" | "danger";
 }) => {
-  // primary → dark green fill, white text
+  // primary → deep violet fill, white text
   // danger  → soft red fill, red text
   // default → light grey fill, graphite text
   const styles =

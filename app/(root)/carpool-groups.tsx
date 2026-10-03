@@ -47,26 +47,26 @@ export default function CarpoolGroupsScreen() {
       >
         {/* Title */}
         <View className="mt-6">
-          <Text className="text-[12px] font-JakartaBold text-[#9A928A] tracking-widest uppercase">
+          <Text className="text-[12px] font-JakartaBold text-[#746A7E] tracking-widest uppercase">
             All clusters
           </Text>
-          <Text className="mt-1 text-[24px] font-JakartaExtraBold text-[#2B2722]">
+          <Text className="mt-1 text-[24px] font-JakartaExtraBold text-[#21152F]">
             Carpool groups
           </Text>
         </View>
 
         {/* Summary pill */}
-        <View className="mt-4 flex-row items-center gap-3 rounded-3xl border border-[#E3E7E5] bg-white p-4">
-          <View className="h-10 w-10 items-center justify-center rounded-full bg-[#E4EFEA]">
-            <Text className="text-[15px] font-JakartaExtraBold text-[#0A3B2E]">
+        <View className="mt-4 flex-row items-center gap-3 rounded-3xl border border-[#E9E2F0] bg-white p-4">
+          <View className="h-10 w-10 items-center justify-center rounded-full bg-[#F0E6FA]">
+            <Text className="text-[15px] font-JakartaExtraBold text-[#5A189A]">
               {groups.length}
             </Text>
           </View>
           <View className="flex-1">
-            <Text className="text-[13px] font-JakartaSemiBold text-[#2B2722]">
+            <Text className="text-[13px] font-JakartaSemiBold text-[#21152F]">
               {groups.length} cluster{groups.length === 1 ? "" : "s"} found
             </Text>
-            <Text className="mt-0.5 text-[11.5px] font-Jakarta text-[#9A928A]">
+            <Text className="mt-0.5 text-[11.5px] font-Jakarta text-[#746A7E]">
               Capacity {vehicleCapacity} · pickup within 5 km
             </Text>
           </View>
@@ -202,13 +202,13 @@ export default function CarpoolGroupsScreen() {
               alignItems: "center",
             }}
           >
-            <View className="h-12 w-12 items-center justify-center rounded-full bg-[#E4EFEA]">
+            <View className="h-12 w-12 items-center justify-center rounded-full bg-[#F0E6FA]">
               <Text className="text-[20px]">🚗</Text>
             </View>
-            <Text className="mt-3 text-[15px] font-JakartaBold text-[#2B2722]">
+            <Text className="mt-3 text-[15px] font-JakartaBold text-[#21152F]">
               No passengers available
             </Text>
-            <Text className="mt-1 text-center text-[12.5px] font-Jakarta text-[#9A928A]">
+            <Text className="mt-1 text-center text-[12.5px] font-Jakarta text-[#746A7E]">
               Add valid latitude and longitude values to generate carpool
               groups.
             </Text>
@@ -223,13 +223,13 @@ function Row({ label, value }: { label: string; value: string }) {
   return (
     <View className="flex-row items-center justify-between gap-3">
       <Text
-        className="text-[11px] font-JakartaBold text-[#9A928A] tracking-widest uppercase"
+        className="text-[11px] font-JakartaBold text-[#746A7E] tracking-widest uppercase"
         numberOfLines={1}
       >
         {label}
       </Text>
       <Text
-        className="flex-1 text-right text-[13px] font-JakartaSemiBold text-[#2B2722]"
+        className="flex-1 text-right text-[13px] font-JakartaSemiBold text-[#21152F]"
         numberOfLines={1}
       >
         {value}

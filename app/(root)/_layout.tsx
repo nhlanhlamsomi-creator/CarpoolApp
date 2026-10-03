@@ -1,7 +1,6 @@
 import { Stack } from "expo-router";
 
-// Matches the splash and the screen headers, so transitions never flash white
-const GREEN_DEEP = "#04231C";
+import { brand } from "@/constants/theme";
 
 const Layout = () => {
   return (
@@ -10,7 +9,7 @@ const Layout = () => {
         headerShown: false,
         animation: "slide_from_right",
         gestureEnabled: true,
-        contentStyle: { backgroundColor: GREEN_DEEP },
+        contentStyle: { backgroundColor: brand.deep },
       }}
     >
       {/* ── Tabs ── */}

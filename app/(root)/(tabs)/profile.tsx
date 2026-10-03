@@ -369,7 +369,7 @@ const Profile = () => {
     </View>
   );
 
-  // Section header — shared green palette
+  // Section header — shared violet palette
   const renderSectionHeader = (
     title: string,
     section: keyof typeof expandedSections,
@@ -429,16 +429,11 @@ const Profile = () => {
         className="px-5"
         contentContainerStyle={{ paddingBottom: 140 }}
       >
-        <Text
-          style={{
-            marginVertical: 20,
-            fontSize: 24,
-            fontFamily: "Jakarta-ExtraBold",
-            color: PALETTE.charcoal,
-          }}
-        >
-          My profile
-        </Text>
+        <View style={{ marginVertical: 20 }}>
+          <Text className="text-[24px] font-JakartaExtraBold text-[#21152F]">
+            My profile
+          </Text>
+        </View>
 
         {loading ? (
           renderSkeleton()
@@ -946,13 +941,13 @@ const Profile = () => {
                             alignItems: "center",
                             justifyContent: "center",
                             borderRadius: 14,
-                            backgroundColor: "#E4EFEA",
+                            backgroundColor: "#F0E6FA",
                           }}
                         >
                           <Ionicons
                             name="alert-circle-outline"
                             size={18}
-                            color="#0A3B2E"
+                            color="#5A189A"
                           />
                         </View>
                         <View style={{ flex: 1 }}>

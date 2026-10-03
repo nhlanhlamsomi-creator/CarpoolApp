@@ -203,7 +203,7 @@ const EditProfile = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F4F6F5]">
+    <SafeAreaView className="flex-1 bg-[#F7F4FB]">
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -213,18 +213,18 @@ const EditProfile = () => {
           <Ionicons
             name="chevron-back"
             size={22}
-            color="#101814"
+            color="#21152F"
             onPress={() => router.back()}
             suppressHighlighting
           />
-          <Text className="text-[19px] font-JakartaExtraBold text-[#101814]">
+          <Text className="text-[19px] font-JakartaExtraBold text-[#21152F]">
             {label || "Edit profile"}
           </Text>
         </View>
 
         {loading ? (
           <View className="flex-1 items-center justify-center">
-            <ActivityIndicator size="large" color="#0A3B2E" />
+            <ActivityIndicator size="large" color="#5A189A" />
           </View>
         ) : (
           <ScrollView
@@ -232,8 +232,8 @@ const EditProfile = () => {
             contentContainerStyle={{ paddingTop: 14, paddingBottom: 40 }}
             keyboardShouldPersistTaps="handled"
           >
-            <View className="rounded-3xl border border-[#E3E7E5] bg-white p-5">
-              <Text className="mb-2.5 text-[12.5px] font-JakartaSemiBold text-[#7A8580]">
+            <View className="rounded-3xl border border-[#E9E2F0] bg-white p-5">
+              <Text className="mb-2.5 text-[12.5px] font-JakartaSemiBold text-[#746A7E]">
                 {label}
               </Text>
 
@@ -244,15 +244,15 @@ const EditProfile = () => {
                   if (error) setError(null);
                 }}
                 placeholder={config.placeholder}
-                placeholderTextColor="#A9B1AD"
+                placeholderTextColor="#A69BAF"
                 keyboardType={config.keyboardType ?? "default"}
                 autoCapitalize={config.autoCapitalize ?? "sentences"}
                 multiline={config.multiline}
                 autoFocus
-                className={`rounded-2xl border-[1.5px] px-4 py-3.5 text-[15px] font-JakartaMedium text-[#101814] ${
+                className={`rounded-2xl border-[1.5px] px-4 py-3.5 text-[15px] font-JakartaMedium text-[#21152F] ${
                   error
                     ? "border-[#E0575B] bg-[#FEF3F3]"
-                    : "border-[#E3E7E5] bg-[#F4F6F5]"
+                    : "border-[#E9E2F0] bg-[#F7F4FB]"
                 }`}
                 style={
                   config.multiline
@@ -273,7 +273,7 @@ const EditProfile = () => {
                   </Text>
                 </View>
               ) : config.help ? (
-                <Text className="ml-1 mt-2 text-[11.5px] font-Jakarta leading-4 text-[#A9B1AD]">
+                <Text className="ml-1 mt-2 text-[11.5px] font-Jakarta leading-4 text-[#A69BAF]">
                   {config.help}
                 </Text>
               ) : null}

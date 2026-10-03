@@ -11,12 +11,12 @@ import {
 
 const { width } = Dimensions.get("window");
 
-const GREEN = {
-  deep: "#04231C",
-  dark: "#0A3B2E",
-  mid: "#14523F",
-  accent: "#1FA574",
-  mint: "#5FD3A6",
+const VIOLET = {
+  deep: "#1D1135",
+  dark: "#5A189A",
+  mid: "#7B2CBF",
+  accent: "#9D4EDD",
+  mint: "#C77DFF",
 };
 
 type Props = {
@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     zIndex: 900,
     elevation: 900,
-    backgroundColor: GREEN.deep,
+    backgroundColor: VIOLET.deep,
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
     width: width * 1.3,
     height: width * 1.3,
     borderRadius: width * 0.65,
-    backgroundColor: GREEN.dark,
+    backgroundColor: VIOLET.dark,
     opacity: 0.45,
     top: -width * 0.8,
     right: -width * 0.35,
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
     height: RING + 30,
     borderRadius: 9999,
     borderWidth: 1,
-    borderColor: GREEN.accent,
+    borderColor: VIOLET.accent,
   },
   track: {
     position: "absolute",
@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
     borderRadius: 9999,
     borderWidth: 2,
     borderColor: "transparent",
-    borderTopColor: GREEN.mint,
+    borderTopColor: VIOLET.mint,
     borderRightColor: "rgba(31,165,116,0.4)",
   },
   card: {
@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: GREEN.accent,
+    shadowColor: VIOLET.accent,
     shadowOffset: { width: 0, height: 14 },
     shadowOpacity: 0.42,
     shadowRadius: 26,
@@ -334,6 +334,6 @@ const styles = StyleSheet.create({
     width: 4,
     height: 4,
     borderRadius: 2,
-    backgroundColor: GREEN.mint,
+    backgroundColor: VIOLET.mint,
   },
 });

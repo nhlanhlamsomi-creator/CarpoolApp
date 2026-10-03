@@ -42,7 +42,7 @@ const NAV_ITEMS: Record<string, NavItem> = {
 };
 
 function TabIcon({ item, focused }: { item: NavItem; focused: boolean }) {
-	const color = focused ? "#111111" : "#B7B8BF";
+	const color = focused ? "#FFFFFF" : "#C9B8DB";
 
 	switch (item.iconType) {
 		case "fontawesome":
@@ -173,8 +173,8 @@ const styles = StyleSheet.create({
 		padding: 6,
 		borderRadius: 999,
 		borderWidth: 1,
-		borderColor: "rgba(255,255,255,0.1)",
-		backgroundColor: "rgba(22,23,27,0.94)",
+		borderColor: "rgba(255,255,255,0.16)",
+		backgroundColor: "#1D1135",
 		shadowColor: "#000000",
 		shadowOffset: { width: 0, height: 8 },
 		shadowOpacity: 0.36,
@@ -192,15 +192,15 @@ const styles = StyleSheet.create({
 		borderRadius: 999,
 	},
 	activeTab: {
-		backgroundColor: "#FFFFFF",
+		backgroundColor: "#5A189A",
 	},
 	inactiveTab: {
 		borderWidth: 1,
-		borderColor: "rgba(255,255,255,0.06)",
-		backgroundColor: "rgba(255,255,255,0.07)",
+		borderColor: "rgba(255,255,255,0.08)",
+		backgroundColor: "rgba(255,255,255,0.06)",
 	},
 	activeLabel: {
-		color: "#111111",
+		color: "#FFFFFF",
 		fontFamily: "Jakarta-Bold",
 		fontSize: 13,
 	},
@@ -215,8 +215,8 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 3,
 		borderRadius: 7,
 		borderWidth: 1,
-		borderColor: "#202126",
-		backgroundColor: "#3B82F6",
+		borderColor: "#1D1135",
+		backgroundColor: "#9D4EDD",
 	},
 	badgeText: {
 		color: "#FFFFFF",

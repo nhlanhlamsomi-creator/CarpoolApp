@@ -31,22 +31,22 @@ const InputField = ({
   const borderColor = error
     ? "border-[#E0575B]"
     : focused
-      ? "border-[#0A3B2E]"
-      : "border-[#E3E7E5]";
+      ? "border-[#5A189A]"
+      : "border-[#E9E2F0]";
 
   const bgColor = error
     ? "bg-[#FEF3F3]"
     : focused
       ? "bg-white"
-      : "bg-[#F4F6F5]";
+      : "bg-[#F7F4FB]";
 
-  const iconColor = error ? "#E0575B" : focused ? "#0A3B2E" : "#A9B1AD";
+  const iconColor = error ? "#E0575B" : focused ? "#5A189A" : "#A69BAF";
 
   return (
     <View className={`my-2 w-full ${className ?? ""}`}>
       {!!label && (
         <Text
-          className={`mb-2 text-[13px] font-JakartaSemiBold text-[#7A8580] ${labelStyle ?? ""}`}
+          className={`mb-2 text-[13px] font-JakartaSemiBold text-[#746A7E] ${labelStyle ?? ""}`}
         >
           {label}
         </Text>
@@ -62,8 +62,8 @@ const InputField = ({
         ) : null}
 
         <TextInput
-          className={`ml-3 flex-1 text-[15px] font-JakartaMedium text-[#101814] ${inputStyle ?? ""}`}
-          placeholderTextColor="#A9B1AD"
+          className={`ml-3 flex-1 text-[15px] font-JakartaMedium text-[#21152F] ${inputStyle ?? ""}`}
+          placeholderTextColor="#A69BAF"
           secureTextEntry={hidden}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
@@ -79,7 +79,7 @@ const InputField = ({
             <Ionicons
               name={hidden ? "eye-outline" : "eye-off-outline"}
               size={19}
-              color="#A9B1AD"
+              color="#A69BAF"
             />
           </TouchableOpacity>
         )}
@@ -95,7 +95,7 @@ const InputField = ({
       )}
 
       {!error && !!hint && (
-        <Text className="ml-1 mt-1.5 text-xs font-Jakarta text-[#A9B1AD]">
+        <Text className="ml-1 mt-1.5 text-xs font-Jakarta text-[#A69BAF]">
           {hint}
         </Text>
       )}

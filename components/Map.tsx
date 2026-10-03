@@ -22,10 +22,10 @@ import { Driver, Hub, MarkerData } from "@/types/type";
 
 const GEOAPIFY_API_KEY = process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY!;
 
-// ─── Palette (dark green / black / white) ────────────────────────────────────
+// ─── Palette (deep violet / black / white) ──────────────────────────────────
 const THEME = {
-  primary: "#0A3B2E", // loader, hub pins
-  accent: "#1FA574", // driver route, hub circles, pulse ring
+  primary: "#5A189A", // loader, hub pins
+  accent: "#9D4EDD", // driver route, hub circles, pulse ring
   route: "#E0575B", // user → destination line
 };
 
@@ -36,7 +36,7 @@ const SOFT_GREY_MAP_STYLE = [
   { elementType: "geometry", stylers: [{ color: "#EBEBEB" }] },
   { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
   { elementType: "labels.text.fill", stylers: [{ color: "#8A9490" }] },
-  { elementType: "labels.text.stroke", stylers: [{ color: "#F4F6F5" }] },
+  { elementType: "labels.text.stroke", stylers: [{ color: "#F7F4FB" }] },
   { featureType: "poi", stylers: [{ visibility: "off" }] },
   { featureType: "transit", stylers: [{ visibility: "off" }] },
   {
@@ -47,7 +47,7 @@ const SOFT_GREY_MAP_STYLE = [
   {
     featureType: "road",
     elementType: "geometry.stroke",
-    stylers: [{ color: "#E3E7E5" }],
+    stylers: [{ color: "#E9E2F0" }],
   },
   {
     featureType: "water",
@@ -247,7 +247,7 @@ export default function Map() {
     }
   }, [userLatitude, userLongitude, destinationLatitude, destinationLongitude]);
 
-  // Fetch route from selected driver to user (green line)
+  // Fetch route from selected driver to user (violet line)
   useEffect(() => {
     if (
       selectedDriver != null &&
@@ -377,7 +377,7 @@ export default function Map() {
         />
       )}
 
-      {/* Route from selected driver to user (green) */}
+      {/* Route from selected driver to user (violet) */}
       {driverRouteCoordinates && driverRouteCoordinates.length > 0 && (
         <Polyline
           coordinates={driverRouteCoordinates}
