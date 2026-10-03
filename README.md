@@ -88,7 +88,7 @@ Progress as at **03 September 2026** (Sprint 5–6 progress report).
 | Trip creation and management APIs | M. Sithomola | Completed | 100% |
 | Stripe payment integration | M. Sithomola | Completed | 100% |
 | Maps and routing integration | M. Sithomola | In progress | 80% |
-| Hub system API (mobile) | L. Nama, M. Sithomola | Completed | 100% |
+| Hub system API (mobile) |  M. Sithomola  &  G. Makwarela | Completed | 100% |
 | Time and distance API | M. Sithomola | In progress | 40% |
 | Trip cancellation endpoint | M. Sithomola | In progress | 50% |
 | Frontend integration |M. Sithomola  &  G. Makwarela  | In progress | 75% |
