@@ -420,12 +420,12 @@ const Welcome = () => {
             <View style={styles.brandRow}>
               <View style={styles.brandMark}>
                 <Image
-                  source={require("../../assets/images/icon.png")}
+                  source={require("../../assets/images/hopon.logo.png")}
                   style={styles.brandMarkImage}
                   resizeMode="contain"
                 />
               </View>
-              <Text style={styles.brandText}>Lyft</Text>
+              <Text style={styles.brandText}>HopOn</Text>
             </View>
 
             <TouchableOpacity

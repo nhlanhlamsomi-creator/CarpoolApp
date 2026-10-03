@@ -199,7 +199,7 @@ export default function LogoLoader({
           ]}
         >
           <Image
-            source={require("../assets/images/icon.png")}
+            source={require("../assets/images/hopon.logo.png")}
             style={styles.logo}
             resizeMode="contain"
           />

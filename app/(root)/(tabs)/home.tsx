@@ -134,6 +134,21 @@ const Home = () => {
     });
   };
 
+  const handleRate = (ride: Ride) => {
+    if (!ride.ride_id) {
+      Alert.alert(
+        "Unable to rate trip",
+        "We couldn't identify this trip. Refresh your rides and try again.",
+      );
+      return;
+    }
+
+    router.push({
+      pathname: "/(root)/rate-driver/[rideId]",
+      params: { rideId: String(ride.ride_id) },
+    });
+  };
+
   const initial = (user?.firstName ?? "T").charAt(0).toUpperCase();
 
   return (
@@ -150,6 +165,7 @@ const Home = () => {
                 ? "upcoming"
                 : "completed"
             }
+            onRate={() => handleRate(item)}
           />
         )}
         keyExtractor={(item, index) =>

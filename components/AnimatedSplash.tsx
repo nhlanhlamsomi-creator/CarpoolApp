@@ -11,76 +11,24 @@ import {
   View,
 } from "react-native";
 
-const { width } = Dimensions.get("window");
-
-// Must match `expo.splash.backgroundColor` in app.json, or you'll see a flash
-// when the native splash hands over to this one.
 type Props = {
   onFinish: () => void;
 };
 
+const { width } = Dimensions.get("window");
+
 export default function AnimatedSplash({ onFinish }: Props) {
   const rootFade = useRef(new Animated.Value(1)).current;
   const rootScale = useRef(new Animated.Value(1)).current;
-
-  const logoScale = useRef(new Animated.Value(0.6)).current;
   const logoFade = useRef(new Animated.Value(0)).current;
-  const ringScale = useRef(new Animated.Value(0.5)).current;
-  const ringFade = useRef(new Animated.Value(0)).current;
-  const pulseScale = useRef(new Animated.Value(0.5)).current;
-  const pulseFade = useRef(new Animated.Value(0)).current;
-  const arcSpin = useRef(new Animated.Value(0)).current;
+  const logoScale = useRef(new Animated.Value(0.6)).current;
   const markFade = useRef(new Animated.Value(0)).current;
   const markSlide = useRef(new Animated.Value(16)).current;
   const lineWidth = useRef(new Animated.Value(0)).current;
   const tagFade = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Arc keeps tracing while everything else settles
-    Animated.loop(
-      Animated.timing(arcSpin, {
-        toValue: 1,
-        duration: 2600,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      }),
-    ).start();
-
-    // Outward pulse, twice
-    Animated.loop(
-      Animated.sequence([
-        Animated.delay(500),
-        Animated.parallel([
-          Animated.timing(pulseScale, {
-            toValue: 1.5,
-            duration: 1500,
-            easing: Easing.out(Easing.quad),
-            useNativeDriver: true,
-          }),
-          Animated.timing(pulseFade, {
-            toValue: 0,
-            duration: 1500,
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.parallel([
-          Animated.timing(pulseScale, {
-            toValue: 0.5,
-            duration: 0,
-            useNativeDriver: true,
-          }),
-          Animated.timing(pulseFade, {
-            toValue: 0.45,
-            duration: 0,
-            useNativeDriver: true,
-          }),
-        ]),
-      ]),
-      { iterations: 2 },
-    ).start();
-
-    Animated.sequence([
-      // Logo lands
+    const splashAnimation = Animated.sequence([
       Animated.parallel([
         Animated.spring(logoScale, {
           toValue: 1,
@@ -90,41 +38,24 @@ export default function AnimatedSplash({ onFinish }: Props) {
         }),
         Animated.timing(logoFade, {
           toValue: 1,
-          duration: 340,
+          duration: 360,
           useNativeDriver: true,
         }),
-        Animated.spring(ringScale, {
-          toValue: 1,
-          tension: 58,
-          friction: 9,
-          useNativeDriver: true,
-        }),
-        Animated.timing(ringFade, {
-          toValue: 1,
-          duration: 380,
-          useNativeDriver: true,
-        }),
-      ]),
-
-      // Wordmark rises
-      Animated.parallel([
         Animated.timing(markFade, {
           toValue: 1,
-          duration: 320,
+          duration: 360,
           useNativeDriver: true,
         }),
         Animated.timing(markSlide, {
           toValue: 0,
-          duration: 320,
+          duration: 360,
           easing: Easing.out(Easing.quad),
           useNativeDriver: true,
         }),
       ]),
-
-      // Rule draws out, tagline follows
       Animated.timing(lineWidth, {
         toValue: 1,
-        duration: 340,
+        duration: 300,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: false,
       }),
@@ -133,32 +64,43 @@ export default function AnimatedSplash({ onFinish }: Props) {
         duration: 300,
         useNativeDriver: true,
       }),
-
-      // Hold, then lift away to reveal the app
-      Animated.delay(420),
+      Animated.delay(850),
       Animated.parallel([
         Animated.timing(rootFade, {
           toValue: 0,
-          duration: 460,
+          duration: 420,
           easing: Easing.in(Easing.quad),
           useNativeDriver: true,
         }),
         Animated.timing(rootScale, {
-          toValue: 1.08,
-          duration: 460,
+          toValue: 1.06,
+          duration: 420,
           easing: Easing.in(Easing.quad),
           useNativeDriver: true,
         }),
       ]),
-    ]).start(({ finished }) => {
-      if (finished) onFinish();
-    });
-  }, []);
+    ]);
 
-  const spin = arcSpin.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0deg", "360deg"],
-  });
+    splashAnimation.start(({ finished }) => {
+      if (finished) {
+        onFinish();
+      }
+    });
+
+    return () => {
+      splashAnimation.stop();
+    };
+  }, [
+    lineWidth,
+    logoFade,
+    logoScale,
+    markFade,
+    markSlide,
+    onFinish,
+    rootFade,
+    rootScale,
+    tagFade,
+  ]);
 
   const ruleWidth = lineWidth.interpolate({
     inputRange: [0, 1],
@@ -168,71 +110,39 @@ export default function AnimatedSplash({ onFinish }: Props) {
   return (
     <Animated.View
       pointerEvents="none"
-      style={[
-        styles.root,
-        { opacity: rootFade, transform: [{ scale: rootScale }] },
-      ]}
+      style={[styles.root, { opacity: rootFade, transform: [{ scale: rootScale }] }]}
     >
       <StatusBar barStyle="light-content" backgroundColor={brand.deep} />
-
-      {/* Depth */}
       <View style={styles.blobTop} />
       <View style={styles.blobBottom} />
 
-      {/* Logo cluster */}
       <View style={styles.logoWrap}>
         <Animated.View
           style={[
-            styles.pulseRing,
-            { opacity: pulseFade, transform: [{ scale: pulseScale }] },
-          ]}
-        />
-        <Animated.View
-          style={[
-            styles.staticRing,
-            { opacity: ringFade, transform: [{ scale: ringScale }] },
-          ]}
-        />
-        <Animated.View
-          style={[
-            styles.arcRing,
-            {
-              opacity: ringFade,
-              transform: [{ scale: ringScale }, { rotate: spin }],
-            },
-          ]}
-        />
-
-        <Animated.View
-          style={[
-            styles.logoCard,
+            styles.logoBadge,
             { opacity: logoFade, transform: [{ scale: logoScale }] },
           ]}
         >
           <Image
-            source={require("../assets/images/icon.png")}
+            source={require("../assets/images/hopon.logo.png")}
             style={styles.logoImage}
             resizeMode="contain"
           />
         </Animated.View>
       </View>
 
-      {/* Wordmark */}
       <Animated.Text
         style={[
           styles.wordmark,
           { opacity: markFade, transform: [{ translateY: markSlide }] },
         ]}
       >
-        Lyft
+        HopOn
       </Animated.Text>
-
       <Animated.View style={[styles.rule, { width: ruleWidth }]} />
-
       <Animated.Text style={[styles.tagline, { opacity: tagFade }]}>
         Ride smart. Save more.
       </Animated.Text>
-
       <Animated.View style={[styles.footer, { opacity: tagFade }]}>
         <View style={styles.footerDot} />
         <Text style={styles.footerText}>by DevSphere Inc.</Text>
@@ -241,11 +151,6 @@ export default function AnimatedSplash({ onFinish }: Props) {
     </Animated.View>
   );
 }
-
-// ─── Styles ──────────────────────────────────────────────────────────────────
-
-const LOGO = 118;
-const RING = LOGO + 42;
 
 const styles = StyleSheet.create({
   root: {
@@ -257,7 +162,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     overflow: "hidden",
   },
-
   blobTop: {
     position: "absolute",
     width: width * 1.4,
@@ -278,43 +182,16 @@ const styles = StyleSheet.create({
     bottom: -width * 0.7,
     left: -width * 0.35,
   },
-
   logoWrap: {
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 34,
   },
-  pulseRing: {
-    position: "absolute",
-    width: RING + 34,
-    height: RING + 34,
-    borderRadius: 9999,
-    borderWidth: 1,
-    borderColor: brand.accent,
-  },
-  staticRing: {
-    position: "absolute",
-    width: RING,
-    height: RING,
-    borderRadius: 9999,
-    borderWidth: 1.5,
-    borderColor: "rgba(255,255,255,0.16)",
-  },
-  arcRing: {
-    position: "absolute",
-    width: RING,
-    height: RING,
-    borderRadius: 9999,
-    borderWidth: 2,
-    borderColor: "transparent",
-    borderTopColor: brand.mint,
-    borderRightColor: "rgba(31,165,116,0.35)",
-  },
-  logoCard: {
-    width: LOGO,
-    height: LOGO,
+  logoBadge: {
+    width: 118,
+    height: 118,
     borderRadius: 32,
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
     shadowColor: brand.accent,
@@ -324,14 +201,13 @@ const styles = StyleSheet.create({
     elevation: 20,
   },
   logoImage: {
-    width: LOGO * 0.66,
-    height: LOGO * 0.66,
+    width: 78,
+    height: 78,
   },
-
   wordmark: {
     fontSize: 44,
     fontFamily: "Jakarta-ExtraBold",
-    color: "#fff",
+    color: "#FFFFFF",
     letterSpacing: -1.4,
   },
   rule: {
@@ -348,7 +224,6 @@ const styles = StyleSheet.create({
     letterSpacing: 1.8,
     textTransform: "uppercase",
   },
-
   footer: {
     position: "absolute",
     bottom: 54,

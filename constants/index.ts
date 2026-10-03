@@ -76,14 +76,14 @@ export const onboarding = [
     id: 1,
     title: "The perfect ride is just a tap away!",
     description:
-      "Your journey begins with Lyft. Find your ideal ride effortlessly.",
+      "Your journey begins with HopOn. Find your ideal ride effortlessly.",
     image: images.onboarding1,
   },
   {
     id: 2,
-    title: "Best car in your hands with Lyft",
+    title: "Best car in your hands with HopOn",
     description:
-      "Discover the convenience of finding your perfect ride with Lyft",
+      "Discover the convenience of finding your perfect ride with HopOn",
     image: images.onboarding2,
   },
   {
