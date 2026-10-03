@@ -31,6 +31,18 @@ export const useLocationStore = create<LocationStore>((set, get) => ({
     if (selectedDriver) clearSelectedDriver();
   },
 
+  clearUserLocation: () => {
+    if (get().rideBooked) return;
+    set({
+      userLatitude: null,
+      userLongitude: null,
+      userAddress: null,
+      selectedHubId: null,
+      selectedHubName: null,
+    });
+    useDriverStore.getState().clearSelectedDriver();
+  },
+
   setHubPickup: ({ id, name, latitude, longitude, address }) => {
     set({
       userLatitude: latitude,
@@ -59,6 +71,16 @@ export const useLocationStore = create<LocationStore>((set, get) => ({
       useDriverStore.getState();
 
     if (selectedDriver) clearSelectedDriver();
+  },
+
+  clearDestinationLocation: () => {
+    if (get().rideBooked) return;
+    set({
+      destinationLatitude: null,
+      destinationLongitude: null,
+      destinationAddress: null,
+    });
+    useDriverStore.getState().clearSelectedDriver();
   },
 
   setRideBooked: (rideBooked) => set({ rideBooked }),

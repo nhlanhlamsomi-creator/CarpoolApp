@@ -138,6 +138,7 @@ declare interface GoogleInputProps {
     longitude: number;
     address: string;
   }) => void;
+  onClear?: () => void;
 }
 
 declare interface InputFieldProps extends TextInputProps {
@@ -179,6 +180,7 @@ declare interface LocationStore {
     longitude: number;
     address: string;
   }) => void;
+  clearUserLocation: () => void;
   setHubPickup: (hub: {
     id: number;
     name: string;
@@ -186,6 +188,7 @@ declare interface LocationStore {
     longitude: number;
     address: string;
   }) => void;
+  clearDestinationLocation: () => void;
   setDestinationLocation: ({
     latitude,
     longitude,

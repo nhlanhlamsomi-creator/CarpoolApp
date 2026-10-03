@@ -34,6 +34,7 @@ const Home = () => {
   const {
     setUserLocation,
     setDestinationLocation,
+    clearDestinationLocation,
     userAddress,
     userLatitude,
     userLongitude,
@@ -206,6 +207,7 @@ const Home = () => {
 
             <GoogleTextInput
               handlePress={handleDestinationPress}
+              onClear={clearDestinationLocation}
               biasLat={userLatitude}
               biasLng={userLongitude}
             />

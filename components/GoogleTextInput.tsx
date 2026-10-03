@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Image, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 import { icons } from "@/constants";
@@ -12,16 +12,19 @@ const GoogleTextInput = ({
   containerStyle,
   textInputBackgroundColor,
   handlePress,
+  onClear,
 }: GoogleInputProps) => {
   const [text, setText] = useState("");
   const [places, setPlaces] = useState<any[]>([]);
   const [focused, setFocused] = useState(false);
+  const searchRequest = useRef(0);
 
   const searchPlaces = async (value: string) => {
+    const requestId = ++searchRequest.current;
     setText(value);
+    setPlaces([]);
 
     if (value.length < 3) {
-      setPlaces([]);
       return;
     }
 
@@ -33,6 +36,7 @@ const GoogleTextInput = ({
       );
 
       const data = await response.json();
+      if (requestId !== searchRequest.current) return;
 
       if (data.features) {
         setPlaces(data.features);
@@ -40,12 +44,14 @@ const GoogleTextInput = ({
         setPlaces([]);
       }
     } catch (error) {
+      if (requestId !== searchRequest.current) return;
       console.log("Geoapify autocomplete error:", error);
       setPlaces([]);
     }
   };
 
   const handleSelectPlace = (place: any) => {
+    searchRequest.current += 1;
     const location = place.properties;
 
     handlePress({
@@ -56,6 +62,13 @@ const GoogleTextInput = ({
 
     setText(location.formatted);
     setPlaces([]);
+  };
+
+  const clearSearch = () => {
+    searchRequest.current += 1;
+    setText("");
+    setPlaces([]);
+    onClear?.();
   };
 
   return (
@@ -85,7 +98,21 @@ const GoogleTextInput = ({
           placeholder={initialLocation ?? "Where do you want to go?"}
           placeholderTextColor="#A9B1AD"
           className="ml-3 h-[52px] flex-1 text-[15px] font-JakartaMedium text-[#101814]"
+          returnKeyType="search"
         />
+        {text.length > 0 && (
+          <TouchableOpacity
+            onPress={clearSearch}
+            accessibilityRole="button"
+            accessibilityLabel="Clear location"
+            hitSlop={10}
+            className="ml-2 h-8 w-8 items-center justify-center rounded-full bg-[#E4EFEA]"
+          >
+            <Text className="text-[18px] font-JakartaBold text-[#0A3B2E]">
+              ×
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Autocomplete results */}

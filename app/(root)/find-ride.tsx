@@ -56,6 +56,8 @@ const FindRide = () => {
     destinationLongitude,
     setDestinationLocation,
     setUserLocation,
+    clearDestinationLocation,
+    clearUserLocation,
   } = useLocationStore();
 
   const [timeSlot, setTimeSlot] = useState<"now" | "later">("now");
@@ -374,6 +376,7 @@ const FindRide = () => {
               biasLat={userLatitude}
               biasLng={userLongitude}
               handlePress={(location) => setUserLocation(location)}
+              onClear={clearUserLocation}
             />
           </View>
 
@@ -480,6 +483,7 @@ const FindRide = () => {
               biasLat={userLatitude}
               biasLng={userLongitude}
               handlePress={(location) => setDestinationLocation(location)}
+              onClear={clearDestinationLocation}
             />
           </View>
 

@@ -240,6 +240,21 @@ const Rides = () => {
     ]);
   };
 
+  const handleRate = (ride: Ride) => {
+    if (!ride.ride_id) {
+      Alert.alert(
+        "Unable to rate trip",
+        "We couldn't identify this trip. Refresh your trips and try again.",
+      );
+      return;
+    }
+
+    router.push({
+      pathname: "/(root)/rate-driver/[rideId]",
+      params: { rideId: String(ride.ride_id) },
+    });
+  };
+
   const handleManualSOS = (ride: Ride) => {
     Alert.alert(
       "Send SOS?",
@@ -438,6 +453,7 @@ const Rides = () => {
             onCall={() => handleCall(item)}
             onCancel={() => handleCancel(item)}
             onRebook={() => handleRebook(item)}
+            onRate={() => handleRate(item)}
             onReport={() => handleReport(item)}
             safetyAlert={safetyAlerts[String(item.ride_id)] ?? null}
             onSafetyResponse={(response, status) =>

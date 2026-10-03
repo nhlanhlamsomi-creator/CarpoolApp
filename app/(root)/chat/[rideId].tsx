@@ -58,7 +58,6 @@ const ChatThread = () => {
   const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
-
   const listRef = useRef<FlatList>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -369,7 +368,7 @@ const ChatThread = () => {
                   color: PALETTE.muted,
                 }}
               >
-                Trip completed — you can still message about lost items.
+                Trip completed — you can still message about lost items or rate your driver from trip history.
               </Text>
             )}
             <View
