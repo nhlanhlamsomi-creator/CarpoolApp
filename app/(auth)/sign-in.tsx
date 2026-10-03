@@ -137,9 +137,6 @@ const SignIn = () => {
       >
         <View style={styles.header}>
           <View style={styles.topBar}>
-            <View style={styles.settingsBadge} accessibilityElementsHidden>
-              <Ionicons name="settings-outline" size={20} color="#FFFFFF" />
-            </View>
             <View style={styles.brandLockup}>
               <Image
                 source={hopOnLogo}
@@ -149,7 +146,6 @@ const SignIn = () => {
               />
               <Text style={styles.brandName}>HopOn</Text>
             </View>
-            <View style={styles.topBarSpacer} />
           </View>
           <View style={styles.welcomeCopy}>
             <Text style={styles.headerTitle}>Welcome</Text>
@@ -330,22 +326,10 @@ const styles = StyleSheet.create({
   },
   topBar: {
     height: 42,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  settingsBadge: {
-    width: 40,
-    height: 40,
-    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(255,255,255,0.1)",
   },
   brandLockup: {
-    position: "absolute",
-    left: 0,
-    right: 0,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -360,9 +344,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: "Jakarta-ExtraBold",
     letterSpacing: -0.5,
-  },
-  topBarSpacer: {
-    width: 40,
   },
   welcomeCopy: {
     alignItems: "center",
