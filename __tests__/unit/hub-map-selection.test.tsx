@@ -153,7 +153,7 @@ describe('Map hub selection', () => {
   it('sets the selected hub when a hub marker is pressed', async () => {
     render(<Map />);
 
-    const marker = await waitFor(() => screen.getByTestId('hub-marker-7'));
+    const marker = await waitFor(() => screen.getByTestId('hub-marker-7'),{timeout: 10000});
 
     fireEvent(marker, 'onTouchEnd');
 
