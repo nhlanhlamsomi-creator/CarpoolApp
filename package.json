@@ -25,7 +25,7 @@
       "^@/(.*)$": "<rootDir>/$1"
     },
     "transformIgnorePatterns": [
-      "node_modules/(?!(@react-native|react-native|expo|@expo|@clerk|@stripe|@supabase|nativewind|react-native-css-interop)/)"
+      "node_modules/(?!(?:@react-native|react-native|expo|@expo|@clerk|@stripe|@supabase|nativewind|react-native-css-interop|react-native-url-polyfill|@clerk/expo)/)"
     ],
     "collectCoverageFrom": [
       "lib/**/*.{js,jsx,ts,tsx}",
