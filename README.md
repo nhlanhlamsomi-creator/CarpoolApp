@@ -1,113 +1,165 @@
 # HopOn Carpool App — DevSphere Inc.
 
-A HopOn carpooling platform for South African commuters, built as a University of Johannesburg project. It has three connected parts: a **Passenger** app, a **Driver** app and an **Admin** dashboard.
+HopOn is a smart carpooling platform for South African commuters, developed as a University of Johannesburg project. The system consists of three connected applications: a Passenger mobile app, a Driver mobile app, and an Admin web application.
+
 **University of Johannesburg · Department of Applied Information Systems**
-**Current phase:** Sprint 5–6 — MVP integration and testing
-**Status as at:** 03 September 2026
+
+**Current Phase:** Sprint 7–8 — MVP Integration, Testing and Release Preparation
+**Status:** MVP feature-complete; deployment and UAT in progress
 
 ---
 
 ## Table of Contents
 
-1. [Features](#features)
-2. [Tech Stack](#tech-stack)
-3. [Project Status](#project-status)
-4. [Getting Started](#getting-started)
-5. [Application Flow](#application-flow)
-6. [Admin Platform](#admin-platform)
-7. [Project Structure](#project-structure)
-8. [Security](#security)
-9. [Testing](#testing)
-10. [Known Limitations](#known-limitations)
-11. [Roadmap](#roadmap)
-12. [Team](#team)
-13. [License](#license)
+* Features
+* Tech Stack
+* Project Status
+* Getting Started
+* Application Flow
+* Admin Platform
+* Project Structure
+* Security
+* Testing
+* Known Limitations
+* Roadmap
+* Team
+* License
 
 ---
 
-## Features
+# Features
 
-**Passenger**
-- Register, verify email and sign in (email/password or Google)
-- Search for trips, view results and book a ride
-- Pay for trips through Stripe
-- Rate drivers after completed trips
-- View pickup and drop-off points, live location and route polylines on a map
-- Browse pickup hubs on the map
+## Passenger
 
-**Driver**
-- Driver profile and verification
-- Create and manage trips
-- Location and availability management
-- Active-trip rules (enforced by the backend)
+* Register, verify email and sign in using email/password or Google
+* Manage passenger profile
+* Search for available rides
+* View available trips and compare ride information
+* Book rides
+* Cancel rides
+* Make payments through Stripe
+* Manage bookings and trips
+* Communicate with drivers
+* View pickup and drop-off locations
+* View routes and location information on maps
+* Browse pickup hubs
+* Passenger grouping
+* HopOn Groups
+* Passenger SOS and safety functionality
+* Rate drivers after completed trips
 
-**Admin**
-- Clerk sign-in with role-based access control
-- Trip management with filtering
-- Driver and passenger verification approval
-- Payment and pricing management
-- Safety monitoring
-- User comments and feedback
-- Hub management (create, read, update, delete)
-- Dashboard statistics and KPIs
+## Driver
 
----
+* Driver registration and authentication
+* Driver profile management
+* Driver verification
+* Driver licence verification
+* Create trip offers
+* Manage available seats
+* Manage ride requests
+* Accept and manage rides
+* Manage active trips
+* Communicate with passengers
+* View trip and route information
+* Location and route functionality
+* Hub functionality
+* View earnings
+* Request withdrawals
 
-## Tech Stack
+## Admin
 
-| Layer | Technology |
-| ----- | ---------- |
-| Mobile app | React Native (Expo), TypeScript |
-| Navigation | Expo Router / React Navigation |
-| State management | Zustand |
-| Authentication | Clerk (email/password, email verification, Google OAuth, sessions) |
-| Backend | Expo API routes |
-| Database | Supabase (PostgreSQL) with database views and Row Level Security |
-| Maps & routing | react-native-maps, Google Maps, routing API |
-| Payments | Stripe (test mode) |
-| Security | Clerk password security, Argon2id server utility, `expo-secure-store` |
-| Testing | Vitest |
-
----
-
-## Project Status
-
-Progress as at **03 September 2026** (Sprint 5–6 progress report).
-
-| Area | Owner | Status | Completion |
-| ---- | ----- | ------ | ---------- |
-| Admin website development | G. Makwarela | Completed | 90% |
-| Admin dashboard UI/UX | G. Makwarela | Completed | 100% |
-| Admin backend APIs | G. Makwarela | Completed | 100% |
-| Admin Clerk authentication | G. Makwarela | Completed | 100% |
-| Admin Supabase integration | G. Makwarela | Completed | 100% |
-| Hub management CRUD (admin) | G. Makwarela | Completed | 100% |
-| Mobile backend | M. Sithomola | In progress | 70% |
-| Supabase migrations | M. Sithomola | Completed | 100% |
-| Driver profile APIs | M. Sithomola | Completed | 100% |
-| Trip creation and management APIs | M. Sithomola | Completed | 100% |
-| Stripe payment integration | M. Sithomola | Completed | 100% |
-| Maps and routing integration | M. Sithomola | In progress | 80% |
-| Hub system API (mobile) |  M. Sithomola  &  G. Makwarela | Completed | 100% |
-| Time and distance API | M. Sithomola | In progress | 40% |
-| Trip cancellation endpoint | M. Sithomola | In progress | 50% |
-| Frontend integration |M. Sithomola  &  G. Makwarela  | In progress | 75% |
-| UI/UX design and bug fixing | T. Macholo | In progress | 70% |
+* Clerk authentication
+* Role-based access control
+* Dashboard statistics and KPIs
+* User management
+* Driver management
+* Passenger management
+* Driver verification management
+* Trip management and filtering
+* Payment monitoring
+* Pricing and fare management
+* Safety monitoring
+* Passenger SOS monitoring
+* Safety alert management
+* User comments and feedback
+* Hub management
+* Create, read, update and delete hubs
+* Administrative verification workflows
 
 ---
 
-## Getting Started
+# Tech Stack
 
-### Prerequisites
+| Layer                 | Technology                         |
+| --------------------- | ---------------------------------- |
+| Passenger Mobile App  | React Native, Expo, TypeScript     |
+| Driver Mobile App     | React Native, Expo, TypeScript     |
+| Admin Web App         | React, Vite                        |
+| Navigation            | Expo Router / React Navigation     |
+| State Management      | Zustand                            |
+| Authentication        | Clerk                              |
+| Backend               | Node.js / API Services             |
+| Database              | PostgreSQL / Supabase              |
+| Database Security     | Row Level Security                 |
+| Maps & Routing        | Google Maps                        |
+| Payments              | Stripe                             |
+| Identity Verification | Didit                              |
+| Security              | Clerk, expo-secure-store, Argon2id |
+| Testing               | Vitest                             |
+| Version Control       | GitHub                             |
 
-- Node.js (LTS) and npm
-- Expo Go on a phone, or an Android/iOS emulator
-- A [Clerk](https://clerk.com) application
-- A [Supabase](https://supabase.com) project
-- A Google Maps API key
-- A Stripe account (test mode)
+---
 
-### 1. Clone and install
+# Project Status
+
+The Sprint 7–8 phase expanded the earlier MVP into a more integrated and feature-complete carpooling platform.
+
+| Area                         | Status      |
+| ---------------------------- | ----------- |
+| Passenger functionality      | Complete    |
+| Driver functionality         | Complete    |
+| Admin functionality          | Complete    |
+| Backend integration          | Complete    |
+| Database integration         | Complete    |
+| Authentication               | Complete    |
+| Payments                     | Complete    |
+| Identity verification        | Complete    |
+| Safety and SOS functionality | Complete    |
+| Automated testing            | Complete    |
+| Integration testing          | Complete    |
+| Deployment                   | In Progress |
+| User Acceptance Testing      | In Progress |
+
+Sprint 7–8 focused on expanding and integrating:
+
+* HopOn Groups and passenger grouping
+* Hubs
+* Route calculation
+* Trip offers
+* Ride booking
+* Payment functionality
+* Driver and passenger communication
+* Identity verification
+* Passenger SOS functionality
+* Ride and trip management
+* Driver earnings and withdrawals
+* Administrative functionality
+
+---
+
+# Getting Started
+
+## Prerequisites
+
+* Node.js (LTS) and npm
+* Expo Go on a phone, or an Android/iOS emulator
+* A Clerk application
+* A Supabase project
+* A Google Maps API key
+* A Stripe account in test mode
+* Required identity verification configuration
+
+## 1. Clone and Install
 
 ```bash
 git clone https://github.com/nhlanhlamsomi-creator/CarpoolApp.git
@@ -115,21 +167,49 @@ cd CarpoolApp
 npm install
 ```
 
-### 2. Configure Expo and Clerk
+## 2. Configure Clerk
 
-1. Create a Clerk application.
-2. Enable email/password, email verification and Google OAuth.
-3. Add the Clerk publishable key to local `.env.local` and to EAS `preview` and `production` environments.
+Create a Clerk application.
 
-### 3. Configure Supabase
+Enable:
 
-1. Create a Supabase project.
-2. Apply the database migrations to create the trip-related tables, views and Row Level Security policies, including [`migrations/driver-ratings.sql`](migrations/driver-ratings.sql) for passenger reviews.
-3. Keep the service-role key **server-only**. Never prefix it with `EXPO_PUBLIC_`.
+* Email/password authentication
+* Email verification
+* Google OAuth
+* Session management
 
-### 4. Configure local and cloud environment variables
+Add the Clerk publishable key to `.env.local` and the relevant EAS environments.
 
-Copy `.env.example` to `.env.local` for local Expo development. The Expo app only needs public client values there. The project ignores local env files; never commit them.
+## 3. Configure Supabase
+
+Create a Supabase project.
+
+Apply the database migrations required for:
+
+* Users
+* Drivers
+* Profiles
+* Trips
+* Ride bookings
+* Ride requests
+* Messages
+* Hubs
+* Payments
+* Earnings
+* Withdrawals
+* Safety alerts
+* Verification information
+* Passenger grouping
+
+Keep the Supabase service-role key server-only.
+
+**Never prefix the service-role key with `EXPO_PUBLIC_`.**
+
+## 4. Configure Environment Variables
+
+Copy `.env.example` to `.env.local`.
+
+Example:
 
 ```env
 EXPO_PUBLIC_API_URL=https://your-render-service.onrender.com
@@ -142,19 +222,42 @@ EXPO_PUBLIC_GEOAPIFY_API_KEY=your_restricted_geoapify_key
 EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_key
 ```
 
-Set the same Expo public variables in Expo dashboard environment groups `preview` (APK) and `production` (AAB). EAS builds do not receive ignored local env files. Configure backend secrets separately in Render; see [`server/.env.example`](server/.env.example) for the exact names.
+Set the same required Expo public variables in the EAS preview and production environments.
 
-> **Never** put `SUPABASE_SERVICE_ROLE_KEY`, `STRIPE_SECRET_KEY`, `CLERK_SECRET_KEY`, or the Check ID key in an `EXPO_PUBLIC_` variable. Expo public variables are embedded in the mobile app.
+Backend secrets must be configured separately on the backend hosting platform.
 
-### 5. Run the app
+Never put the following values in an `EXPO_PUBLIC_` variable:
+
+```text
+SUPABASE_SERVICE_ROLE_KEY
+STRIPE_SECRET_KEY
+CLERK_SECRET_KEY
+CHECK_ID_API_KEY
+```
+
+Expo public variables are bundled into the mobile application and must therefore not contain sensitive server credentials.
+
+## 5. Run the App
 
 ```bash
 npx expo start
 ```
 
-Scan the QR code with Expo Go, or press `a` (Android) / `i` (iOS) to open an emulator.
+Scan the QR code with Expo Go, or press:
 
-### 6. Run the tests
+```text
+a
+```
+
+for Android or:
+
+```text
+i
+```
+
+for iOS.
+
+## 6. Run the Tests
 
 ```bash
 npx vitest run
@@ -162,152 +265,283 @@ npx vitest run
 
 ---
 
-## Application Flow
+# Application Flow
 
 ```text
 Splash
    │
    ▼
-Welcome (onboarding)
+Welcome / Onboarding
    │
    ▼
 Get Started
-   ├──────────────┐
-   ▼              ▼
-Passenger      Driver
-Register       Register
-   │              │
-   ▼              ▼
-Login          Login
-   │              │
-   ▼              ▼
-Passenger Tabs   Driver Tabs
+   │
+   ├───────────────┐
+   ▼               ▼
+Passenger         Driver
+Register          Register
+   │               │
+Login             Login
+   │               │
+   ▼               ▼
+Passenger Tabs    Driver Tabs
 ```
 
-**Passenger tabs:** Home Search · Trip Results · Confirm Booking · My Trips · Profile
-**Driver tabs:** Driver Home · Create Trip · Earnings · Profile
+## Passenger Flow
+
+```text
+Home
+  │
+  ▼
+Search for Ride
+  │
+  ▼
+Trip Results
+  │
+  ▼
+Select Ride
+  │
+  ▼
+Trip Information
+  │
+  ▼
+Confirm Booking
+  │
+  ▼
+Payment
+  │
+  ▼
+My Trips
+  │
+  ├── Messaging
+  ├── Trip Management
+  └── Safety / SOS
+```
+
+## Driver Flow
+
+```text
+Driver Home
+     │
+     ▼
+Create Trip Offer
+     │
+     ▼
+Ride Requests
+     │
+     ▼
+Manage Requests
+     │
+     ▼
+Trip Management
+     │
+     ▼
+Trip Completion
+     │
+     ▼
+Earnings
+     │
+     ▼
+Withdrawals
+```
 
 ---
 
-## Admin Platform
+# Admin Platform
 
-The admin platform is used by administrators to manage the whole system. It authenticates with Clerk, enforces role-based access control, and reads from Supabase through secured queries, database views and Row Level Security.
+The HopOn Admin Platform is used to manage and monitor the platform.
 
-### Admin API
+It authenticates administrators through Clerk and uses role-based access control to protect administrative functionality.
 
-| Endpoint | Method | Description |
-| -------- | ------ | ----------- |
-| `/admin/users` | GET | Fetch all users with verification status |
-| `/admin/drivers` | GET | Fetch all drivers with verification status |
-| `/admin/trips` | GET | Fetch all trips with filtering options |
-| `/admin/trips/{id}` | GET | Fetch specific trip details |
-| `/admin/trips/{id}` | PUT | Update trip status |
-| `/admin/payments` | GET | Fetch all payment transactions |
-| `/admin/verifications` | GET | Fetch pending verifications |
-| `/admin/verify/{id}` | PUT | Approve or reject driver verification |
-| `/admin/hubs` | GET | Fetch all hubs |
-| `/admin/hubs` | POST | Create a new hub |
-| `/admin/hubs/{id}` | PUT | Update hub details |
-| `/admin/hubs/{id}` | DELETE | Delete a hub |
-| `/admin/comments` | GET | Fetch user comments and feedback |
-| `/admin/stats` | GET | Fetch dashboard statistics and KPIs |
+The Admin Platform communicates with backend services and the Supabase PostgreSQL database through secured queries, database views and Row Level Security.
 
-### Hub management
+## Admin API
 
-Admins have full CRUD control over pickup hubs. Hubs created in the admin dashboard sync to the mobile apps and appear on the maps in both.
+| Endpoint               | Method | Description                                |
+| ---------------------- | ------ | ------------------------------------------ |
+| `/admin/users`         | GET    | Fetch all users with verification status   |
+| `/admin/drivers`       | GET    | Fetch all drivers with verification status |
+| `/admin/trips`         | GET    | Fetch all trips with filtering options     |
+| `/admin/trips/{id}`    | GET    | Fetch specific trip details                |
+| `/admin/trips/{id}`    | PUT    | Update trip status                         |
+| `/admin/payments`      | GET    | Fetch payment transactions                 |
+| `/admin/verifications` | GET    | Fetch pending verifications                |
+| `/admin/verify/{id}`   | PUT    | Approve or reject driver verification      |
+| `/admin/hubs`          | GET    | Fetch all hubs                             |
+| `/admin/hubs`          | POST   | Create a new hub                           |
+| `/admin/hubs/{id}`     | PUT    | Update hub details                         |
+| `/admin/hubs/{id}`     | DELETE | Delete a hub                               |
+| `/admin/comments`      | GET    | Fetch user comments and feedback           |
+| `/admin/stats`         | GET    | Fetch dashboard statistics and KPIs        |
 
-<!-- TODO: add admin dashboard setup/run instructions (folder or repo, install command, dev command, env vars) -->
+## Hub Management
+
+Administrators have full CRUD control over pickup hubs.
+
+Hubs are stored in Supabase and are available to the relevant mobile application functionality for pickup and drop-off organisation.
 
 ---
 
-## Project Structure
-
-<!-- TODO: replace with the output of your real folder tree; the paths below are the ones referenced by the auth code -->
+# Project Structure
 
 ```text
 CarpoolApp/
 ├── app/
 │   ├── (auth)/
-│   │   ├── sign-up.tsx          # Clerk registration + email verification
-│   │   └── sign-in.tsx          # Clerk login with generic errors
+│   │   ├── sign-up.tsx
+│   │   └── sign-in.tsx
+│   │
 │   ├── (root)/
-│   │   └── change-password.tsx  # Clerk password changes
+│   │   └── change-password.tsx
+│   │
 │   └── (api)/
-│       └── user+api.ts          # Allowlisted profile creation
+│       └── user+api.ts
+│
 ├── lib/
-│   ├── auth.ts                  # Clerk token cache + Google OAuth profile creation
-│   ├── fetch.ts                 # API transport (rejects HTTP)
+│   ├── auth.ts
+│   ├── fetch.ts
+│   │
 │   └── server/
-│       └── passwordHash.ts      # Server-only Argon2id utility
+│       └── passwordHash.ts
+│
 └── tests/
     └── passwordHash.test.ts
 ```
 
 ---
 
-## Security
+# Security
 
-### Authentication
+## Authentication
 
-- **Clerk is the single password authority.** It handles email/password, email verification, Google OAuth, sessions, password changes and provider-side rate limiting on sign-in.
-- The app does not run a second password system or duplicate Clerk credentials in its own `users` table.
-- Passwords and password hashes are never stored in React Native state persistence, `AsyncStorage`, `SecureStore`, Supabase tables or API responses.
-- Session tokens are stored via Clerk's `expo-secure-store` token cache.
-- Input is validated before Clerk registration/login and before profile creation.
-- Login failures always return the generic message `Invalid email or password`, so the app never reveals whether an email exists.
-- South African ID (13 digits) and phone validation are part of the profile verification flow.
+Clerk is the authentication provider for HopOn.
 
-### Admin access
+It handles:
 
-- Admin API routes require authentication and a role check.
-- Supabase Row Level Security policies restrict admin data access.
+* Email/password authentication
+* Email verification
+* Google OAuth
+* Sessions
+* Password changes
+* Authentication security
 
-### API and data
+The application does not maintain a separate password authentication system.
 
-- API calls reject absolute `http:` URLs. Production hosting must use HTTPS.
-- Profile API responses use explicit column lists and never `select("*")`, so a future credential column cannot leak to the client.
-- The Supabase service-role key and Stripe secret key are server-only.
+Passwords and password hashes are never stored in React Native state persistence, AsyncStorage, SecureStore, Supabase tables or API responses.
 
-### Password hashing (Argon2id)
+Session tokens are managed through Clerk's secure token cache.
 
-The repo includes a reusable, server-only Argon2id service at [`lib/server/passwordHash.ts`](lib/server/passwordHash.ts):
+Input is validated before Clerk registration/login and before profile creation.
 
-```ts
+Login failures use generic authentication messages so the application does not reveal whether an account exists.
+
+South African ID and phone validation are included as part of the profile verification workflow.
+
+## Admin Access
+
+Admin API routes require authentication and appropriate role authorisation.
+
+Supabase Row Level Security policies restrict access to protected administrative data.
+
+## API and Data Security
+
+* API calls reject absolute `http:` URLs.
+* Production services must use HTTPS.
+* Profile API responses use explicit column lists.
+* Sensitive credentials are never returned to clients.
+* The Supabase service-role key is server-only.
+* Stripe secret keys are server-only.
+* Clerk secret keys are server-only.
+* Provider credentials are server-only.
+
+## Password Hashing
+
+The repository includes a reusable server-only Argon2id utility:
+
+```text
+lib/server/passwordHash.ts
+```
+
+Available functions:
+
+```text
 hashPassword(password: string): Promise<string>
 verifyPassword(password: string, hash: string): Promise<boolean>
 ```
 
-- Requires at least 8 characters, one uppercase letter and one number.
-- Generates a unique salt per hash.
-- Returns `false` for malformed hashes; never logs passwords or hashes.
-- Cost parameters default to `ARGON2_MEMORY_COST=65536`, `ARGON2_TIME_COST=3`, `ARGON2_PARALLELISM=4` and can be raised via server environment variables.
+The service:
 
-`argon2` is a Node/server dependency and **must not** be imported into Expo client code. The current sign-up and sign-in screens intentionally do not call this service, because Clerk already hashes and verifies passwords. Adding a second verifier would create two authentication authorities.
+* Generates a unique salt for every hash.
+* Returns `false` for malformed hashes.
+* Never logs passwords or password hashes.
+* Uses configurable Argon2id cost parameters.
 
-If first-party password authentication is introduced later:
+Argon2 is a Node/server dependency and must not be imported into Expo client code.
 
-1. Validate the email and password.
-2. Call `hashPassword()` at registration and store only the returned string in a `password_hash` column.
-3. Look up the account by email at login and call `verifyPassword()`.
-4. Return `Invalid email or password` for every failure.
-5. Add per-account and per-IP rate limiting before exposing the endpoint.
-6. Never include `password` or `password_hash` in logs or responses.
-
-### Payments
-
-Payments run through Stripe. Development uses **test mode only**. Never commit live keys.
-
-### Repository hygiene
-
-- `.env` files are git-ignored.
-- Use `.env.example` with placeholder values only.
-- Before each release, check the repository and history for exposed credentials or API keys.
+Clerk remains the authentication authority for the current application.
 
 ---
 
-## Testing
+# Payments
 
-Run the full suite:
+Payments are processed through Stripe.
+
+Development and testing use Stripe test mode.
+
+Never commit live Stripe credentials or secret keys to the repository.
+
+---
+
+# Identity Verification
+
+HopOn includes identity verification functionality to support user verification, particularly within the driver verification workflow.
+
+The identity verification service is accessed through the appropriate backend functionality.
+
+Provider credentials must remain server-side and must never be included in `EXPO_PUBLIC_` variables.
+
+---
+
+# Safety and SOS
+
+HopOn includes passenger safety functionality and an SOS workflow.
+
+Safety information is stored in Supabase through the safety alert system and can be monitored through the Admin Platform.
+
+The MVP includes:
+
+* Passenger SOS functionality
+* Safety alerts
+* Administrative safety monitoring
+* Safety status management
+* Safety-related database records
+
+Advanced real-time notification and escalation capabilities may require further development.
+
+---
+
+# Testing
+
+Testing was performed throughout development to verify application functionality, integration and system quality.
+
+Testing activities include:
+
+* Automated testing
+* Integration testing
+* Regression testing
+* Smoke testing
+* User Acceptance Testing
+
+The automated test suite covers areas including:
+
+* Business rules
+* Safety functionality
+* K-means/grouping functionality
+* Identity verification
+* Password hashing
+* User APIs
+
+Run the complete test suite:
 
 ```bash
 npx vitest run
@@ -319,119 +553,125 @@ Run the password hashing tests only:
 npx vitest run tests/passwordHash.test.ts
 ```
 
-The password tests cover Argon2id output, correct and incorrect verification, unique salts, invalid and empty passwords, and the configured cost parameters.
+Detailed test cases, execution results, coverage reports and screenshots are maintained in the Testing submission.
 
-### Check ID verification
+---
 
-The identity-verification screen sends a normalized 13-digit South African ID number
-to the authenticated Render endpoint `POST /api/check-id/validate`. Render calls Check ID.
+# System Test Cases
 
-Add the provider key to Render as `CHECK_ID_API_KEY` (and to `server/.env` for local
-backend development). Do not add it to Expo or an `EXPO_PUBLIC_*` variable.
+| ID   | Module           | Test Case                                                   | Status |
+| ---- | ---------------- | ----------------------------------------------------------- | ------ |
+| TC08 | Admin Dashboard  | Admin logs in with Clerk and views the dashboard            | Pass   |
+| TC09 | Admin Dashboard  | Admin creates a hub and it appears in the system            | Pass   |
+| TC10 | Admin Dashboard  | Admin approves driver verification                          | Pass   |
+| TC11 | Admin Dashboard  | Admin views trip history                                    | Pass   |
+| TC12 | Admin API        | Admin fetches users through the API                         | Pass   |
+| TC13 | Admin API        | Admin updates trip status through the API                   | Pass   |
+| TC14 | Backend API      | Driver creates a trip                                       | Pass   |
+| TC15 | Backend API      | Passenger books a ride linked to a driver                   | Pass   |
+| TC16 | Payment          | Stripe payment is processed                                 | Pass   |
+| TC17 | Maps and Routing | Route displays between pickup and drop-off                  | Pass   |
+| TC18 | Driver App       | Driver manages ride requests                                | Pass   |
+| TC19 | Messaging        | Passenger and driver communicate                            | Pass   |
+| TC20 | Trip Lifecycle   | Trip progresses through the booking and completion workflow | Pass   |
 
-[`migrations/profile-migration.sql`](migrations/profile-migration.sql) in Supabase; it adds
-`users.id_verified`, which is set to `true` after a successful Check ID response. No
-`drivers` table change is needed because the current identity-verification flow stores
-driver profile verification data in `users`.
+---
 
-Start the app with:
+# Check ID Verification
 
-```bash
-npm install
-npx expo start -c
+The identity-verification workflow sends a normalized South African ID number to the authenticated backend endpoint.
+
+The backend communicates with the configured identity-verification provider.
+
+For local development, configure the provider key in the backend environment.
+
+Example:
+
+```text
+CHECK_ID_API_KEY=your_provider_key
 ```
 
-Enter a valid 13-digit ID and press **Verify ID** to see `ID Verified` and the returned
-date of birth, age, gender, and citizenship. Use a rejected 13-digit value to test the
-invalid-ID message; a malformed value tests the 400 validation path.
+Do not add the provider key to Expo or an `EXPO_PUBLIC_*` variable.
 
-This service validates the ID number and returns demographic information. It does not
-prove that the ID belongs to the person presenting it and does not perform physical or
-biometric identity verification. Because `EXPO_PUBLIC_*` variables are bundled into the
-mobile app, provider credentials must stay on the server.
+The identity verification process validates the supplied ID and can return demographic information supported by the provider.
 
-### System test cases
-
-| ID | Module | Test case | Status |
-| -- | ------ | --------- | ------ |
-| TC08 | Admin dashboard | Admin logs in with Clerk and sees dashboard with name and profile | Pass |
-| TC09 | Admin dashboard | Admin creates a hub; it appears in the database and mobile app | Pass |
-| TC10 | Admin dashboard | Admin approves driver verification; driver status becomes verified | Pass |
-| TC11 | Admin dashboard | Admin views trip history with correct data | Pass |
-| TC12 | Admin API | Admin fetches all users via API | Pass |
-| TC13 | Admin API | Admin updates trip status via API | Pass |
-| TC14 | Backend API | Driver creates a trip | Pass |
-| TC15 | Backend API | Passenger books a ride; request is linked to driver | Pass |
-| TC16 | Payment | Stripe payment is processed with receipt | Pass |
-| TC17 | Maps and routing | Route polyline displays between pickup and drop-off | In progress |
-| TC18 | Driver app | Driver accepts a ride request; passenger app updates | Planned |
-| TC19 | Messaging | Passenger message is delivered to driver in real time | Planned |
-| TC20 | Trip lifecycle | Full trip from booking to completion, payment released | Planned |
-
-Still to do: at least 10 automated tests covering valid, invalid and error scenarios, API/payment/calculation testing, end-to-end integration testing, final regression testing and a bug register.
+The service does not by itself prove that the person presenting the ID is the rightful owner unless the configured verification workflow explicitly provides that capability.
 
 ---
 
-## Known Limitations
+# Repository Hygiene
 
-These are not yet complete and should not be treated as working features:
-
-- Time and distance functionality is not finalised.
-- Routing needs final validation.
-- Trip cancellation and refund handling is in progress.
-- Driver-side ride acceptance and full trip management need final integration.
-- K-Means ride/zone optimisation is not implemented.
-- Scheduled-trip user interaction is incomplete.
-- Real-time passenger–driver messaging is not complete.
-- Automated test coverage and final regression testing are outstanding.
-- Security documentation is still being completed.
+* `.env` files are git-ignored.
+* Use `.env.example` with placeholder values only.
+* Never commit API keys or authentication secrets.
+* Never commit Stripe secret keys.
+* Never commit Supabase service-role keys.
+* Never commit Clerk secret keys.
+* Never commit identity-verification provider credentials.
+* Review the repository and Git history for accidentally exposed credentials before releases.
 
 ---
 
-## Roadmap
+# Known Limitations
 
-### Remaining for the Sprint 5–6 MVP
+The following areas remain subject to final release verification or refinement:
 
-- [ ] Finalise the Time and Distance API
-- [ ] Dynamic fare calculation
-- [ ] K-Means ride/zone optimisation
-- [ ] Trip cancellation and refund handling
-- [ ] Driver app: ride accept/decline, trip tracking, trip history, earnings and pay-outs
-- [ ] Passenger–driver real-time messaging
-- [ ] Future-date trip scheduling and scheduled-trip workflow
-- [ ] Saved places
-- [ ] Stripe test-mode testing, including failure and cancellation scenarios
-- [ ] Automated, API, payment and end-to-end tests
-- [ ] Bug register, final Git release/tag and updated documentation
-
-### Sprint 7–8 (potential)
-
-- Improved ride matching, routing/ETA and fare calculation
-- Expanded analytics and improved notifications
-- Improved driver earnings and hub functionality
-- Refinement of scheduled trips
-- Performance optimisation, expanded security controls and additional automated testing
-- Usability improvements
+* Deployment is still in progress.
+* User Acceptance Testing is still in progress.
+* Some UI refinements may remain.
+* Advanced real-time SOS notification and escalation may require additional development.
+* Final release verification and operational readiness are still required.
+* Some deployment evidence is still being finalised.
 
 ---
 
+# Roadmap
+
+## Final MVP Release
+
+* Complete deployment verification
+* Complete User Acceptance Testing
+* Finalise release evidence
+* Complete final regression testing
+* Finalise bug register
+* Verify security configuration
+* Verify production environment variables
+* Finalise project documentation
+* Create final Git release/tag
+
+## Future Improvements
+
+* Improved ride matching
+* Improved routing and ETA
+* Improved fare calculation
+* Expanded analytics
+* Improved notifications
+* Enhanced driver earnings functionality
+* Improved hub functionality
+* Enhanced scheduled-trip workflows
+* Saved places
+* Advanced safety notifications and escalation
+* Performance optimisation
+* Expanded automated testing
+* Additional usability improvements
+
+---
 ## Team
 
-| Member | Role | Responsibility |
-| ------ | ---- | -------------- |
-| S. Mdala | Project Manager | Project management and process flows |
-| L.P. Nama | Business Analyst | Requirements gathering |
-| T. Macholo | UX/UI Designer | Figma design and navigation |
-| N.S. Msomi | Frontend Developer | UI components and screens |
-| M. Sithomola | Backend Developer | Supabase migrations, driver and trip APIs, Stripe payments, maps and routing |
-| G.P. Makwarela | Database Administrator & Backend Developer | Admin dashboard and APIs, Clerk authentication, Supabase database administration, hub management, security |
-
-
+| Member | Role |
+| --- | --- |
+| S. Mdala | Project Manager |
+| L. Nama | Business Analyst |
+| T. Macholo | UI/UX Designer & Software Tester |
+| N. S. Msomi | Frontend Developer |
+| M. Sithomola | Backend Developer |
+| G. P. Makwarela | Database Administrator & Backend Developer |
 
 ---
 
-## License
+# License
 
-University of Johannesburg – Department of Applied Information Systems
+University of Johannesburg
+Department of Applied Information Systems
 
-Sprint 5–6 MVP – CarpoolGo (DevSphere Inc.)
+**HopOn Carpool App — DevSphere Inc.**
