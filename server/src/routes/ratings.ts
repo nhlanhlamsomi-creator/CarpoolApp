@@ -42,7 +42,7 @@ router.get("/:rideId", async (request, response) => {
       .eq("id", ride.driver_id)
       .maybeSingle(),
     supabase
-      .from("passenger_ratings")
+      .from("driver_ratings")
       .select("rating, comment")
       .eq("ride_id", String(ride.ride_id))
       .eq("passenger_clerk_id", ride.user_id)
@@ -107,29 +107,49 @@ router.post("/:rideId", async (request, response) => {
   if (driverError) throw driverError;
   if (!driver) throw new HttpError(404, "Driver not found");
 
-  const { data, error } = await getSupabaseServerClient().rpc(
-    "record_passenger_driver_rating",
-    {
-      p_ride_id: String(ride.ride_id),
-      p_passenger_clerk_id: passengerId,
-      p_driver_id: ride.driver_id,
-      p_rating: rating,
-      p_comment: feedback.trim() || null,
-    },
-  );
+  const supabase = getSupabaseServerClient();
+  const { error: insertError } = await supabase.from("driver_ratings").insert({
+    ride_id: String(ride.ride_id),
+    passenger_clerk_id: passengerId,
+    driver_id: ride.driver_id,
+    rating,
+    comment: feedback.trim() || null,
+  });
 
-  if (error?.code === "23505") {
+  if (insertError?.code === "23505") {
     throw new HttpError(409, "You have already rated this trip");
   }
-  if (error) throw error;
+  if (insertError) throw insertError;
 
-  const aggregate = Array.isArray(data) ? data[0] : data;
+  const { data: ratings, error: ratingsError } = await supabase
+    .from("driver_ratings")
+    .select("rating")
+    .eq("driver_id", ride.driver_id);
+  if (ratingsError) throw ratingsError;
+
+  const driverRatingRows = ratings ?? [];
+  const averageRating =
+    Math.round(
+      (driverRatingRows.reduce(
+        (total, entry) => total + Number(entry.rating),
+        0,
+      ) /
+        driverRatingRows.length) *
+        10,
+    ) / 10;
+
+  const { error: updateError } = await supabase
+    .from("drivers")
+    .update({ rating: averageRating })
+    .eq("id", ride.driver_id);
+  if (updateError) throw updateError;
+
   response.status(201).json({
     data: {
       success: true,
       rating,
-      average_rating: Number(aggregate?.average_rating ?? rating),
-      rating_count: Number(aggregate?.rating_count ?? 1),
+      average_rating: averageRating,
+      rating_count: driverRatingRows.length,
     },
   });
 });
