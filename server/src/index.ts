@@ -47,6 +47,25 @@ const writableProfileFields = [
 
 const clientAllowedVerificationStatuses = new Set(["not_submitted", "pending"]);
 
+async function loadPassengerRating(clerkId: string) {
+  const { data, error } = await getSupabaseServerClient()
+    .from("passenger_ratings")
+    .select("rating")
+    .eq("passenger_clerk_id", clerkId);
+
+  if (error) throw error;
+
+  const ratings = data ?? [];
+  return {
+    rating:
+      ratings.length > 0
+        ? ratings.reduce((sum, entry) => sum + Number(entry.rating), 0) /
+          ratings.length
+        : null,
+    rating_count: ratings.length,
+  };
+}
+
 profileRouter.get("/", async (_request, response) => {
   const clerkId = response.locals.authUserId as string;
 
@@ -65,8 +84,16 @@ profileRouter.get("/", async (_request, response) => {
 
   if (error) throw error;
 
+  const passengerRating = await loadPassengerRating(clerkId);
   response.json({
-    data: data ? { ...data, profile_data: data.profile_data ?? {} } : null,
+    data: {
+      ...(data ?? {}),
+      ...passengerRating,
+      rating:
+        passengerRating.rating ??
+        (data?.rating == null ? null : Number(data.rating)),
+      profile_data: data?.profile_data ?? {},
+    },
   });
 });
 
@@ -204,8 +231,16 @@ profileRouter.post("/", async (request, response) => {
     return;
   }
 
+  const passengerRating = await loadPassengerRating(clerkId);
   response.json({
-    data: { ...data, profile_data: data.profile_data ?? {} },
+    data: {
+      ...data,
+      ...passengerRating,
+      rating:
+        passengerRating.rating ??
+        (data.rating == null ? null : Number(data.rating)),
+      profile_data: data.profile_data ?? {},
+    },
   });
 });
 

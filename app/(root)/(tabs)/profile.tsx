@@ -69,7 +69,8 @@ type ProfileRecord = {
   email?: string;
   clerk_id?: string;
   profile_image_url?: string;
-  rating?: number;
+  rating?: number | string | null;
+  rating_count?: number;
   total_trips?: number;
   verification_percentage?: number;
   government_id_url?: string;
@@ -292,7 +293,11 @@ const Profile = () => {
     profileData.phone_number ||
     user?.primaryPhoneNumber?.phoneNumber ||
     "Add a phone number";
-  const rating = typeof profile?.rating === "number" ? profile.rating : 5.0;
+  const numericRating = Number(profile?.rating);
+  const rating =
+    Number.isFinite(numericRating) && numericRating > 0
+      ? numericRating.toFixed(1)
+      : "New";
   const totalTrips = rideSummary.total_trips;
   const verification =
     typeof profile?.verification_percentage === "number"
@@ -562,7 +567,7 @@ const Profile = () => {
                 icon="star"
                 iconSource={icons.star}
                 label="Rating"
-                value={rating.toFixed(1)}
+                value={rating}
               />
               <StatCard
                 icon="car-sport"

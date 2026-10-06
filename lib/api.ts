@@ -3,6 +3,17 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 const configuredApiUrl = process.env.EXPO_PUBLIC_API_URL?.trim().replace(/\/+$/, "");
 
+function buildApiUrl(baseUrl: string, path: string): string {
+  const normalizedBaseUrl = baseUrl.replace(/\/+$/, "");
+  const normalizedPath = path.replace(/^\/+/, "");
+  const pathWithoutDuplicateApiPrefix =
+    /\/api$/i.test(normalizedBaseUrl) && /^api(?:\/|$)/i.test(normalizedPath)
+      ? normalizedPath.replace(/^api\/?/i, "")
+      : normalizedPath;
+
+  return `${normalizedBaseUrl}/${pathWithoutDuplicateApiPrefix}`;
+}
+
 export async function apiRequest<T>(
   path: string,
   options: RequestInit = {},
@@ -27,10 +38,10 @@ export async function apiRequest<T>(
   }
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
-  const response = await fetch(
-    `${configuredApiUrl}/${path.replace(/^\/+/, "")}`,
-    { ...options, headers },
-  );
+  const response = await fetch(buildApiUrl(configuredApiUrl, path), {
+    ...options,
+    headers,
+  });
   const body = await response.json().catch(() => null);
 
   if (!response.ok) {

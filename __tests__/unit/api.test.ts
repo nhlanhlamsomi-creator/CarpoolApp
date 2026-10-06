@@ -41,6 +41,24 @@ describe('apiRequest wrapper', () => {
     expect(result).toEqual({ data: { id: 1 } });
   });
 
+  it('uses a single api prefix when the base URL already ends in /api', async () => {
+    process.env.EXPO_PUBLIC_API_URL = 'https://api.example.com/api/';
+    jest.resetModules();
+
+    globalThis.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ data: { rating: 3 } }),
+    }) as any;
+
+    const { apiRequest } = require('../../lib/api');
+    await apiRequest('/api/profile');
+
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      'https://api.example.com/api/profile',
+      expect.objectContaining({}),
+    );
+  });
+
   it('UT-API-03: sets Content-Type when body is present', async () => {
     process.env.EXPO_PUBLIC_API_URL = 'https://api.example.com';
     jest.resetModules();
