@@ -566,13 +566,13 @@ const Profile = () => {
               />
               <StatCard
                 icon="car-sport"
-                iconSource={icons.trips}
+                iconSource={icons.sportsCar}
                 label="Trips"
                 value={String(totalTrips)}
               />
               <StatCard
                 icon="shield-checkmark"
-                iconSource={icons.verified}
+                iconSource={icons.verify}
                 label="Verified"
                 value={`${verification}%`}
               />

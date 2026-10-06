@@ -40,9 +40,11 @@ import search from "@/assets/icons/search.png";
 import selectedMarker from "@/assets/icons/selected-marker.png";
 import selfie from "@/assets/icons/selfie.png";
 import signOut from "@/assets/icons/signout.png";
-import support from "@/assets/icons/support.png";
+import sportsCar from "@/assets/icons/sports-car.png";
 import star from "@/assets/icons/star.png";
+import support from "@/assets/icons/support.png";
 import target from "@/assets/icons/target.png";
+import verify from "@/assets/icons/verify.png";
 import termsOfUse from "@/assets/icons/terms of use.png";
 import to from "@/assets/icons/to.png";
 import tripHistory from "@/assets/icons/trip history.png";
@@ -116,8 +118,9 @@ export const icons = {
   selectedMarker,
   selfie,
   signOut,
-  support,
+  sportsCar,
   star,
+  support,
   target,
   termsOfUse,
   to,
@@ -125,6 +128,7 @@ export const icons = {
   tripNotifications,
   trips,
   verified,
+  verify,
   verifyIdentity,
   whatsappSupport,
 };
