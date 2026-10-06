@@ -42,9 +42,9 @@ router.get("/:rideId", async (request, response) => {
       .eq("id", ride.driver_id)
       .maybeSingle(),
     supabase
-      .from("driver_ratings")
-      .select("rating, feedback")
-      .eq("ride_id", ride.ride_id)
+      .from("passenger_ratings")
+      .select("rating, comment")
+      .eq("ride_id", String(ride.ride_id))
       .eq("passenger_clerk_id", ride.user_id)
       .maybeSingle(),
   ]);
@@ -74,7 +74,7 @@ router.get("/:rideId", async (request, response) => {
       existingRating: ratingResult.data
         ? {
             rating: Number(ratingResult.data.rating),
-            feedback: ratingResult.data.feedback ?? null,
+            feedback: ratingResult.data.comment ?? null,
           }
         : null,
     },
@@ -108,13 +108,13 @@ router.post("/:rideId", async (request, response) => {
   if (!driver) throw new HttpError(404, "Driver not found");
 
   const { data, error } = await getSupabaseServerClient().rpc(
-    "record_driver_rating",
+    "record_passenger_driver_rating",
     {
-      p_ride_id: ride.ride_id,
+      p_ride_id: String(ride.ride_id),
       p_passenger_clerk_id: passengerId,
       p_driver_id: ride.driver_id,
       p_rating: rating,
-      p_feedback: feedback.trim() || null,
+      p_comment: feedback.trim() || null,
     },
   );
 
@@ -128,7 +128,7 @@ router.post("/:rideId", async (request, response) => {
     data: {
       success: true,
       rating,
-      average_rating: Number(aggregate?.rating ?? rating),
+      average_rating: Number(aggregate?.average_rating ?? rating),
       rating_count: Number(aggregate?.rating_count ?? 1),
     },
   });
