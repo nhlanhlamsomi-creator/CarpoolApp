@@ -81,6 +81,9 @@ export function supportErrorMessage(error: unknown): string {
   if (/AI_SUPPORT_NOT_CONFIGURED/i.test(message)) {
     return "AI Support is not configured on the server yet. Please contact Hop On Support. The server owner needs to add GEMINI_API_KEY to the backend environment.";
   }
+  if (/AI_SUPPORT_RATE_LIMITED/i.test(message)) {
+    return "AI Support has reached the Gemini API request limit for this project. Please try again later. If this continues, the server owner should review the project's Gemini API limits and billing.";
+  }
   if (/endpoint not found|404/i.test(message)) {
     return "The support chat endpoint is not available on the current backend. Please contact Hop On Support so the server can be updated.";
   }

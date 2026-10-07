@@ -21,4 +21,10 @@ describe("supportErrorMessage", () => {
       /offline/i,
     );
   });
+
+  it("explains when the Gemini project has reached its request limit", () => {
+    expect(
+      supportErrorMessage(new Error("AI_SUPPORT_RATE_LIMITED")),
+    ).toMatch(/Gemini API request limit/i);
+  });
 });

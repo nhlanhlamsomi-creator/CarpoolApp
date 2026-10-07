@@ -155,6 +155,13 @@ router.post("/chat", async (request, response) => {
       status: typeof details.status === "number" ? details.status : undefined,
       code: typeof details.code === "string" ? details.code : undefined,
     });
+    if (
+      details.status === 429 ||
+      details.code === 429 ||
+      details.code === "RESOURCE_EXHAUSTED"
+    ) {
+      throw new HttpError(503, "AI_SUPPORT_RATE_LIMITED");
+    }
     throw new HttpError(502, "AI_SUPPORT_UPSTREAM_ERROR");
   }
 });
