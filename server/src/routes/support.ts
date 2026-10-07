@@ -134,7 +134,7 @@ router.post("/chat", async (request, response) => {
       "Hop On Support:",
     ].join("\n");
     const result = await ai.interactions.create({
-      model: "gemini-3.8-flash",
+      model: "gemini-3.1-flash-lite",
       system_instruction: SYSTEM_INSTRUCTION,
       input: conversation,
       generation_config: { thinking_level: "low" },
