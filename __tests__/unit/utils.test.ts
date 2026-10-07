@@ -1,7 +1,7 @@
 import {
   formatDate,
   formatTime,
-  estimateDropoffTime,
+  estimateRideTimes,
   isDriverVisible,
   sortRides,
 } from '../../lib/utils';
@@ -50,10 +50,16 @@ describe('Utility functions', () => {
   it('estimates drop-off clock time from pickup ETA plus trip duration', () => {
     const now = new Date(2024, 0, 3, 17, 40);
 
-    expect(estimateDropoffTime(20, 40, now)).toBe('18:40');
-    expect(estimateDropoffTime(20, 40, new Date(2024, 0, 3, 23, 40))).toBe(
-      '00:40',
-    );
-    expect(estimateDropoffTime(Number.NaN, 40, now)).toBe('—');
+    expect(estimateRideTimes(20, 40, now)).toEqual({
+      pickupTime: '18:00',
+      dropoffTime: '18:40',
+    });
+    expect(
+      estimateRideTimes(20, 40, new Date(2024, 0, 3, 23, 40)),
+    ).toEqual({
+      pickupTime: '00:00',
+      dropoffTime: '00:40',
+    });
+    expect(estimateRideTimes(Number.NaN, 40, now)).toBeNull();
   });
 });

@@ -335,6 +335,26 @@ const RideCard = ({
           </View>
         </View>
 
+        <View
+          style={{
+            marginTop: 12,
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+          <Ionicons name="people-outline" size={14} color={THEME.muted} />
+          <Text
+            style={{
+              marginLeft: 6,
+              fontSize: 11,
+              fontFamily: "Jakarta",
+              color: THEME.muted,
+            }}
+          >
+            {ride.booked_seats ?? 1} {(ride.booked_seats ?? 1) === 1 ? "seat" : "seats"} booked
+          </Text>
+        </View>
+
         {/* ── Facts strip ── */}
         <View
           style={{

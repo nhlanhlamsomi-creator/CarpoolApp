@@ -71,11 +71,11 @@ export function formatTime(value: number | string): string {
   return "";
 }
 
-export function estimateDropoffTime(
+export function estimateRideTimes(
   pickupEtaMinutes: number,
   tripDurationMinutes: number,
   now = new Date(),
-): string {
+): { pickupTime: string; dropoffTime: string } | null {
   if (
     !Number.isFinite(pickupEtaMinutes) ||
     !Number.isFinite(tripDurationMinutes) ||
@@ -83,15 +83,19 @@ export function estimateDropoffTime(
     tripDurationMinutes < 0 ||
     Number.isNaN(now.getTime())
   ) {
-    return "—";
+    return null;
   }
 
+  const pickup = new Date(now.getTime() + pickupEtaMinutes * 60_000);
   const dropoff = new Date(
     now.getTime() + (pickupEtaMinutes + tripDurationMinutes) * 60_000,
   );
-  return `${String(dropoff.getHours()).padStart(2, "0")}:${String(
-    dropoff.getMinutes(),
-  ).padStart(2, "0")}`;
+  const formatClock = (date: Date) =>
+    `${String(date.getHours()).padStart(2, "0")}:${String(
+      date.getMinutes(),
+    ).padStart(2, "0")}`;
+
+  return { pickupTime: formatClock(pickup), dropoffTime: formatClock(dropoff) };
 }
 
 export function formatDate(dateString: string): string {

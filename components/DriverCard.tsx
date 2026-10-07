@@ -1,12 +1,16 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
-import { estimateDropoffTime, formatTime } from "@/lib/utils";
+import { estimateRideTimes } from "@/lib/utils";
 import { DriverCardProps } from "@/types/type";
 
 const DriverCard = ({ item, selected, setSelected }: DriverCardProps) => {
   const isSelected = selected === item.id;
   const rating = Number(item.rating ?? 0);
+  const estimatedRideTimes =
+    item.time != null && item.trip_time != null
+      ? estimateRideTimes(item.time, item.trip_time)
+      : null;
 
   return (
     <TouchableOpacity
@@ -54,7 +58,7 @@ const DriverCard = ({ item, selected, setSelected }: DriverCardProps) => {
           <View className="flex-row items-center gap-1">
             <Ionicons name="time-outline" size={13} color="#746A7E" />
             <Text className="text-xs font-JakartaMedium text-[#746A7E]">
-              Pickup ~{formatTime(item.time ?? 0)}
+              Pickup ~{estimatedRideTimes?.pickupTime ?? "—"}
             </Text>
           </View>
 
@@ -63,11 +67,7 @@ const DriverCard = ({ item, selected, setSelected }: DriverCardProps) => {
           <View className="flex-row items-center gap-1">
             <Ionicons name="navigate-outline" size={13} color="#746A7E" />
             <Text className="text-xs font-JakartaMedium text-[#746A7E]">
-              Drop-off ~
-              {estimateDropoffTime(
-                item.time ?? Number.NaN,
-                item.trip_time ?? Number.NaN,
-              )}
+              Drop-off ~{estimatedRideTimes?.dropoffTime ?? "—"}
             </Text>
           </View>
 

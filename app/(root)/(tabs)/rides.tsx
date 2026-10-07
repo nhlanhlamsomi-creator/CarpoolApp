@@ -1,4 +1,4 @@
-import { useUser } from "@clerk/expo";
+import { useAuth, useUser } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { router, useFocusEffect } from "expo-router";
@@ -18,7 +18,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { EmptyState } from "@/components/Cards";
 import RideCard from "@/components/RideCard";
-import { useApiFetch } from "@/lib/api";
+import { apiRequest, useApiFetch } from "@/lib/api";
 import { useLocationStore } from "@/store";
 import { Ride } from "@/types/type";
 
@@ -28,6 +28,7 @@ type Tab = "upcoming" | "history";
 
 const Rides = () => {
   const { user } = useUser();
+  const { getToken } = useAuth();
   const { setUserLocation, setDestinationLocation } = useLocationStore();
 
   const [tab, setTab] = useState<Tab>("upcoming");
@@ -70,9 +71,13 @@ const Rides = () => {
     const status = ride.status;
 
     if (status) {
-      return ["booked", "scheduled", "accepted", "in_progress"].includes(
-        status,
-      );
+      return [
+        "booked",
+        "scheduled",
+        "accepted",
+        "confirmed",
+        "in_progress",
+      ].includes(status);
     }
 
     const scheduled = ride.scheduled_for;
@@ -163,6 +168,12 @@ const Rides = () => {
   };
 
   const handleCancel = (ride: Ride) => {
+    const rideId = Number(ride.ride_id);
+    if (!Number.isSafeInteger(rideId) || rideId <= 0) {
+      Alert.alert("Cancel failed", "This trip is missing a valid ride ID.");
+      return;
+    }
+
     Alert.alert(
       "Cancel this trip?",
       "Cancelling close to departure may incur a fee, and your seat is released to someone else.",
@@ -173,32 +184,20 @@ const Rides = () => {
           style: "destructive",
           onPress: async () => {
             try {
-              const res = await fetch("/(api)/ride/cancel", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  ride_id: (ride as any).ride_id,
-                  user_id: user?.id,
-                }),
-              });
-
-              const json = await res.json();
-
-              if (!res.ok) {
-                console.error("Cancel failed:", json);
-                Alert.alert(
-                  "Cancel failed",
-                  json?.error || "Unable to cancel trip",
-                );
-                return;
-              }
-
+              const token = await getToken();
+              await apiRequest(
+                `/api/rides/${rideId}/cancel`,
+                { method: "POST" },
+                token,
+              );
               Alert.alert("Cancelled", "Your trip has been cancelled.");
-              // Refresh list
               await refetch();
-            } catch (e) {
-              console.error("Error calling cancel endpoint:", e);
-              Alert.alert("Cancel failed", "Unable to cancel trip");
+            } catch (error) {
+              console.error("Error cancelling ride:", error);
+              Alert.alert(
+                "Cancel failed",
+                error instanceof Error ? error.message : "Unable to cancel trip",
+              );
             }
           },
         },

@@ -60,6 +60,7 @@ declare interface Ride {
   scheduled_for?: string | null;
   duration_minutes?: number | null;
   status?: string | null;
+  booked_seats?: number | null;
   fare_price: number | string;
   payment_status: string;
   driver_id: number;
@@ -88,6 +89,7 @@ declare interface OfferTrip {
   repeat_weekly: boolean | null;
   repeat_days: string[] | null;
   seats_available: number;
+  available_seats?: number;
   seats_booked: number;
   price_per_seat: number | string;
   service_fee_percentage: number | string | null;
@@ -160,6 +162,7 @@ declare interface PaymentProps {
   driverId: number;
   rideTime: number;
   offerTripId?: number;
+  seatsToBook?: number;
 }
 
 declare interface LocationStore {

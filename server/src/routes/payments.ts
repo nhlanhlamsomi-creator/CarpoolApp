@@ -17,6 +17,7 @@ router.post("/intents", async (request, response) => {
   const email = String(body.email ?? "").trim().slice(0, 254);
   const offerTripId =
     body.offer_trip_id == null ? null : Number(body.offer_trip_id);
+  const seatCount = Number(body.seat_count ?? 1);
 
   if (
     !Number.isFinite(amount) ||
@@ -25,7 +26,10 @@ router.post("/intents", async (request, response) => {
     !email ||
     !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
     (offerTripId !== null &&
-      (!Number.isSafeInteger(offerTripId) || offerTripId <= 0))
+      (!Number.isSafeInteger(offerTripId) || offerTripId <= 0)) ||
+    !Number.isSafeInteger(seatCount) ||
+    seatCount <= 0 ||
+    (offerTripId === null && seatCount !== 1)
   ) {
     throw new HttpError(400, "A valid amount and email are required");
   }
@@ -58,6 +62,7 @@ router.post("/intents", async (request, response) => {
     metadata: {
       clerk_user_id: userId,
       ...(offerTripId === null ? {} : { offer_trip_id: String(offerTripId) }),
+      ...(offerTripId === null ? {} : { seat_count: String(seatCount) }),
     },
   });
 

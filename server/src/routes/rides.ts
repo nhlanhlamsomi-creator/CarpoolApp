@@ -16,9 +16,42 @@ function finiteCoordinate(value: unknown, minimum: number, maximum: number) {
     : null;
 }
 
+async function restoreLegacyCancelledOfferTripSeat(
+  supabase: ReturnType<typeof getSupabaseServerClient>,
+  ride: Record<string, any>,
+  userId: string,
+) {
+  if (
+    ride.offer_trip_id != null ||
+    (ride.status !== "cancelled" && ride.payment_status !== "cancelled") ||
+    !ride.stripe_payment_id
+  ) {
+    return null;
+  }
+
+  const paymentIntent = await getStripeServerClient().paymentIntents.retrieve(
+    ride.stripe_payment_id,
+  );
+  const offerTripId = Number(paymentIntent.metadata.offer_trip_id);
+  if (!Number.isSafeInteger(offerTripId) || offerTripId <= 0) return null;
+
+  const { error } = await supabase.rpc(
+    "cancel_ride_and_release_offer_trip_seat",
+    {
+      p_ride_id: ride.ride_id,
+      p_user_id: userId,
+      p_recovered_offer_trip_id: offerTripId,
+    },
+  );
+  if (error) throw error;
+
+  return offerTripId;
+}
+
 router.get("/", async (_request, response) => {
   const userId = userIdFrom(response);
-  const { data, error } = await getSupabaseServerClient()
+  const supabase = getSupabaseServerClient();
+  const { data, error } = await supabase
     .from("rides")
     .select(
       "*, drivers(id, first_name, last_name, profile_image_url, car_image_url, car_seats, rating, phone_number)",
@@ -28,10 +61,33 @@ router.get("/", async (_request, response) => {
 
   if (error) throw error;
 
+  const recoveredOfferTripIds = new Map<number, number>();
+  await Promise.all(
+    (data ?? []).map(async (ride: Record<string, any>) => {
+      try {
+        const offerTripId = await restoreLegacyCancelledOfferTripSeat(
+          supabase,
+          ride,
+          userId,
+        );
+        if (offerTripId != null) {
+          recoveredOfferTripIds.set(Number(ride.ride_id), offerTripId);
+        }
+      } catch (recoveryError) {
+        console.error(
+          `Failed to restore seats for legacy cancelled ride ${ride.ride_id}:`,
+          recoveryError,
+        );
+      }
+    }),
+  );
+
   const rides = (data ?? []).map((ride: Record<string, any>) => {
     const driver = Array.isArray(ride.drivers) ? ride.drivers[0] : ride.drivers;
     return {
       ...ride,
+      offer_trip_id:
+        recoveredOfferTripIds.get(Number(ride.ride_id)) ?? ride.offer_trip_id,
       duration_minutes:
         ride.duration_minutes == null ? null : Number(ride.duration_minutes),
       status: ride.status ?? null,
@@ -171,28 +227,35 @@ router.post("/:rideId/cancel", async (request, response) => {
   const supabase = getSupabaseServerClient();
   const { data: ride, error: readError } = await supabase
     .from("rides")
-    .select("ride_id, payment_status")
+    .select("ride_id, payment_status, stripe_payment_id, offer_trip_id")
     .eq("ride_id", rideId)
     .eq("user_id", userId)
     .maybeSingle();
   if (readError) throw readError;
   if (!ride) throw new HttpError(404, "Ride not found");
-  if (ride.payment_status === "cancelled") {
-    response.json({ data: { ok: true } });
-    return;
+
+  let recoveredOfferTripId: number | null = null;
+  if (
+    ride.offer_trip_id == null &&
+    ride.stripe_payment_id
+  ) {
+    const paymentIntent = await getStripeServerClient().paymentIntents.retrieve(
+      ride.stripe_payment_id,
+    );
+    const metadataTripId = Number(paymentIntent.metadata.offer_trip_id);
+    if (Number.isSafeInteger(metadataTripId) && metadataTripId > 0) {
+      recoveredOfferTripId = metadataTripId;
+    }
   }
 
-  const { data, error } = await supabase
-    .from("rides")
-    .update({
-      payment_status: "cancelled",
-      status: "cancelled",
-      cancelled_at: new Date().toISOString(),
-    })
-    .eq("ride_id", rideId)
-    .eq("user_id", userId)
-    .select()
-    .single();
+  const { data, error } = await supabase.rpc(
+    "cancel_ride_and_release_offer_trip_seat",
+    {
+      p_ride_id: rideId,
+      p_user_id: userId,
+      p_recovered_offer_trip_id: recoveredOfferTripId,
+    },
+  );
   if (error) throw error;
   response.json({ data });
 });

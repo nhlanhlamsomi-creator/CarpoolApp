@@ -67,7 +67,13 @@ const OfferTripCard = ({
   const displayName = `${firstName}${lastInitial}`.trim() || "Driver";
   const initial = (firstName[0] ?? displayName[0] ?? "?").toUpperCase();
   const rating = trip.drivers?.rating;
-  const seatsLeft = Math.max(0, trip.seats_available - trip.seats_booked);
+  const seatsLeft = Math.min(
+    trip.seats_available,
+    Math.max(
+      0,
+      trip.available_seats ?? trip.seats_available - trip.seats_booked,
+    ),
+  );
   const departTime = trip.departure_time.slice(0, 5);
   const arriveTime = trip.arrival_time?.slice(0, 5) ?? null;
   const duration = formatDuration(departTime, arriveTime);

@@ -20,6 +20,7 @@ const Payment = ({
   driverId,
   rideTime,
   offerTripId,
+  seatsToBook = 1,
 }: PaymentProps) => {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const {
@@ -106,6 +107,7 @@ const Payment = ({
             body: JSON.stringify({
               tripId: offerTripId,
               payment_intent_id: paymentIntentId,
+              seat_count: seatsToBook,
             }),
           },
           token,
@@ -169,6 +171,7 @@ const Payment = ({
             email: safeEmail,
             amount: paymentAmount,
             offer_trip_id: offerTripId,
+            seat_count: seatsToBook,
           }),
         },
         token,

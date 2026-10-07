@@ -2,6 +2,7 @@ import { useUser } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { router, useLocalSearchParams } from "expo-router";
+import { useState } from "react";
 import { ScrollView, StatusBar, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -39,6 +40,7 @@ const OfferTripBooking = () => {
   const { user } = useUser();
   const { trip: tripParam } = useLocalSearchParams<{ trip?: string }>();
   const trip = parseTrip(tripParam);
+  const [seatsToBook, setSeatsToBook] = useState(1);
   const { vehicle, loading: vehicleLoading } = useDriverVehicle(
     trip?.driver_id,
   );
@@ -64,7 +66,18 @@ const OfferTripBooking = () => {
     .join(" ") || "Your driver";
   const date = formatDate(trip.departure_date);
   const time = trip.departure_time.slice(0, 5);
-  const seatsLeft = Math.max(0, trip.seats_available - trip.seats_booked);
+  const seatsLeft = Math.min(
+    trip.seats_available,
+    Math.max(
+      0,
+      trip.available_seats ?? trip.seats_available - trip.seats_booked,
+    ),
+  );
+  const selectedSeatCount = Math.max(1, Math.min(seatsToBook, seatsLeft));
+  const totalFare =
+    (Math.round(Number(trip.price_per_seat) * 100) *
+      selectedSeatCount) /
+    100;
 
   return (
     <StripeProvider
@@ -169,24 +182,54 @@ const OfferTripBooking = () => {
               </View>
             </View>
 
-            <View style={{ marginTop: 16, paddingTop: 14, borderTopWidth: 1, borderTopColor: ui.border, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+            <View style={{ marginTop: 16, paddingTop: 14, borderTopWidth: 1, borderTopColor: ui.border, flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
               <Text style={{ fontSize: 12, fontFamily: "Jakarta", color: ui.muted }}>
                 {seatsLeft} {seatsLeft === 1 ? "seat" : "seats"} available
               </Text>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <TouchableOpacity
+                  onPress={() => setSeatsToBook((count) => Math.max(1, count - 1))}
+                  disabled={seatsToBook <= 1}
+                  accessibilityRole="button"
+                  accessibilityLabel="Remove one seat"
+                  style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: brand.tint, alignItems: "center", justifyContent: "center", opacity: seatsToBook <= 1 ? 0.45 : 1 }}
+                >
+                  <Ionicons name="remove" size={18} color={brand.dark} />
+                </TouchableOpacity>
+                <Text style={{ fontSize: 12, fontFamily: "Jakarta-Bold", color: ui.ink }}>
+                  {selectedSeatCount}
+                </Text>
+                <TouchableOpacity
+                  onPress={() => setSeatsToBook((count) => Math.min(seatsLeft, count + 1))}
+                  disabled={seatsToBook >= seatsLeft}
+                  accessibilityRole="button"
+                  accessibilityLabel="Add one seat"
+                  style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: brand.tint, alignItems: "center", justifyContent: "center", opacity: seatsToBook >= seatsLeft ? 0.45 : 1 }}
+                >
+                  <Ionicons name="add" size={18} color={brand.dark} />
+                </TouchableOpacity>
+              </View>
               <Text style={{ fontSize: 20, fontFamily: "Jakarta-ExtraBold", color: ui.ink }}>
-                R{Number(trip.price_per_seat).toFixed(2)}
+                R{totalFare.toFixed(2)}
               </Text>
             </View>
           </View>
 
-          <Payment
-            fullName={user?.fullName ?? ""}
-            email={user?.emailAddresses[0]?.emailAddress ?? ""}
-            amount={String(trip.price_per_seat)}
-            driverId={trip.driver_id}
-            rideTime={0}
-            offerTripId={trip.id}
-          />
+          {seatsLeft > 0 ? (
+            <Payment
+              fullName={user?.fullName ?? ""}
+              email={user?.emailAddresses[0]?.emailAddress ?? ""}
+              amount={totalFare.toFixed(2)}
+              driverId={trip.driver_id}
+              rideTime={0}
+              offerTripId={trip.id}
+              seatsToBook={selectedSeatCount}
+            />
+          ) : (
+            <Text style={{ marginTop: 16, textAlign: "center", color: ui.muted }}>
+              This trip no longer has any available seats.
+            </Text>
+          )}
         </ScrollView>
       </SafeAreaView>
     </StripeProvider>
