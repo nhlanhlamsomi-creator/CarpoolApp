@@ -8,6 +8,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Payment from "@/components/Payment";
 import { brand, ui } from "@/constants/theme";
 import { formatDate } from "@/lib/utils";
+import { useDriverVehicle } from "@/lib/useDriverVehicle";
 import { OfferTrip } from "@/types/type";
 
 const parseTrip = (value?: string | string[]): OfferTrip | null => {
@@ -38,6 +39,9 @@ const OfferTripBooking = () => {
   const { user } = useUser();
   const { trip: tripParam } = useLocalSearchParams<{ trip?: string }>();
   const trip = parseTrip(tripParam);
+  const { vehicle, loading: vehicleLoading } = useDriverVehicle(
+    trip?.driver_id,
+  );
 
   if (!trip) {
     return (
@@ -125,6 +129,28 @@ const OfferTripBooking = () => {
             </View>
 
             <View style={{ height: 1, backgroundColor: ui.border, marginBottom: 16 }} />
+            <View
+              style={{
+                marginBottom: 16,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 10,
+                borderRadius: 14,
+                backgroundColor: ui.bg,
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+              }}
+            >
+              <Ionicons name="car-outline" size={18} color={brand.dark} />
+              <Text style={{ flex: 1, fontSize: 12, fontFamily: "Jakarta", color: ui.muted }}>
+                Vehicle plate
+              </Text>
+              <Text style={{ fontSize: 13, fontFamily: "Jakarta-Bold", color: ui.ink }}>
+                {vehicleLoading
+                  ? "Loading…"
+                  : vehicle?.plate ?? "Plate unavailable"}
+              </Text>
+            </View>
             <View style={{ flexDirection: "row", gap: 10 }}>
               <View style={{ alignItems: "center", paddingTop: 3 }}>
                 <View style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: brand.accent }} />

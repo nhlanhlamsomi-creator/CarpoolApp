@@ -18,6 +18,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Payment from "@/components/Payment";
 import { brand, ui } from "@/constants/theme";
 import { formatTime } from "@/lib/utils";
+import { useDriverVehicle } from "@/lib/useDriverVehicle";
 import { useDriverStore, useLocationStore } from "@/store";
 
 // ─── Palette ─────────────────────────────────────────────────────────────────
@@ -35,6 +36,9 @@ const PALETTE = {
 
 const BookRide = () => {
   const { user } = useUser();
+  const { vehicle, loading: vehicleLoading } = useDriverVehicle(
+    useDriverStore((state) => state.selectedDriver),
+  );
   const { userAddress, destinationAddress } = useLocationStore();
   const { drivers, selectedDriver } = useDriverStore();
 
@@ -394,9 +398,12 @@ const BookRide = () => {
                   }}
                   numberOfLines={1}
                 >
-                  {driverDetails?.car_model ??
-                    driverDetails?.car_type ??
-                    "Vehicle"}
+                  {[vehicle?.year, vehicle?.make, vehicle?.model]
+                    .filter(Boolean)
+                    .join(" ") ||
+                    (driverDetails?.car_model ??
+                      driverDetails?.car_type ??
+                      "Vehicle")}
                 </Text>
 
                 <View
@@ -419,9 +426,12 @@ const BookRide = () => {
                       letterSpacing: 1.5,
                     }}
                   >
-                    {driverDetails?.license_plate ??
+                    {vehicleLoading
+                      ? "Loading plate…"
+                      : vehicle?.plate ??
+                        driverDetails?.license_plate ??
                       driverDetails?.car_number ??
-                      "— — —"}
+                      "Plate unavailable"}
                   </Text>
                 </View>
               </View>

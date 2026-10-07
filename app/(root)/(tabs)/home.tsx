@@ -158,6 +158,7 @@ const Home = () => {
         renderItem={({ item }) => (
           <RideCard
             ride={item}
+            layout="home"
             variant={
               ["booked", "scheduled", "accepted", "in_progress"].includes(
                 item.status ?? "",
