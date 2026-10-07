@@ -1,5 +1,5 @@
 import { useAuth } from "@clerk/expo";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { apiRequest } from "@/lib/api";
 
@@ -14,11 +14,16 @@ export type DriverVehicle = {
 
 export function useDriverVehicle(driverId?: number | null) {
   const { getToken } = useAuth();
+  const getTokenRef = useRef(getToken);
   const [vehicleResult, setVehicleResult] = useState<{
     driverId: number;
     vehicle: DriverVehicle | null;
   } | null>(null);
   const [loadingDriverId, setLoadingDriverId] = useState<number | null>(null);
+
+  useEffect(() => {
+    getTokenRef.current = getToken;
+  }, [getToken]);
 
   useEffect(() => {
     let active = true;
@@ -28,7 +33,7 @@ export function useDriverVehicle(driverId?: number | null) {
     const loadVehicle = async () => {
       setLoadingDriverId(driverId);
       try {
-        const token = await getToken();
+        const token = await getTokenRef.current();
         const result = await apiRequest<{ data: { vehicle: DriverVehicle } }>(
           `/api/drivers/${driverId}/vehicle`,
           {},
@@ -53,7 +58,7 @@ export function useDriverVehicle(driverId?: number | null) {
     return () => {
       active = false;
     };
-  }, [driverId, getToken]);
+  }, [driverId]);
 
   return {
     vehicle:
