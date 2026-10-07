@@ -1,6 +1,7 @@
 import {
   formatDate,
   formatTime,
+  estimateDropoffTime,
   isDriverVisible,
   sortRides,
 } from '../../lib/utils';
@@ -44,5 +45,15 @@ describe('Utility functions', () => {
 
   it('UT-UTIL-04: formats dates into a readable display string', () => {
     expect(formatDate('2024-01-03')).toBe('03 January 2024');
+  });
+
+  it('estimates drop-off clock time from pickup ETA plus trip duration', () => {
+    const now = new Date(2024, 0, 3, 17, 40);
+
+    expect(estimateDropoffTime(20, 40, now)).toBe('18:40');
+    expect(estimateDropoffTime(20, 40, new Date(2024, 0, 3, 23, 40))).toBe(
+      '00:40',
+    );
+    expect(estimateDropoffTime(Number.NaN, 40, now)).toBe('—');
   });
 });

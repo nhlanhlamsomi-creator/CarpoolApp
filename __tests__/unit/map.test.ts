@@ -97,4 +97,30 @@ describe('Map utilities', () => {
     expect(result[0].trip_time).toBeGreaterThan(0);
     expect(Number(result[0].price)).toBeGreaterThan(0);
   });
+
+  it('uses routed distance and duration when estimating pickup and trip times', async () => {
+    const originalFetch = global.fetch;
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        features: [{ properties: { distance: 20000, time: 1800 } }],
+      }),
+    }) as typeof fetch;
+
+    try {
+      const result = await calculateDriverTimes({
+        markers: [{ id: 1, latitude: -26.19, longitude: 28.03 }] as any[],
+        userLatitude: -26.20,
+        userLongitude: 28.04,
+        destinationLatitude: -26.22,
+        destinationLongitude: 28.06,
+        apiKey: 'test-key',
+      });
+
+      expect(result[0].trip_time).toBe(30);
+      expect(result[0].time).toBeGreaterThan(3);
+    } finally {
+      global.fetch = originalFetch;
+    }
+  });
 });

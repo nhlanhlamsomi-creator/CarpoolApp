@@ -71,6 +71,29 @@ export function formatTime(value: number | string): string {
   return "";
 }
 
+export function estimateDropoffTime(
+  pickupEtaMinutes: number,
+  tripDurationMinutes: number,
+  now = new Date(),
+): string {
+  if (
+    !Number.isFinite(pickupEtaMinutes) ||
+    !Number.isFinite(tripDurationMinutes) ||
+    pickupEtaMinutes < 0 ||
+    tripDurationMinutes < 0 ||
+    Number.isNaN(now.getTime())
+  ) {
+    return "—";
+  }
+
+  const dropoff = new Date(
+    now.getTime() + (pickupEtaMinutes + tripDurationMinutes) * 60_000,
+  );
+  return `${String(dropoff.getHours()).padStart(2, "0")}:${String(
+    dropoff.getMinutes(),
+  ).padStart(2, "0")}`;
+}
+
 export function formatDate(dateString: string): string {
   const date = new Date(dateString);
   const day = date.getDate();

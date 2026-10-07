@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
-import { formatTime } from "@/lib/utils";
+import { estimateDropoffTime, formatTime } from "@/lib/utils";
 import { DriverCardProps } from "@/types/type";
 
 const DriverCard = ({ item, selected, setSelected }: DriverCardProps) => {
@@ -50,11 +50,24 @@ const DriverCard = ({ item, selected, setSelected }: DriverCardProps) => {
         </View>
 
         {/* Meta chips — spaced, not pipe-separated */}
-        <View className="mt-2 flex-row items-center gap-3">
+        <View className="mt-2 flex-row flex-wrap items-center gap-3">
           <View className="flex-row items-center gap-1">
             <Ionicons name="time-outline" size={13} color="#746A7E" />
             <Text className="text-xs font-JakartaMedium text-[#746A7E]">
-              {formatTime(item.time!)}
+              Pickup ~{formatTime(item.time ?? 0)}
+            </Text>
+          </View>
+
+          <View className="h-3 w-[1px] bg-[#E9E2F0]" />
+
+          <View className="flex-row items-center gap-1">
+            <Ionicons name="navigate-outline" size={13} color="#746A7E" />
+            <Text className="text-xs font-JakartaMedium text-[#746A7E]">
+              Drop-off ~
+              {estimateDropoffTime(
+                item.time ?? Number.NaN,
+                item.trip_time ?? Number.NaN,
+              )}
             </Text>
           </View>
 

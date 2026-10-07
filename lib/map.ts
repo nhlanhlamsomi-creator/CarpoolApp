@@ -87,12 +87,14 @@ export const calculateDriverTimes = async ({
   userLongitude,
   destinationLatitude,
   destinationLongitude,
+  apiKey,
 }: {
   markers: MarkerData[];
   userLatitude: number | null;
   userLongitude: number | null;
   destinationLatitude: number | null;
   destinationLongitude: number | null;
+  apiKey?: string;
 }) => {
   // If any required location is missing, return markers unchanged
   if (
@@ -129,7 +131,34 @@ export const calculateDriverTimes = async ({
   // Pricing parameters (tweak as needed)
   const baseFare = 10; // base fare in currency units
   const perKm = 5; // per-kilometre rate
-  const avgSpeedKmh = 40; // used to estimate time in minutes
+  const fallbackSpeedKmh = 40;
+  const directTripDistanceKm = haversineKm(
+    userLatitude,
+    userLongitude,
+    destinationLatitude,
+    destinationLongitude,
+  );
+  const tripRoute = apiKey
+    ? await fetchRouteMetrics({
+        originLatitude: userLatitude,
+        originLongitude: userLongitude,
+        destinationLatitude,
+        destinationLongitude,
+        apiKey,
+      })
+    : null;
+  const roadFactor =
+    tripRoute && directTripDistanceKm > 0
+      ? tripRoute.distanceKm / directTripDistanceKm
+      : 1;
+  const routeSpeedKmh =
+    tripRoute && tripRoute.durationMinutes > 0
+      ? tripRoute.distanceKm / (tripRoute.durationMinutes / 60)
+      : fallbackSpeedKmh;
+  const estimatedSpeedKmh =
+    Number.isFinite(routeSpeedKmh) && routeSpeedKmh > 0
+      ? routeSpeedKmh
+      : fallbackSpeedKmh;
 
   return markers.map((marker) => {
     const distToUserKm = haversineKm(
@@ -149,10 +178,19 @@ export const calculateDriverTimes = async ({
     const totalDistanceKm = distToUserKm + distUserToDestKm;
 
     // Estimate ETA (minutes) from driver to user
-    const etaMinutes = Math.max(1, Math.round((distToUserKm / avgSpeedKmh) * 60));
+    const etaMinutes = Math.max(
+      1,
+      Math.round(((distToUserKm * roadFactor) / estimatedSpeedKmh) * 60),
+    );
 
     // Estimate trip duration (minutes) from pickup to destination
-    const tripMinutes = Math.max(1, Math.round((distUserToDestKm / avgSpeedKmh) * 60));
+    const tripMinutes = Math.max(
+      1,
+      tripRoute?.durationMinutes ??
+        Math.round(
+          ((distUserToDestKm * roadFactor) / estimatedSpeedKmh) * 60,
+        ),
+    );
 
     // Price = base fare + per-km * total distance
     const price = baseFare + perKm * totalDistanceKm;
@@ -167,6 +205,71 @@ export const calculateDriverTimes = async ({
     };
   });
 };
+
+async function fetchRouteMetrics({
+  originLatitude,
+  originLongitude,
+  destinationLatitude,
+  destinationLongitude,
+  apiKey,
+}: {
+  originLatitude: number;
+  originLongitude: number;
+  destinationLatitude: number;
+  destinationLongitude: number;
+  apiKey: string;
+}): Promise<{ distanceKm: number; durationMinutes: number } | null> {
+  const params = new URLSearchParams({
+    waypoints: `${originLatitude},${originLongitude}|${destinationLatitude},${destinationLongitude}`,
+    mode: "drive",
+    apiKey,
+  });
+
+  try {
+    const response = await fetch(
+      `https://api.geoapify.com/v1/routing?${params.toString()}`,
+    );
+    if (!response.ok) {
+      console.warn("Geoapify route estimate failed", {
+        status: response.status,
+      });
+      return null;
+    }
+
+    const data: unknown = await response.json();
+    if (!data || typeof data !== "object" || !("features" in data)) {
+      return null;
+    }
+    const feature = Array.isArray(data.features) ? data.features[0] : null;
+    const properties =
+      feature && typeof feature === "object" && "properties" in feature
+        ? feature.properties
+        : null;
+    if (!properties || typeof properties !== "object") {
+      return null;
+    }
+
+    const distanceMeters =
+      "distance" in properties ? Number(properties.distance) : NaN;
+    const durationSeconds = "time" in properties ? Number(properties.time) : NaN;
+    if (
+      !Number.isFinite(distanceMeters) ||
+      distanceMeters <= 0 ||
+      !Number.isFinite(durationSeconds) ||
+      durationSeconds <= 0
+    ) {
+      return null;
+    }
+
+    return {
+      distanceKm: distanceMeters / 1000,
+      durationMinutes: Math.max(1, Math.round(durationSeconds / 60)),
+    };
+  } catch (error) {
+    console.warn("Geoapify route estimate unavailable", error);
+    return null;
+  }
+}
 
 /**
  * Fetch a route from the Geoapify Routing API.

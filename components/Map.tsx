@@ -184,6 +184,8 @@ export default function Map() {
   }, [userLatitude, userLongitude, drivers, rideBooked, selectedDriver]);
 
   useEffect(() => {
+    let isCurrent = true;
+
     if (
       markers.length &&
       destinationLatitude != null &&
@@ -195,12 +197,21 @@ export default function Map() {
         userLongitude,
         destinationLatitude,
         destinationLongitude,
+        apiKey: GEOAPIFY_API_KEY,
       }).then((driversWithTimes) => {
-        setStoreDrivers(driversWithTimes as MarkerData[]);
+        if (isCurrent) {
+          setStoreDrivers(driversWithTimes as MarkerData[]);
+        }
+      }).catch((error: unknown) => {
+        console.error("Failed to estimate driver arrival and trip times:", error);
       });
     } else {
       setStoreDrivers([]);
     }
+
+    return () => {
+      isCurrent = false;
+    };
   }, [
     markers,
     destinationLatitude,
