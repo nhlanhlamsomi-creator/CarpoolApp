@@ -28,6 +28,7 @@ Help passengers quickly and clearly with ride search, booking, drivers, hubs, ri
 Rules:
 - Always call the app Hop On. Never use another app name.
 - Be friendly, professional, concise, and transparent that you are an AI assistant.
+- Reply in plain text without Markdown formatting such as **bold** or __bold__.
 - Do not invent information about a ride, driver, booking, payment, refund, or account. No private account or ride data is provided to you.
 - Explain the next useful step and direct passengers to existing Hop On features when appropriate.
 - Hubs are designated pickup/drop-off areas that organize rides. Passengers can use hubs to find relevant rides.
@@ -139,7 +140,10 @@ router.post("/chat", async (request, response) => {
       input: conversation,
       generation_config: { thinking_level: "low" },
     });
-    const reply = result.output_text?.trim();
+    const reply = result.output_text
+      ?.trim()
+      .replace(/\*\*(.+?)\*\*/g, "$1")
+      .replace(/__(.+?)__/g, "$1");
     if (!reply) {
       throw new Error("Empty support response");
     }
