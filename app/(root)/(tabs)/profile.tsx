@@ -1255,6 +1255,12 @@ const Profile = () => {
             {expandedSections.support && (
               <View style={{ marginBottom: 20 }}>
                 <SectionCard
+                  title="Help & Support"
+                  value="Find answers or chat with Hop On Support"
+                  iconSource={icons.support}
+                  onPress={() => router.push("/(root)/help-support")}
+                />
+                <SectionCard
                   title="WhatsApp support"
                   value="Fastest reply, usually within an hour"
                   iconSource={icons.whatsappSupport}
@@ -1267,7 +1273,7 @@ const Profile = () => {
                   onPress={() =>
                     openLink(
                       `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
-                        "Lyft support request",
+                        "Hop On support request",
                       )}&body=${encodeURIComponent(
                         `\n\n---\nAccount: ${emailAddress}\nName: ${fullName}`,
                       )}`,

@@ -14,6 +14,7 @@ import paymentsRouter from "./routes/payments";
 import ratingsRouter from "./routes/ratings";
 import ridesRouter from "./routes/rides";
 import sosRouter from "./routes/sos";
+import supportRouter from "./routes/support";
 import { getSupabaseServerClient } from "./services/supabase";
 
 dotenv.config({ path: path.resolve(__dirname, "../.env"), quiet: true });
@@ -273,6 +274,7 @@ app.use("/api/profile", requireAuth, profileRouter);
 app.use("/api/ratings", requireAuth, ratingsRouter);
 app.use("/api/rides", requireAuth, ridesRouter);
 app.use("/api/sos", requireAuth, sosRouter);
+app.use("/api/support", requireAuth, supportRouter);
 app.use("/api/payments", requireAuth, paymentsRouter);
 
 app.use(notFoundHandler);
@@ -281,5 +283,5 @@ app.use(errorHandler);
 const port = Number(process.env.PORT || 3000);
 
 app.listen(port, "0.0.0.0", () => {
-  console.log(`Lyft API listening on port ${port}`);
+  console.log(`Hop On API listening on port ${port}`);
 });

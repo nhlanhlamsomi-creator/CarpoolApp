@@ -32,6 +32,8 @@ const Layout = () => {
       <Stack.Screen name="verification" />
       <Stack.Screen name="payment-methods" />
       <Stack.Screen name="change-password" />
+      <Stack.Screen name="help-support" />
+      <Stack.Screen name="support-chat" />
 
       {/* Legal is reference material rather than a step forward, so it slides
           up like a document being pulled out */}

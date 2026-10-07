@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@clerk/backend": "^3.16.13",
+    "@google/genai": "^2.27.0",
     "@supabase/supabase-js": "^2.109.0",
     "cors": "^2.8.5",
     "dotenv": "^17.4.2",
