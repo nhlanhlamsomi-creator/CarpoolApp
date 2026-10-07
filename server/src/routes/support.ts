@@ -120,7 +120,7 @@ router.post("/chat", async (request, response) => {
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    throw new HttpError(503, "Hop On Support is temporarily unavailable. Please try again shortly.");
+    throw new HttpError(503, "AI_SUPPORT_NOT_CONFIGURED");
   }
 
   try {
@@ -145,8 +145,17 @@ router.post("/chat", async (request, response) => {
     }
 
     response.json({ success: true, reply, safety: false });
-  } catch {
-    throw new HttpError(502, "I couldn't process that right now. Please try again.");
+  } catch (error) {
+    const details =
+      error && typeof error === "object"
+        ? (error as { name?: unknown; status?: unknown; code?: unknown })
+        : {};
+    console.error("Gemini support request failed", {
+      errorName: typeof details.name === "string" ? details.name : "UnknownError",
+      status: typeof details.status === "number" ? details.status : undefined,
+      code: typeof details.code === "string" ? details.code : undefined,
+    });
+    throw new HttpError(502, "AI_SUPPORT_UPSTREAM_ERROR");
   }
 });
 

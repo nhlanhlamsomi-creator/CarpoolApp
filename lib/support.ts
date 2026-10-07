@@ -78,6 +78,12 @@ export const INITIAL_SUPPORT_MESSAGE =
 
 export function supportErrorMessage(error: unknown): string {
   const message = error instanceof Error ? error.message : "";
+  if (/AI_SUPPORT_NOT_CONFIGURED/i.test(message)) {
+    return "AI Support is not configured on the server yet. Please contact Hop On Support. The server owner needs to add GEMINI_API_KEY to the backend environment.";
+  }
+  if (/endpoint not found|404/i.test(message)) {
+    return "The support chat endpoint is not available on the current backend. Please contact Hop On Support so the server can be updated.";
+  }
   if (/429|sending messages too quickly/i.test(message)) {
     return "You're sending messages too quickly. Please wait a moment and try again.";
   }
@@ -87,8 +93,8 @@ export function supportErrorMessage(error: unknown): string {
   if (/network request failed|failed to fetch|networkerror|offline|timed out/i.test(message)) {
     return "You're offline. Check your internet connection and try again.";
   }
-  if (/temporarily unavailable|502|503|504|500|couldn't process/i.test(message)) {
-    return "Hop On Support is temporarily unavailable. Please try again shortly.";
+  if (/AI_SUPPORT_UPSTREAM_ERROR|temporarily unavailable|502|503|504|500|couldn't process|internal server error/i.test(message)) {
+    return "Hop On AI Support could not reach its AI service. Please try again shortly or contact human support if this continues.";
   }
   return "Sorry, we're having trouble connecting to Hop On Support right now. Please try again.";
 }
