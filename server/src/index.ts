@@ -7,6 +7,7 @@ import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
 import { requireAuth } from "./middleware/requireAuth";
 import checkIdRouter from "./routes/checkId";
 import driverVehicleRouter from "./routes/driverVehicle";
+import driverWalletRouter from "./routes/driverWallet";
 import healthRouter from "./routes/health";
 import messagesRouter from "./routes/messages";
 import offerTripsRouter from "./routes/offerTrips";
@@ -259,10 +260,11 @@ app.use(
       callback(new Error("Origin is not allowed by CORS"));
     },
     methods: ["GET", "POST", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Authorization", "Content-Type"],
+    allowedHeaders: ["Authorization", "Content-Type", "stripe-signature"],
   }),
 );
 
+app.use("/api/driver-wallet/webhooks", express.raw({ type: "application/json" }));
 app.use(express.json({ limit: "32kb" }));
 
 app.use("/api/health", healthRouter);
@@ -270,6 +272,7 @@ app.use("/api/check-id", requireAuth, checkIdRouter);
 app.use("/api/drivers", requireAuth, driverVehicleRouter);
 app.use("/api/messages", requireAuth, messagesRouter);
 app.use("/api/offer-trip", offerTripsRouter);
+app.use("/api/driver-wallet", requireAuth, driverWalletRouter);
 app.use("/api/profile", requireAuth, profileRouter);
 app.use("/api/ratings", requireAuth, ratingsRouter);
 app.use("/api/rides", requireAuth, ridesRouter);
