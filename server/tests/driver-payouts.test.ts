@@ -5,6 +5,7 @@ import {
   createDriverWithdrawal,
   normalizeDriverPayoutAmount,
   processStripePayoutEvent,
+  verifyStripePayoutWebhookSignature,
 } from "../src/services/driverPayoutService";
 
 function createSupabaseMock() {
@@ -98,6 +99,13 @@ describe("driver payout flow", () => {
   it("blocks withdrawals above the connected account available balance", async () => {
     const supabase = createSupabaseMock();
     const stripe = {
+      accounts: {
+        retrieve: async () => ({
+          id: "acct_123",
+          payouts_enabled: true,
+          capabilities: { transfers: "active" },
+        }),
+      },
       balance: {
         retrieve: async () => ({
           available: [{ currency: "zar", amount: 4000 }],
@@ -118,6 +126,13 @@ describe("driver payout flow", () => {
   it("stores a pending payout and ignores a duplicate webhook event", async () => {
     const supabase = createSupabaseMock();
     const stripe = {
+      accounts: {
+        retrieve: async () => ({
+          id: "acct_123",
+          payouts_enabled: true,
+          capabilities: { transfers: "active" },
+        }),
+      },
       balance: {
         retrieve: async () => ({
           available: [{ currency: "zar", amount: 10000 }],
@@ -125,7 +140,7 @@ describe("driver payout flow", () => {
         }),
       },
       payouts: {
-        create: async () => ({ id: "po_789", status: "pending" }),
+        create: async () => ({ id: "po_789", status: "paid" }),
       },
     } as any;
 
@@ -169,5 +184,117 @@ describe("driver payout flow", () => {
     });
     assert.equal(duplicate.duplicate, true);
     assert.equal(supabase.state.driver_withdrawals[0].status, "paid");
+  });
+
+  it("marks failed payouts and adds only one ledger reversal", async () => {
+    const supabase = createSupabaseMock();
+    const stripe = {
+      accounts: {
+        retrieve: async () => ({
+          id: "acct_123",
+          payouts_enabled: true,
+          capabilities: { transfers: "active" },
+        }),
+      },
+      balance: {
+        retrieve: async () => ({
+          available: [{ currency: "zar", amount: 10000 }],
+          pending: [{ currency: "zar", amount: 0 }],
+        }),
+      },
+      payouts: {
+        create: async () => ({ id: "po_failed", status: "pending" }),
+      },
+    } as any;
+
+    await createDriverWithdrawal({
+      stripe,
+      supabase: supabase as any,
+      clerkId: "driver-1",
+      amount: 50,
+    });
+
+    const event = {
+      id: "evt_failed",
+      type: "payout.failed",
+      account: "acct_123",
+      data: {
+        object: {
+          id: "po_failed",
+          amount: 5000,
+          currency: "zar",
+          metadata: { driver_id: "1" },
+          failure_code: "account_closed",
+          failure_message: "The destination account is closed",
+        },
+      },
+    } as any;
+
+    await processStripePayoutEvent({ stripe, supabase: supabase as any, event });
+    await processStripePayoutEvent({ stripe, supabase: supabase as any, event });
+
+    assert.equal(supabase.state.driver_withdrawals[0].status, "failed");
+    assert.equal(supabase.state.driver_withdrawals[0].failure_reason, "account_closed");
+    assert.equal(supabase.state.driver_ledger_entries.length, 2);
+    assert.equal(supabase.state.driver_ledger_entries[1].entry_type, "withdrawal_reversal");
+    assert.equal(supabase.state.driver_ledger_entries[1].amount_cents, 5000);
+  });
+
+  it("rejects an invalid Stripe webhook signature", () => {
+    const previousSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    process.env.STRIPE_WEBHOOK_SECRET = "whsec_test";
+    try {
+      assert.throws(
+        () =>
+          verifyStripePayoutWebhookSignature({
+            stripe: {
+              webhooks: {
+                constructEvent: () => {
+                  throw new Error("signature verification failed");
+                },
+              },
+            } as any,
+            rawBody: Buffer.from("{}"),
+            signature: "invalid",
+          }),
+        /signature verification failed/,
+      );
+    } finally {
+      if (previousSecret === undefined) {
+        delete process.env.STRIPE_WEBHOOK_SECRET;
+      } else {
+        process.env.STRIPE_WEBHOOK_SECRET = previousSecret;
+      }
+    }
+  });
+
+  it("requires completed Connect onboarding before creating a payout", async () => {
+    const supabase = createSupabaseMock();
+    const stripe = {
+      accounts: {
+        retrieve: async () => ({ id: "acct_123", payouts_enabled: false }),
+      },
+      balance: {
+        retrieve: async () => ({
+          available: [{ currency: "zar", amount: 10000 }],
+          pending: [{ currency: "zar", amount: 0 }],
+        }),
+      },
+      payouts: {
+        create: async () => ({ id: "po_999", status: "pending" }),
+      },
+    } as any;
+
+    await assert.rejects(
+      () =>
+        createDriverWithdrawal({
+          stripe,
+          supabase: supabase as any,
+          clerkId: "driver-1",
+          amount: 50,
+        }),
+      /complete stripe connect onboarding/i,
+    );
+    assert.equal(supabase.state.driver_withdrawals.length, 0);
   });
 });

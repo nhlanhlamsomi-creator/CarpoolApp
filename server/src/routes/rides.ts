@@ -2,6 +2,7 @@ import { Router } from "express";
 import { HttpError } from "../middleware/errorHandler";
 import { getStripeServerClient } from "../services/stripe";
 import { getSupabaseServerClient } from "../services/supabase";
+import { recordDriverPaymentLedger } from "../services/driverPayoutService";
 
 const router = Router();
 
@@ -170,8 +171,11 @@ router.post("/", async (request, response) => {
 
   const stripe = getStripeServerClient();
   const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-  if (paymentIntent.metadata.clerk_user_id !== userId) {
-    throw new HttpError(403, "Payment does not belong to this account");
+  if (
+    paymentIntent.metadata.clerk_user_id !== userId ||
+    paymentIntent.metadata.driver_id !== String(driverId)
+  ) {
+    throw new HttpError(403, "Payment does not belong to this account or driver");
   }
   if (
     paymentIntent.status !== "succeeded" ||
@@ -214,6 +218,12 @@ router.post("/", async (request, response) => {
     .single();
 
   if (error) throw error;
+  await recordDriverPaymentLedger({
+    supabase,
+    driverId,
+    paymentIntentId,
+    amountCents: paymentIntent.amount,
+  });
   response.status(201).json({ data });
 });
 

@@ -7,8 +7,11 @@ export function getStripeServerClient(): Stripe {
   if (client) return client;
 
   const secretKey = process.env.STRIPE_SECRET_KEY;
-  if (!secretKey) {
-    throw new HttpError(500, "Payments are not configured");
+  if (!secretKey?.startsWith("sk_test_")) {
+    throw new HttpError(
+      503,
+      "Stripe Sandbox is not configured. Set STRIPE_SECRET_KEY to a test-mode secret key.",
+    );
   }
 
   client = new Stripe(secretKey);

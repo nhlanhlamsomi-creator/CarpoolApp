@@ -3,6 +3,7 @@ import { HttpError } from "../middleware/errorHandler";
 import { requireAuth } from "../middleware/requireAuth";
 import { getStripeServerClient } from "../services/stripe";
 import { getSupabaseServerClient } from "../services/supabase";
+import { recordDriverPaymentLedger } from "../services/driverPayoutService";
 
 const router = Router();
 
@@ -103,7 +104,12 @@ router.post("/", requireAuth, async (request, response) => {
       limit: 1,
     });
     if (existingRefunds.data.length === 0) {
-      await stripe.refunds.create({ payment_intent: paymentIntentId });
+      await stripe.refunds.create({
+        payment_intent: paymentIntentId,
+        ...(paymentIntent.transfer_data?.destination
+          ? { reverse_transfer: true }
+          : {}),
+      });
     }
   };
 
@@ -166,6 +172,12 @@ router.post("/", requireAuth, async (request, response) => {
     ) {
       throw new HttpError(409, "This booking has already been cancelled");
     }
+    await recordDriverPaymentLedger({
+      supabase,
+      driverId: Number(trip.driver_id),
+      paymentIntentId,
+      amountCents: paymentIntent.amount,
+    });
     response.status(200).json({ data: { ride: existingRide } });
     return;
   }
@@ -195,6 +207,12 @@ router.post("/", requireAuth, async (request, response) => {
     );
   }
 
+  await recordDriverPaymentLedger({
+    supabase,
+    driverId: Number(trip.driver_id),
+    paymentIntentId,
+    amountCents: paymentIntent.amount,
+  });
   response.status(201).json({ data: booking });
 });
 

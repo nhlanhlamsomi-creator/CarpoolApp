@@ -4,6 +4,35 @@ import { getSupabaseServerClient } from "./supabase";
 
 export type DriverRecord = Record<string, any>;
 
+const PAYOUT_CURRENCY = "zar";
+
+export async function recordDriverPaymentLedger({
+  supabase,
+  driverId,
+  paymentIntentId,
+  amountCents,
+}: {
+  supabase: ReturnType<typeof getSupabaseServerClient>;
+  driverId: number;
+  paymentIntentId: string;
+  amountCents: number;
+}) {
+  const { error } = await supabase.from("driver_ledger_entries").insert({
+    driver_id: driverId,
+    entry_type: "payment",
+    amount_cents: amountCents,
+    currency: PAYOUT_CURRENCY,
+    related_type: "payment_intent",
+    related_id: paymentIntentId,
+    description: `Passenger payment of ${amountCents / 100} ZAR`,
+  });
+
+  if (String(error?.code) === "23505" || error?.message?.includes("duplicate")) {
+    return;
+  }
+  if (error) throw error;
+}
+
 export function normalizeDriverPayoutAmount(value: unknown): number {
   const amount = Number(value);
   if (!Number.isFinite(amount) || amount <= 0 || !Number.isSafeInteger(Math.round(amount * 100))) {
@@ -40,37 +69,62 @@ export async function ensureDriverStripeConnectAccount({
   clerkId: string;
 }) {
   const driver = await getDriverFromClerkId(clerkId, supabase);
+  const appUrl = process.env.APP_URL;
+  if (!appUrl) {
+    throw new HttpError(503, "APP_URL must be configured for Stripe Connect onboarding");
+  }
 
+  let account: Stripe.Account;
   if (driver.stripe_connected_account_id) {
+    account = await stripe.accounts.retrieve(driver.stripe_connected_account_id);
+  } else {
+    const country = process.env.STRIPE_CONNECT_ACCOUNT_COUNTRY?.toUpperCase();
+    if (!country || !/^[A-Z]{2}$/.test(country)) {
+      throw new HttpError(
+        503,
+        "Set STRIPE_CONNECT_ACCOUNT_COUNTRY to the driver's eligible Stripe country",
+      );
+    }
+
+    account = await stripe.accounts.create({
+      type: "express",
+      country,
+      ...(driver.email ? { email: driver.email } : {}),
+      capabilities: { transfers: { requested: true } },
+      metadata: {
+        driver_id: String(driver.id),
+        clerk_user_id: clerkId,
+        source: "driver-wallet",
+      },
+    });
+  }
+
+  const accountReady =
+    account.payouts_enabled && account.capabilities?.transfers === "active";
+  if (accountReady) {
+    const { error } = await supabase
+      .from("drivers")
+      .update({
+        stripe_account_status: "connected",
+        stripe_onboarding_url: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", driver.id);
+    if (error) throw error;
+
     return {
-      driver,
-      accountId: driver.stripe_connected_account_id,
-      onboardingUrl: driver.stripe_onboarding_url ?? null,
-      status: driver.stripe_account_status ?? "connected",
+      driver: { ...driver, stripe_account_status: "connected", stripe_onboarding_url: null },
+      driverId: driver.id,
+      accountId: account.id,
+      onboardingUrl: null,
+      status: "connected",
     };
   }
 
-  const account = await stripe.accounts.create({
-    type: "standard",
-    country: "US",
-    email: driver.email ?? `${clerkId}@example.invalid`,
-    capabilities: { transfers: { requested: true } },
-    metadata: {
-      driver_id: String(driver.id),
-      clerk_user_id: clerkId,
-      source: "driver-wallet",
-    },
-  });
-
-  const returnUrl =
-    process.env.APP_URL || "https://example.com/driver/onboarding/return";
-  const refreshUrl =
-    process.env.APP_URL || "https://example.com/driver/onboarding/refresh";
-
   const onboarding = await stripe.accountLinks.create({
     account: account.id,
-    refresh_url: refreshUrl,
-    return_url: returnUrl,
+    refresh_url: new URL("/driver/onboarding/refresh", appUrl).toString(),
+    return_url: new URL("/driver/onboarding/return", appUrl).toString(),
     type: "account_onboarding",
   });
 
@@ -78,7 +132,7 @@ export async function ensureDriverStripeConnectAccount({
     .from("drivers")
     .update({
       stripe_connected_account_id: account.id,
-      stripe_account_status: "created",
+      stripe_account_status: "onboarding_required",
       stripe_onboarding_url: onboarding.url,
       updated_at: new Date().toISOString(),
     })
@@ -90,12 +144,13 @@ export async function ensureDriverStripeConnectAccount({
     driver: {
       ...driver,
       stripe_connected_account_id: account.id,
-      stripe_account_status: "created",
+      stripe_account_status: "onboarding_required",
       stripe_onboarding_url: onboarding.url,
     },
+    driverId: driver.id,
     accountId: account.id,
     onboardingUrl: onboarding.url,
-    status: "created",
+    status: "onboarding_required",
   };
 }
 
@@ -113,14 +168,19 @@ export async function getDriverAvailableBalance({
     throw new HttpError(400, "Driver Stripe account has not been configured");
   }
 
+  const account = await stripe.accounts.retrieve(driver.stripe_connected_account_id);
   const balance = await stripe.balance.retrieve(undefined, {
     stripeAccount: driver.stripe_connected_account_id,
   } as Stripe.RequestOptions);
-  const available = balance.available?.find((entry) => entry.currency === "zar")?.amount ?? 0;
-  const pending = balance.pending?.find((entry) => entry.currency === "zar")?.amount ?? 0;
+  const available =
+    balance.available?.find((entry) => entry.currency === PAYOUT_CURRENCY)?.amount ?? 0;
+  const pending =
+    balance.pending?.find((entry) => entry.currency === PAYOUT_CURRENCY)?.amount ?? 0;
 
   return {
-    currency: "zar",
+    currency: PAYOUT_CURRENCY,
+    payouts_enabled:
+      account.payouts_enabled && account.capabilities?.transfers === "active",
     available_cents: available,
     pending_cents: pending,
     available_rands: Number((available / 100).toFixed(2)),
@@ -146,6 +206,10 @@ export async function createDriverWithdrawal({
   const amountCents = normalizeDriverPayoutAmount(amount);
   const balance = await getDriverAvailableBalance({ stripe, clerkId, supabase });
 
+  if (!balance.payouts_enabled) {
+    throw new HttpError(409, "Complete Stripe Connect onboarding before withdrawing");
+  }
+
   if (amountCents > balance.available_cents) {
     throw new HttpError(422, "Insufficient available balance for this withdrawal");
   }
@@ -154,7 +218,7 @@ export async function createDriverWithdrawal({
     .from("driver_withdrawals")
     .select("id, status")
     .eq("driver_id", driver.id)
-    .in("status", ["pending", "paid"])
+    .in("status", ["pending"])
     .eq("amount_cents", amountCents)
     .maybeSingle();
 
@@ -166,7 +230,7 @@ export async function createDriverWithdrawal({
   const payout = await stripe.payouts.create(
     {
       amount: amountCents,
-      currency: "zar",
+      currency: PAYOUT_CURRENCY,
       description: `Driver withdrawal for ${driver.first_name ?? "driver"}`,
       metadata: {
         clerk_user_id: clerkId,
@@ -184,8 +248,8 @@ export async function createDriverWithdrawal({
       stripe_connected_account_id: driver.stripe_connected_account_id,
       stripe_payout_id: payout.id,
       amount_cents: amountCents,
-      currency: "zar",
-      status: payout.status === "pending" ? "pending" : payout.status,
+      currency: PAYOUT_CURRENCY,
+      status: "pending",
       failure_reason: null,
       paid_at: null,
     })
@@ -196,15 +260,16 @@ export async function createDriverWithdrawal({
 
   if (error) throw error;
 
-  await supabase.from("driver_ledger_entries").insert({
+  const { error: ledgerError } = await supabase.from("driver_ledger_entries").insert({
     driver_id: driver.id,
     entry_type: "withdrawal",
     amount_cents: -amountCents,
-    currency: "zar",
+    currency: PAYOUT_CURRENCY,
     related_type: "driver_withdrawal",
     related_id: data?.id ?? payout.id,
     description: `Driver withdrawal of ${amountCents / 100} ZAR`,
   });
+  if (ledgerError) throw ledgerError;
 
   return {
     withdrawal: {
@@ -214,7 +279,7 @@ export async function createDriverWithdrawal({
       stripe_payout_id: payout.id,
       amount_cents: amountCents,
       amount_rands: Number((amountCents / 100).toFixed(2)),
-      currency: "zar",
+      currency: PAYOUT_CURRENCY,
       status: "pending",
       failure_reason: null,
       created_at: data?.created_at ?? new Date().toISOString(),
@@ -222,6 +287,23 @@ export async function createDriverWithdrawal({
       paid_at: null,
     },
   };
+}
+
+async function recordStripeWebhookEvent(
+  supabase: ReturnType<typeof getSupabaseServerClient>,
+  event: Stripe.Event,
+) {
+  const { error } = await supabase.from("stripe_webhook_events").insert({
+    event_id: event.id,
+    event_type: event.type,
+    payload: event,
+  });
+
+  if (String(error?.code) === "23505" || error?.message?.includes("duplicate")) {
+    return false;
+  }
+  if (error) throw error;
+  return true;
 }
 
 export async function processStripePayoutEvent({
@@ -235,12 +317,12 @@ export async function processStripePayoutEvent({
 }) {
   const payout = event.data.object as Stripe.Payout;
   const payoutWithExtras = payout as typeof payout & {
-    account?: string;
     failure_code?: string;
     failure_message?: string;
   };
   const payoutId = payout.id;
   const driverId = Number(payout.metadata?.driver_id ?? 0);
+  const connectedAccountId = event.account ?? "";
 
   const { data: existingEvent, error: existingEventError } = await supabase
     .from("stripe_webhook_events")
@@ -251,19 +333,6 @@ export async function processStripePayoutEvent({
   if (existingEventError) throw existingEventError;
   if (existingEvent) {
     return { processed: false, duplicate: true };
-  }
-
-  const { error: eventError } = await supabase.from("stripe_webhook_events").insert({
-    event_id: event.id,
-    event_type: event.type,
-    payload: event,
-  });
-
-  if (eventError) {
-    if (String(eventError.code) === "23505" || eventError.message?.includes("duplicate")) {
-      return { processed: false, duplicate: true };
-    }
-    throw eventError;
   }
 
   const normalizedStatus =
@@ -292,6 +361,8 @@ export async function processStripePayoutEvent({
 
   if (!existingWithdrawal) {
     if (!driverMetaId) {
+      const recorded = await recordStripeWebhookEvent(supabase, event);
+      if (!recorded) return { processed: false, duplicate: true };
       return { processed: true, duplicate: false, ignored: true };
     }
 
@@ -299,7 +370,7 @@ export async function processStripePayoutEvent({
       .from("driver_withdrawals")
       .insert({
         driver_id: driverMetaId,
-        stripe_connected_account_id: payoutWithExtras.account ?? "",
+        stripe_connected_account_id: connectedAccountId,
         stripe_payout_id: payoutId,
         amount_cents: amountCents,
         currency: payout.currency ?? "zar",
@@ -313,6 +384,20 @@ export async function processStripePayoutEvent({
       .single();
 
     if (insertError) throw insertError;
+    const { error: ledgerError } = await supabase
+      .from("driver_ledger_entries")
+      .insert({
+        driver_id: driverMetaId,
+        entry_type: "withdrawal",
+        amount_cents: -amountCents,
+        currency: payout.currency ?? PAYOUT_CURRENCY,
+        related_type: "stripe_payout",
+        related_id: payoutId,
+        description: `Driver withdrawal of ${amountCents / 100} ZAR`,
+      });
+    if (ledgerError && String(ledgerError.code) !== "23505") throw ledgerError;
+    const recorded = await recordStripeWebhookEvent(supabase, event);
+    if (!recorded) return { processed: false, duplicate: true };
     return { processed: true, duplicate: false, withdrawal: inserted };
   }
 
@@ -344,6 +429,26 @@ export async function processStripePayoutEvent({
     .single();
 
   if (updateError) throw updateError;
+
+  if (normalizedStatus === "failed") {
+    const { error: reversalError } = await supabase
+      .from("driver_ledger_entries")
+      .insert({
+        driver_id: existingWithdrawal.driver_id,
+        entry_type: "withdrawal_reversal",
+        amount_cents: amountCents,
+        currency: payout.currency ?? PAYOUT_CURRENCY,
+        related_type: "stripe_payout",
+        related_id: payoutId,
+        description: `Failed withdrawal returned ${amountCents / 100} ZAR`,
+      });
+    if (reversalError && String(reversalError.code) !== "23505") {
+      throw reversalError;
+    }
+  }
+
+  const recorded = await recordStripeWebhookEvent(supabase, event);
+  if (!recorded) return { processed: false, duplicate: true };
 
   return { processed: true, duplicate: false, withdrawal: updated };
 }

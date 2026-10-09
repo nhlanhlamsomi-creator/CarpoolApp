@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Request, Response, Router } from "express";
 import { HttpError } from "../middleware/errorHandler";
 import { getStripeServerClient } from "../services/stripe";
 import { getSupabaseServerClient } from "../services/supabase";
@@ -30,7 +30,7 @@ router.post("/connect", async (_request, response) => {
 
   response.json({
     data: {
-      driver_id: result.driver.id,
+      driver_id: result.driverId,
       stripe_connected_account_id: result.accountId,
       stripe_account_status: result.status,
       onboarding_url: result.onboardingUrl,
@@ -84,7 +84,10 @@ router.post("/withdraw", async (request, response) => {
   response.status(201).json({ data: result.withdrawal });
 });
 
-router.post("/webhooks", async (request, response) => {
+export async function handleStripePayoutWebhook(
+  request: Request,
+  response: Response,
+) {
   const stripe = getStripeServerClient();
   const supabase = getSupabaseServerClient();
 
@@ -120,6 +123,6 @@ router.post("/webhooks", async (request, response) => {
     console.error("Stripe payout webhook error", error);
     response.status(400).json({ error: "Invalid Stripe webhook payload" });
   }
-});
+}
 
 export default router;

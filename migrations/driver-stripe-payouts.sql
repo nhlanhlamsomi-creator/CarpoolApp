@@ -46,3 +46,7 @@ CREATE INDEX IF NOT EXISTS driver_withdrawals_status_idx
 
 CREATE INDEX IF NOT EXISTS driver_ledger_entries_driver_id_idx
   ON public.driver_ledger_entries USING btree (driver_id);
+
+CREATE UNIQUE INDEX IF NOT EXISTS driver_ledger_entries_idempotency_idx
+  ON public.driver_ledger_entries (entry_type, related_type, related_id)
+  WHERE related_id IS NOT NULL;
