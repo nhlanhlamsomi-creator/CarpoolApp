@@ -124,19 +124,22 @@ const Rides = () => {
 
   const pollSafetyAlerts = useCallback(async () => {
     if (!user?.id || activeRides.length === 0) return;
-    const results = await Promise.all(
-      activeRides.map(async (ride) => {
-        const rideId = String(ride.ride_id);
-        const response = await fetch(
-          `/(api)/safety/${rideId}?passenger_id=${encodeURIComponent(user.id)}`,
-        );
-        if (!response.ok) return [rideId, null] as const;
-        const json = await response.json();
-        return [rideId, json.data] as const;
-      }),
-    );
-    setSafetyAlerts(Object.fromEntries(results.filter(([, alert]) => alert)));
-  }, [activeRides, user?.id]);
+    try {
+      const token = await getToken();
+      const results = await Promise.all(
+        activeRides.map(async (ride) => {
+          const rideId = String(ride.ride_id);
+          const result = await apiRequest<{
+            data: Record<string, unknown> | null;
+          }>(`/api/sos/${encodeURIComponent(rideId)}`, {}, token);
+          return [rideId, result.data] as const;
+        }),
+      );
+      setSafetyAlerts(Object.fromEntries(results.filter(([, alert]) => alert)));
+    } catch (error) {
+      console.warn("Unable to load safety alerts:", error);
+    }
+  }, [activeRides, getToken, user?.id]);
 
   useEffect(() => {
     pollSafetyAlerts();
@@ -290,39 +293,48 @@ const Rides = () => {
                 console.warn("Unable to get location for SOS:", locationError);
               }
 
-              const response = await fetch("/(api)/safety/manual", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  ride_id: (ride as any).ride_id,
-                  passenger_id: user?.id,
-                  latitude: location?.latitude ?? null,
-                  longitude: location?.longitude ?? null,
-                }),
-              });
-              if (!response.ok) throw new Error("SOS request failed");
+              const token = await getToken();
+              await apiRequest(
+                "/api/sos",
+                {
+                  method: "POST",
+                  body: JSON.stringify({
+                    ride_id: ride.ride_id,
+                    latitude: location?.latitude ?? null,
+                    longitude: location?.longitude ?? null,
+                  }),
+                },
+                token,
+              );
 
               void pollSafetyAlerts();
               let emergencyContact: { name: string; phone: string } | null =
                 null;
               try {
-                const profileResponse = await fetch(
-                  `/(api)/profile?clerkId=${encodeURIComponent(user?.id ?? "")}`,
-                );
-                if (profileResponse.ok) {
-                  const profileJson = await profileResponse.json();
-                  const rawContact =
-                    profileJson.data?.profile_data?.emergency_contact;
-                  const parsedContact =
-                    typeof rawContact === "string"
-                      ? JSON.parse(rawContact)
-                      : rawContact;
-                  if (parsedContact?.phone) {
-                    emergencyContact = {
-                      name: parsedContact.name || "emergency contact",
-                      phone: String(parsedContact.phone),
-                    };
-                  }
+                const profileResponse = await apiRequest<{
+                  data?: {
+                    profile_data?: { emergency_contact?: unknown };
+                  } | null;
+                }>("/api/profile", {}, token);
+                const rawContact =
+                  profileResponse.data?.profile_data?.emergency_contact;
+                const parsedContact =
+                  typeof rawContact === "string"
+                    ? JSON.parse(rawContact)
+                    : rawContact;
+                if (
+                  parsedContact &&
+                  typeof parsedContact === "object" &&
+                  "phone" in parsedContact &&
+                  parsedContact.phone
+                ) {
+                  emergencyContact = {
+                    name:
+                      "name" in parsedContact && parsedContact.name
+                        ? String(parsedContact.name)
+                        : "emergency contact",
+                    phone: String(parsedContact.phone),
+                  };
                 }
               } catch (contactError) {
                 console.warn("Unable to load emergency contact:", contactError);
@@ -370,10 +382,10 @@ const Rides = () => {
                   { text: "Done", style: "cancel" },
                 ],
               );
-            } catch {
+            } catch (error) {
               Alert.alert(
                 "SOS failed",
-                "The safety incident could not be saved. If you are in immediate danger, call 112.",
+                `${error instanceof Error ? error.message : "The safety incident could not be saved."} If you are in immediate danger, call 112.`,
                 [
                   {
                     text: "Call 112",
