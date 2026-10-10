@@ -178,7 +178,7 @@ Enable:
 * Google OAuth
 * Session management
 
-Set the Clerk publishable key in your EAS build environment. Do not store it in a local `.env` file.
+Set `CLERK_PUBLISHABLE_KEY` in the Render service environment. The app fetches this public key from the Render app-config endpoint at startup; do not hardcode it in the app.
 
 ## 3. Configure Supabase
 
@@ -207,9 +207,9 @@ Keep the Supabase service-role key server-only.
 
 ## 4. Configure Deployment Settings
 
-The mobile app sends backend API requests to `https://lyft-api-eofz.onrender.com`; the origin is configured in `constants/api.ts`, so `EXPO_PUBLIC_API_URL` is not needed.
+The mobile app sends backend API requests to `https://lyft-api-eofz.onrender.com`; the origin is configured in `constants/api.ts`, so `EXPO_PUBLIC_API_URL` is not needed. The Render API must be redeployed with the app-config and map-data endpoints from `server/src` for startup configuration and map loading to work.
 
-Configure the required Expo client variables (`EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY`, `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`, `EXPO_PUBLIC_DIRECTIONS_API_KEY`, `EXPO_PUBLIC_GEOAPIFY_API_KEY`, and `EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY`) in the EAS build environment or your local shell session. These values are bundled into the app and must be treated as public.
+Configure the Expo client variables (`EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`, `EXPO_PUBLIC_DIRECTIONS_API_KEY`, `EXPO_PUBLIC_GEOAPIFY_API_KEY`, and `EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY`) in the EAS build environment or your local shell session. These values are bundled into the app and must be treated as public.
 
 Configure backend credentials in the Render service's environment settings. Do not place server credentials in Expo variables or the mobile app.
 

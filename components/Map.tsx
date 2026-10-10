@@ -1,3 +1,4 @@
+import { useAuth } from "@clerk/expo";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Image, Platform, View } from "react-native";
 import MapView, {
@@ -9,13 +10,13 @@ import MapView, {
 } from "react-native-maps";
 
 import { icons } from "@/constants";
+import { fetchAPI } from "@/lib/fetch";
 import {
     calculateDriverTimes,
     calculateRegion,
     fetchRoutePolyline,
     generateMarkersFromData,
 } from "@/lib/map";
-import { getSupabaseClient } from "@/lib/supabase";
 import { isDriverVisible } from "@/lib/utils";
 import { useDriverStore, useLocationStore } from "@/store";
 import { Driver, Hub, MarkerData } from "@/types/type";
@@ -62,6 +63,7 @@ const SOFT_GREY_MAP_STYLE = [
 ];
 
 export default function Map() {
+  const { getToken } = useAuth();
   const {
     userLatitude,
     userLongitude,
@@ -93,73 +95,31 @@ export default function Map() {
 
     const loadDrivers = async () => {
       try {
-        const supabase = getSupabaseClient();
-        const { data, error } = await supabase
-          .from("drivers")
-          .select(
-            "id, first_name, last_name, profile_image_url, car_image_url, car_seats, rating, status, verified, is_online, driver_verification_status, latitude, longitude",
-          );
+        const token = await getToken();
+        const result: { data: { drivers: Driver[]; hubs: Hub[] } } =
+          await fetchAPI("/api/map-data", {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
 
-        if (!isMounted) return;
-
-        if (error) {
-          throw error;
+        if (isMounted) {
+          setLoadedDrivers(result.data.drivers.filter(isDriverVisible));
+          setHubs(result.data.hubs);
         }
-
-        const visibleDrivers = (Array.isArray(data) ? data : []).filter(
-          isDriverVisible,
-        ) as Driver[];
-
-        setLoadedDrivers(visibleDrivers);
       } catch (error) {
-        console.error("Failed to load drivers:", error);
+        console.error("Failed to load map data:", error);
         if (isMounted) {
           setLoadedDrivers([]);
-        }
-      }
-    };
-
-    const loadHubs = async () => {
-      try {
-        const supabase = getSupabaseClient();
-        const { data, error } = await supabase
-          .from("hubs")
-          .select("id, name, address, latitude, longitude, radius, status")
-          .eq("status", "active");
-
-        if (!isMounted) return;
-
-        if (error) {
-          const errorMessage = String((error as { message?: string })?.message ?? "");
-
-          if (
-            /permission|row level security|42501/i.test(errorMessage) ||
-            (error as { code?: string })?.code === "42501"
-          ) {
-            console.warn(
-              "Hubs are blocked by Supabase RLS. Add a public SELECT policy / grant for public.hubs to restore hub markers.",
-            );
-          }
-
-          throw error;
-        }
-
-        setHubs((Array.isArray(data) ? data : []) as Hub[]);
-      } catch (error) {
-        console.error("Failed to load hubs:", error);
-        if (isMounted) {
           setHubs([]);
         }
       }
     };
 
     loadDrivers();
-    loadHubs();
 
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [getToken]);
 
   useEffect(() => {
     const visibleDrivers = rideBooked

@@ -3,11 +3,12 @@ import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
-import { LogBox, View } from "react-native";
+import { ActivityIndicator, LogBox, Pressable, Text, View } from "react-native";
 import "react-native-reanimated";
 import "../global.css";
 
 import AnimatedSplash from "@/components/AnimatedSplash";
+import { API_ORIGIN } from "@/constants/api";
 import { tokenCache } from "@/lib/auth";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -15,23 +16,12 @@ import { tokenCache } from "@/lib/auth";
 // splash registered, and the rejected promise surfaces as a red-box error.
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
-const rawPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ?? "";
-const publishableKey = rawPublishableKey.trim();
-const hasValidClerkKey = /^pk_(test|live)_[A-Za-z0-9]+$/.test(publishableKey);
-
-if (!publishableKey) {
-  console.warn(
-    "Missing EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY. The app will render a safe fallback until the value is configured.",
-  );
-} else if (!hasValidClerkKey) {
-  console.warn(
-    "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY is not a valid Clerk publishable key. The app will skip Clerk until the real key is configured.",
-  );
-}
-
 LogBox.ignoreLogs(["Clerk:"]);
 
 export default function RootLayout() {
+  const [publishableKey, setPublishableKey] = useState<string | null>(null);
+  const [configError, setConfigError] = useState<string | null>(null);
+  const [configAttempt, setConfigAttempt] = useState(0);
   const [loaded] = useFonts({
     "Jakarta-Bold": require("../assets/fonts/PlusJakartaSans-Bold.ttf"),
     "Jakarta-ExtraBold": require("../assets/fonts/PlusJakartaSans-ExtraBold.ttf"),
@@ -46,6 +36,45 @@ export default function RootLayout() {
   const [splashDone, setSplashDone] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+
+    const loadAppConfig = async () => {
+      setConfigError(null);
+      try {
+        const response = await fetch(`${API_ORIGIN}/api/app-config`);
+        const body = await response.json();
+        if (!response.ok) {
+          throw new Error(
+            typeof body?.error === "string"
+              ? body.error
+              : `Configuration request failed (${response.status})`,
+          );
+        }
+        if (
+          typeof body?.clerkPublishableKey !== "string" ||
+          !/^pk_(test|live)_[A-Za-z0-9]+$/.test(body.clerkPublishableKey)
+        ) {
+          throw new Error("Render returned an invalid Clerk publishable key");
+        }
+        if (isMounted) setPublishableKey(body.clerkPublishableKey);
+      } catch (error) {
+        if (isMounted) {
+          setConfigError(
+            error instanceof Error
+              ? error.message
+              : "Unable to load sign-in configuration",
+          );
+        }
+      }
+    };
+
+    loadAppConfig();
+    return () => {
+      isMounted = false;
+    };
+  }, [configAttempt]);
+
+  useEffect(() => {
     if (loaded) {
       // Hand off from the native splash to ours. Both use the same green
       // background, so there's no visible seam.
@@ -57,7 +86,7 @@ export default function RootLayout() {
     return null;
   }
 
-  const content = hasValidClerkKey ? (
+  const content = publishableKey ? (
     <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
       <ClerkLoaded>
         <Stack screenOptions={{ headerShown: false }}>
@@ -68,8 +97,22 @@ export default function RootLayout() {
         </Stack>
       </ClerkLoaded>
     </ClerkProvider>
+  ) : configError ? (
+    <View className="flex-1 items-center justify-center bg-[#1d1135] px-8">
+      <Text className="mb-4 text-center text-white">
+        Could not load sign-in configuration: {configError}
+      </Text>
+      <Pressable
+        className="rounded-xl bg-white px-5 py-3"
+        onPress={() => setConfigAttempt((attempt) => attempt + 1)}
+      >
+        <Text className="font-semibold text-[#1d1135]">Retry</Text>
+      </Pressable>
+    </View>
   ) : (
-    <View style={{ flex: 1, backgroundColor: "#1d1135" }} />
+    <View className="flex-1 items-center justify-center bg-[#1d1135]">
+      <ActivityIndicator color="#ffffff" />
+    </View>
   );
 
   return (

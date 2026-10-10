@@ -5,10 +5,12 @@ import path from "node:path";
 
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
 import { requireAuth, requireDriverAuth } from "./middleware/requireAuth";
+import appConfigRouter from "./routes/appConfig";
 import checkIdRouter from "./routes/checkId";
 import driverVehicleRouter from "./routes/driverVehicle";
 import driverWalletRouter, { handleStripePayoutWebhook } from "./routes/driverWallet";
 import healthRouter from "./routes/health";
+import mapDataRouter from "./routes/mapData";
 import messagesRouter from "./routes/messages";
 import offerTripsRouter from "./routes/offerTrips";
 import paymentsRouter from "./routes/payments";
@@ -268,6 +270,8 @@ app.use("/api/driver-wallet/webhooks", express.raw({ type: "application/json" })
 app.use(express.json({ limit: "32kb" }));
 
 app.use("/api/health", healthRouter);
+app.use("/api/app-config", appConfigRouter);
+app.use("/api/map-data", requireAuth, mapDataRouter);
 app.use("/api/check-id", requireAuth, checkIdRouter);
 app.use("/api/drivers", requireAuth, driverVehicleRouter);
 app.use("/api/messages", requireAuth, messagesRouter);
