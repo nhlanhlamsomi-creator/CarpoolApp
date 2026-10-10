@@ -1,6 +1,5 @@
 module.exports = ({ config }) => {
   const requiredVariables = [
-    "EXPO_PUBLIC_API_URL",
     "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY",
     "EXPO_PUBLIC_SUPABASE_URL",
     "EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY",

@@ -1,23 +1,12 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
     CheckIdServiceError,
     verifySouthAfricanID,
 } from "../lib/checkIdService";
 
-const originalApiUrl = process.env.EXPO_PUBLIC_API_URL;
-
-beforeEach(() => {
-  process.env.EXPO_PUBLIC_API_URL = "https://api.example.test";
-});
-
 afterEach(() => {
   vi.restoreAllMocks();
-  if (originalApiUrl === undefined) {
-    delete process.env.EXPO_PUBLIC_API_URL;
-  } else {
-    process.env.EXPO_PUBLIC_API_URL = originalApiUrl;
-  }
 });
 
 describe("Check ID service", () => {
@@ -40,7 +29,7 @@ describe("Check ID service", () => {
       verifySouthAfricanID("890307 5555 083", "test-session-token"),
     ).resolves.toMatchObject({ isValid: true, age: 35 });
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://api.example.test/api/check-id/validate",
+      "https://lyft-api-eofz.onrender.com/api/check-id/validate",
       expect.objectContaining({
         method: "POST",
         headers: {

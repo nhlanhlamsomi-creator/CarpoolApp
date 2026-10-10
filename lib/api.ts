@@ -1,7 +1,6 @@
 import { useAuth } from "@clerk/expo";
 import { useCallback, useEffect, useRef, useState } from "react";
-
-const configuredApiUrl = process.env.EXPO_PUBLIC_API_URL?.trim().replace(/\/+$/, "");
+import { API_ORIGIN } from "@/constants/api";
 
 function buildApiUrl(baseUrl: string, path: string): string {
   const normalizedBaseUrl = baseUrl.replace(/\/+$/, "");
@@ -19,26 +18,13 @@ export async function apiRequest<T>(
   options: RequestInit = {},
   token?: string | null,
 ): Promise<T> {
-  if (!configuredApiUrl) {
-    throw new Error(
-      "Missing EXPO_PUBLIC_API_URL. Configure the backend URL and restart Expo.",
-    );
-  }
-
-  if (
-    configuredApiUrl.startsWith("http://") &&
-    !__DEV__
-  ) {
-    throw new Error("The backend URL must use HTTPS outside development.");
-  }
-
   const headers = new Headers(options.headers);
   if (options.body && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
-  const response = await fetch(buildApiUrl(configuredApiUrl, path), {
+  const response = await fetch(buildApiUrl(API_ORIGIN, path), {
     ...options,
     headers,
   });

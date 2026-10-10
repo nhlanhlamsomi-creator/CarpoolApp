@@ -170,6 +170,7 @@ const Payment = ({
             name: safeName,
             email: safeEmail,
             amount: paymentAmount,
+            driver_id: driverId,
             offer_trip_id: offerTripId,
             seat_count: seatsToBook,
           }),

@@ -178,7 +178,7 @@ Enable:
 * Google OAuth
 * Session management
 
-Add the Clerk publishable key to `.env.local` and the relevant EAS environments.
+Set the Clerk publishable key in your EAS build environment. Do not store it in a local `.env` file.
 
 ## 3. Configure Supabase
 
@@ -205,26 +205,13 @@ Keep the Supabase service-role key server-only.
 
 **Never prefix the service-role key with `EXPO_PUBLIC_`.**
 
-## 4. Configure Environment Variables
+## 4. Configure Deployment Settings
 
-Copy `.env.example` to `.env.local`.
+The mobile app sends backend API requests to `https://lyft-api-eofz.onrender.com`; the origin is configured in `constants/api.ts`, so `EXPO_PUBLIC_API_URL` is not needed.
 
-Example:
+Configure the required Expo client variables (`EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY`, `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`, `EXPO_PUBLIC_DIRECTIONS_API_KEY`, `EXPO_PUBLIC_GEOAPIFY_API_KEY`, and `EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY`) in the EAS build environment or your local shell session. These values are bundled into the app and must be treated as public.
 
-```env
-EXPO_PUBLIC_API_URL=https://your-render-service.onrender.com
-EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_your_key
-EXPO_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
-EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=your_restricted_google_maps_key
-EXPO_PUBLIC_DIRECTIONS_API_KEY=your_restricted_google_maps_key
-EXPO_PUBLIC_GEOAPIFY_API_KEY=your_restricted_geoapify_key
-EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_key
-```
-
-Set the same required Expo public variables in the EAS preview and production environments.
-
-Backend secrets must be configured separately on the backend hosting platform.
+Configure backend credentials in the Render service's environment settings. Do not place server credentials in Expo variables or the mobile app.
 
 Never put the following values in an `EXPO_PUBLIC_` variable:
 
@@ -583,7 +570,7 @@ The identity-verification workflow sends a normalized South African ID number to
 
 The backend communicates with the configured identity-verification provider.
 
-For local development, configure the provider key in the backend environment.
+Configure the provider key in the Render backend environment.
 
 Example:
 
@@ -601,8 +588,7 @@ The service does not by itself prove that the person presenting the ID is the ri
 
 # Repository Hygiene
 
-* `.env` files are git-ignored.
-* Use `.env.example` with placeholder values only.
+* The project does not use local `.env` files; configure client build variables through EAS or the shell, and backend secrets in Render.
 * Never commit API keys or authentication secrets.
 * Never commit Stripe secret keys.
 * Never commit Supabase service-role keys.

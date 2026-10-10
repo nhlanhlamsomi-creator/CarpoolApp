@@ -1,21 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { API_ORIGIN } from "@/constants/api";
 
 export const fetchAPI = async (url: string, options?: RequestInit) => {
   try {
-    const apiBaseUrl = process.env.EXPO_PUBLIC_API_URL?.trim().replace(/\/+$/, "");
     const requestUrl = /^https?:\/\//i.test(url)
       ? url
-      : apiBaseUrl
-        ? `${apiBaseUrl}/${url
-            .replace(/^\/\(api\)(?=\/|$)/, "/api")
-            .replace(/^\/+/, "")}`
-        : null;
-
-    if (!requestUrl) {
-      throw new Error(
-        "Missing EXPO_PUBLIC_API_URL. Configure the Render backend URL and restart Expo.",
-      );
-    }
+      : `${API_ORIGIN}/${url
+          .replace(/^\/\(api\)(?=\/|$)/, "/api")
+          .replace(/^\/+/, "")}`;
 
     if (/^http:/i.test(requestUrl)) {
       throw new Error("Insecure HTTP requests are not allowed");
